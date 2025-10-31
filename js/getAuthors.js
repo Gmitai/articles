@@ -1,12 +1,12 @@
 getAuthors();
 
 async function getAuthors(){
-    const response = await fetch("/getPublishers");
+    const response = await fetch("/getAuthors");
     const data = await response.json();
     let authors = [];
-    data.forEach(publisher => {
-        publishers.push(`<option value="${publisher.id}">${publisher.title_tj}</option>`);
+    data.forEach(author => {
+        authors.push(`<option value="${author.id}">${author.lastName}</option>`);
     });
-    document.getElementById("PublisherList").innerHTML =publishers.join("\n");
+    document.getElementById("authorsList").innerHTML =authors.join("\n");
     console.log(data);
 }

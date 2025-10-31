@@ -60,6 +60,13 @@ app.get('/getPublishers', (req, res) => {
     });
 });
 
+app.get('/getAuthors', (req, res) => {
+    connection.execute("SELECT id, lastName FROM authors", (err, result) => {
+        if (err) return console.log(err);
+        res.send(result);
+    });
+});
+
 
 app.post('/addAuthor', urlencodedParser, (req, res) => {
     const fullName = req.body.authorsName.split(' ');
