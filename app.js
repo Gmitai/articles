@@ -103,7 +103,7 @@ app.post('/addPublisher', urlencodedParser, (req, res) => {
     const address=req.body.address;
     connection.execute(`SELECT * FROM publishers WHERE title_tj = '${publisher}' AND cityId='${selCity}'`, function (err, result){
         if(result.length > 0){
-            res.send("Чунин нашриёт аллакай дар БМ вуҷуд дорад!");
+            res.send("Чунин нашриёт аллакай дар БМ вуҷуд  дорад!");
             res.sendFile(__dirname + '/public/addPublisher.html');
         }
         else {
