@@ -53,6 +53,13 @@ app.get('/getDirections', (req, res) => {
     });
 });
 
+app.get('/getPublishers', (req, res) => {
+    connection.execute("SELECT id, title_tj FROM publishers", (err, result) => {
+        if (err) return console.log(err);
+        res.send(result);
+    });
+});
+
 
 app.post('/addAuthor', urlencodedParser, (req, res) => {
     const fullName = req.body.authorsName.split(' ');
@@ -103,6 +110,28 @@ app.post('/addPublisher', urlencodedParser, (req, res) => {
 
 })
 
-app.listen(3000, "192.168.31.103", () => {
+app.post('/addArticle', urlencodedParser, (req, res) => {
+   const title=req.body.aricleName;
+   const pageCount=req.body.pCount;
+   const publishDate=req.body.publishYear;
+   const direction=req.body.selDirect;
+   const publisher=req.body.selPublisher;
+
+    connection.execute(`SELECT * FROM articles WHERE title_tj = '${title}' AND pagesCount='${pageCount}'`, function (err, result){
+        if(result.length > 0){
+            res.send("Чунин мақола аллакай дар БМ вуҷуд дорад!");
+            res.sendFile(__dirname + '/public/addArticle.html');
+        }
+        else {
+            const sql="Insert into articles (title_tj, pagesCount, publishYear, directionId, publisherId) VALUES (?,?,?,?,?)";
+            connection.query(sql, [title, pageCount, publishDate, direction, publisher], (err, result) => {
+                if (err) {console.log(err)}
+            });
+            res.sendFile(__dirname + '/public/addArticle.html');
+        }
+    });
+})
+
+app.listen(3000, "localhost", () => {
     console.log('Сервер дар порти 3000 ҷойгир шудааст');
 });
