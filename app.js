@@ -47,7 +47,7 @@ app.get('/getCities', (req, res) => {
 });
 
 app.get('/getDirections', (req, res) => {
-    connection.execute("SELECT id, title_ru FROM directions", (err, result) => {
+    connection.execute("SELECT id, CONCAT(udc,' ', title_ru) AS title_ru FROM directions", (err, result) => {
         if (err) return console.log(err);
         res.send(result);
     });
@@ -139,6 +139,6 @@ app.post('/addArticle', urlencodedParser, (req, res) => {
     });
 })
 
-app.listen(3000, "localhost", () => {
+app.listen(3000, "192.168.31.103", () => {
     console.log('Сервер дар порти 3000 ҷойгир шудааст');
 });
