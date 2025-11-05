@@ -39,6 +39,14 @@ app.get('/addAuthor', (req, res) => {
     res.sendFile(__dirname + '/public/addAuthors.html');
 });
 
+app.get('/register', (req, res) => {
+    res.sendFile(__dirname + '/public/register.html');
+});
+
+app.get('/login', (req, res) => {
+    res.sendFile(__dirname + '/public/login.html');
+});
+
 app.get('/getCities', (req, res) => {
     connection.execute("SELECT id, title FROM cities WHERE typeOf = 1", (err, result) => {
         if (err) return console.log(err);
@@ -61,7 +69,7 @@ app.get('/getPublishers', (req, res) => {
 });
 
 app.get('/getAuthors', (req, res) => {
-    connection.execute("SELECT id, lastName FROM authors", (err, result) => {
+    connection.execute("SELECT id, CONCAT(lastName, ' ', firstName) AS lastName FROM authors", (err, result) => {
         if (err) return console.log(err);
         res.send(result);
     });
@@ -137,6 +145,36 @@ app.post('/addArticle', urlencodedParser, (req, res) => {
             res.sendFile(__dirname + '/public/addArticle.html');
         }
     });
+})
+
+app.post('/register', urlencodedParser, (req, res) => {
+    const fullName = req.body.fName.split(' ');
+    const birthDate=req.body.bDate;
+    const phoneNumber=req.body.pNumber;
+    const selCity=req.body.selCity;
+    const address=req.body.address;
+    const email=req.body.userMail;
+    const password=req.body.userPassword;
+    const pseudonym=req.body.PName;
+    const lastName=fullName[0].charAt(0).toUpperCase() + fullName[0].substring(1).toLowerCase();
+    const firstName=fullName[1].charAt(0).toUpperCase() + fullName[1].substring(1).toLowerCase();
+    let familyName=null;
+    if (fullName.length>2) {
+        familyName=fullName[2].charAt(0).toUpperCase() + fullName[2].substring(1).toLowerCase();
+    }
+
+    connection.execute(`SELECT * FROM users WHERE password = '${password}' AND login='${email}'`, function (err, result, fields){
+        if(result.length > 0){
+            res.sendFile(__dirname + '/public/register.html');
+        }
+        else {
+            const sql="Insert into users (eMail, login, password, firstName, lastName, familyName, birthDate, mobilePhone, cityId, address, pseudonym) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+            connection.query(sql, [email, email, password, firstName, lastName, familyName, birthDate, phoneNumber, selCity, address, pseudonym], (err, result) => {
+                if (err) {console.log(err)}
+            });
+        }
+    });
+
 })
 
 app.listen(3000, "192.168.31.103", () => {
