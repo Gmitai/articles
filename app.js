@@ -178,5 +178,5 @@ app.post('/register', urlencodedParser, (req, res) => {
 })
 
 app.listen(3000, "192.168.31.103", () => {
-    console.log('Сервер дар порти 3000 ҷойгир шудааст');
+    console.log('Сервер дар порти 3000 ҷойгир шуд');
 });
