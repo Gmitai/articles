@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="fe834628-b3fc-4675-bd87-9a32f97eadd9" name="Changes" comment="v1.5">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+<<<<<<< HEAD
+      <change beforePath="$PROJECT_DIR$/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/app.js" afterDir="false" />
+=======
+>>>>>>> b1b21cb439997d12d41008e372d6954235f6ce54
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="tsconfig.json" />
+        <option value="JavaScript File" />
+        <option value="HTML File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <excluded-from-favorite>
+      <branch-storage>
+        <map>
+          <entry type="REMOTE">
+            <value>
+              <list>
+                <branch-info repo="$PROJECT_DIR$" source="origin/main" />
+              </list>
+            </value>
+          </entry>
+        </map>
+      </branch-storage>
+    </excluded-from-favorite>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;history&quot;: [
+    {
+      &quot;state&quot;: &quot;OPEN&quot;,
+      &quot;assignee&quot;: &quot;Gmitai&quot;
+    }
+  ],
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Gmitai&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;git@github.com:Gmitai/articles.git&quot;,
+    &quot;accountId&quot;: &quot;c214bdf0-225d-45ea-bd9b-ccbcb479166b&quot;
+  }
+}</component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8
+}</component>
+  <component name="ProjectId" id="33lzKxX1HqCYkdFrC3Cd3PEpuO5" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+<<<<<<< HEAD
+    "last_opened_file_path": "D:/Project Ai/articles",
+=======
+    "last_opened_file_path": "D:/ProjectAI/articles",
+>>>>>>> b1b21cb439997d12d41008e372d6954235f6ce54
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "ts.external.directory.path": "C:\\Program Files\\JetBrains\\WebStorm 2025.2.3\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\My_app\js" />
+      <recent name="D:\My_app\public" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-WS-252.26830.93" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="fe834628-b3fc-4675-bd87-9a32f97eadd9" name="Changes" comment="" />
+      <created>1759906386596</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1759906386596</updated>
+      <workItem from="1759906387656" duration="6703000" />
+      <workItem from="1760069947000" duration="10273000" />
+      <workItem from="1760591440131" duration="4334000" />
+      <workItem from="1760598814885" duration="2615000" />
+      <workItem from="1760673559676" duration="8549000" />
+      <workItem from="1761016495679" duration="40000" />
+      <workItem from="1761113842862" duration="8012000" />
+      <workItem from="1761122317593" duration="1412000" />
+      <workItem from="1761624971608" duration="121000" />
+      <workItem from="1761625166536" duration="35000" />
+      <workItem from="1761715216032" duration="7147000" />
+      <workItem from="1761889093828" duration="6339000" />
+      <workItem from="1761975679527" duration="366000" />
+      <workItem from="1762226036958" duration="139000" />
+<<<<<<< HEAD
+      <workItem from="1762312481518" duration="7224000" />
+      <workItem from="1762325146356" duration="5166000" />
+=======
+      <workItem from="1762312481518" duration="14441000" />
+>>>>>>> b1b21cb439997d12d41008e372d6954235f6ce54
+    </task>
+    <task id="LOCAL-00001" summary="v1.2">
+      <option name="closed" value="true" />
+      <created>1761891781222</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1761891781222</updated>
+    </task>
+    <task id="LOCAL-00002" summary="v1.3">
+      <option name="closed" value="true" />
+      <created>1761892199641</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1761892199641</updated>
+    </task>
+    <task id="LOCAL-00003" summary="v1.4">
+      <option name="closed" value="true" />
+      <created>1761892430642</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1761892430642</updated>
+    </task>
+    <task id="LOCAL-00004" summary="v1.5">
+      <option name="closed" value="true" />
+      <created>1761893142639</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1761893142639</updated>
+    </task>
+    <task id="LOCAL-00005" summary="v1.5">
+      <option name="closed" value="true" />
+      <created>1761896125431</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1761896125431</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="v1.2" />
+    <MESSAGE value="v1.3" />
+    <MESSAGE value="v1.4" />
+    <MESSAGE value="v1.5" />
+    <option name="LAST_COMMIT_MESSAGE" value="v1.5" />
+  </component>
+</project>
