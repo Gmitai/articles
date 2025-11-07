@@ -172,16 +172,15 @@ app.post('/register', urlencodedParser, (req, res) => {
             connection.query(sql, [email, email, password, firstName, lastName, familyName, birthDate, phoneNumber, selCity, address, pseudonym], (err, result) => {
                 if (err) {console.log(err)}
             });
-        }``
+        }
     });
 
 })
 
-<<<<<<< HEAD
+
 app.listen(3000, "localhost", () => {
     console.log('Сервер дар порти 3000 ҷойгир шудааст');
-=======
+
 app.listen(3000, "192.168.31.103", () => {
     console.log('Сервер дар порти 3000 ҷойгир шуд');
->>>>>>> b1b21cb439997d12d41008e372d6954235f6ce54
 });
