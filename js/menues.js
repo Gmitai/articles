@@ -4,13 +4,14 @@ const titleEl = document.getElementById('page-title');
 const refreshBtn = document.getElementById('refreshBtn');
     
     const TABLES = [
-      "articles",
-      "authors",
-      "publishers",
-      "cities",
-      "directions",
-      "genres",
-      "users"
+        "articles",
+        "books",
+        "authors",
+        "publishers",
+        "cities",
+        "directions",
+        "genres",
+        "users"
     ];
     createNav();
 
@@ -28,7 +29,7 @@ const refreshBtn = document.getElementById('refreshBtn');
     }
 
     function humanizeKey(key){
-      const map = {articles:'Мақолаҳо', authors:'Муалифҳо', publishers:'Нашриёт', cities:'Шаҳрҳо', directions:'Классификаторҳо', genres:'Жанрҳо', users:'Истифодабарандагон'};
+      const map = {articles:'Мақолаҳо', authors:'Муалифҳо', publishers:'Нашриёт', cities:'Шаҳрҳо', directions:'Классификаторҳо', genres:'Жанрҳо', users:'Истифодабарандагон', books:'Китобҳо'};
       return map[key]||key;
     }
 
@@ -50,7 +51,8 @@ const refreshBtn = document.getElementById('refreshBtn');
         const res = await fetch(`/${encodeURIComponent(key)}`);
         if(!res.ok) throw new Error(res.statusText||'Ошибка сети');
         const data = await res.json();
-        renderTable(key, data);
+        renderTable(key, data[0]);
+        localStorage.setItem('frmId', JSON.stringify(data[1]));
       }catch(err){
         showError(err);
       }

@@ -1,7 +1,7 @@
 const express = require('express');
 const mysql = require('mysql2');
 const urlencodedParser = express.urlencoded({extended: false});
-
+let selected_menuId=0;
 const app = express();
 app.use(express.static(__dirname + '/Public'));
 app.use(express.static(__dirname + '/js'))
@@ -21,49 +21,67 @@ app.get('/', (req, res) =>{
 app.get('/articles', (req,res) => {
      connection.execute("SELECT a.id, a.title_tj AS 'Мавзӯъ', d.title_ru AS 'Самт', g.name AS 'Жанр', p.title_tj AS 'Нашриёт', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Соли нашр', IF(a.typeOf=1, 'Мақола', 'Китоб') AS 'Тип', CONCAT(au.lastName,' ', au.firstName, ' ', IFNULL(au.familyName, '')) AS 'Муалиф' FROM articles a JOIN authors au ON a.author_id=au.id LEFT JOIN directions d ON a.directionId=d.id LEFT JOIN genres g ON a.genreId=g.id LEFT JOIN publishers p  ON a.publisherId=p.id WHERE a.typeOf=1", (err, result) => {
         if(err) return console.log(err);
-        res.send(result);
+         selected_menuId=0;
+         res.send([result, selected_menuId]);
+
+         console.log(selected_menuId);
+    })
+});
+
+app.get('/books', (req,res) => {
+    connection.execute("SELECT a.id, a.title_tj AS 'Мавзӯъ', d.title_ru AS 'Самт', g.name AS 'Жанр', p.title_tj AS 'Нашриёт', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Соли нашр', IF(a.typeOf=1, 'Мақола', 'Китоб') AS 'Тип', CONCAT(au.lastName,' ', au.firstName, ' ', IFNULL(au.familyName, '')) AS 'Муалиф' FROM articles a JOIN authors au ON a.author_id=au.id LEFT JOIN directions d ON a.directionId=d.id LEFT JOIN genres g ON a.genreId=g.id LEFT JOIN publishers p  ON a.publisherId=p.id WHERE a.typeOf=0", (err, result) => {
+        if(err) return console.log(err);
+        selected_menuId=0;
+        res.send([result, selected_menuId]);
+        console.log(selected_menuId);
     })
 });
 
 app.get('/authors', (req, res) => {
     connection.execute("SELECT a.id, CONCAT(a.lastName,' ', a.firstName, ' ', IFNULL(a.familyName, '')) AS 'Ному насаб',   DATE_FORMAT(a.birthDate, '%d.%m.%Y') AS 'Санаи тавалуд', c.title AS 'Шаҳр', a.address AS 'Суроға' FROM authors a LEFT JOIN cities c ON a.cityId=c.id", (err, result) =>{
         if(err) return console.log(err);
-        res.send(result);
+        selected_menuId=1;
+        res.send([result, selected_menuId]);
     })
 });
 
 app.get('/publishers', (req, res) => {
     connection.execute("SELECT p.title_tj as 'Номи нашриёт', c.title as 'Шаҳр', address as 'Суроға' from publishers p left join cities c on p.cityId=c.id", (err, result) => {
         if(err) return console.log(err);
-        res.send(result);
+        selected_menuId=2;
+        res.send([result, selected_menuId]);
     })
 })
 
 app.get('/cities', (req, res) => {
     connection.execute("SELECT title as 'Шаҳр', if(typeOf=1, 'Давлат', 'Шаҳр') as 'Шаҳр/Давлат/Ноҳия' from cities", (err, result) => {
         if(err) return console.log(err);
-        res.send(result);
+        selected_menuId=3;
+        res.send([result, selected_menuId]);
     })
 })
 
 app.get('/directions', (req, res) => {
     connection.execute("SELECT title_ru as 'Самт', udc as 'Классификатор-udc' FROM directions order by udc", (err, result) => {
         if(err) return console.log(err);
-        res.send(result);
+        selected_menuId=4;
+        res.send([result, selected_menuId]);
     })
 })
 
 app.get('/genres', (req, res) => {
     connection.execute("SELECT `name` AS 'Жанр', `status` AS 'Статус' FROM genres", (err, result) => {
         if(err) return console.log(err);
-        res.send(result);
+        selected_menuId=5;
+        res.send([result, selected_menuId]);
     })
 })
 
 app.get('/users', (req, res) => {
     connection.execute("SELECT u.id, CONCAT(u.lastName,' ', u.firstName, ' ', IFNULL(u.familyName, '')) AS 'Ному насаб', u.login AS 'Логин', u.eMail AS 'Эл-почта', u.mobilePhone AS 'Номери телефон', DATE_FORMAT(u.birthDate, '%d.%m.%Y') AS 'Санаи тавалуд', c.title AS 'Шаҳр', u.address AS 'Суроға', u.pseudonym AS 'Номи кутоҳ', DATE_FORMAT(u.createdAt, '%d.%m.%Y') AS 'Санаи регистратсия' FROM users u left join cities c on u.cityId=c.id", (err, result) => {
         if(err) return console.log(err);
-        res.send(result);
+        selected_menuId=6;
+        res.send([result, selected_menuId]);
     })
 })
 

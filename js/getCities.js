@@ -7,6 +7,6 @@ async function getCities() {
     data.forEach(city => {
        cities.push(`<option value="${city.id}">${city.title}</option>`);
     });
-    document.getElementById("cityList").innerHTML =cities.join("\n");
+    document.getElementById("city_List").innerHTML =cities.join("\n");
     console.log(data);
 }
