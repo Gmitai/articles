@@ -1,34 +1,41 @@
-
-const forms=[
+const forms = [
+    ".modal-iframe",
     ".add_article_overlay",
     ".add_author_overlay",
     ".add_publisher_overlay"
 ];
-let frmId=0;
+let frmId = 0;
 let article_form_layer = document.querySelector(forms[frmId]);
 
-hideForm();
+function showForm(fId) {
+    if (fId >= 0) {
 
-function showForm(fId)
-{
-    if(fId>=0)
-    {
         article_form_layer = document.querySelector(forms[fId]);
-        article_form_layer.style.display = "block";
-        frmId = fId;
+        if(article_form_layer){
+            article_form_layer.style.display = "block";
+            //document.querySelector('.modal-iframe').style.display = "block";
+            frmId = fId;
+        }
     }
 }
 
-function hideForm()
-{
-    article_form_layer = document.querySelector(forms[frmId]);
-    article_form_layer.style.display = "none";
-    console.log(frmId);
+function hideForm() {
+    forms.forEach(selector => {
+        const el = document.querySelector(selector);
+        if(el) el.style.display = "none";
+    });
 }
 
-article_form_layer.addEventListener("click", function(event){
-    if (event.target===article_form_layer){
-        hideForm();
+
+forms.forEach(selector => {
+    //alert("Кнопка внутри iframe нажата!");
+    const el = document.querySelector(selector);
+    if(el){
+        alert("Кнопка внутри iframe нажата!");
+        el.addEventListener("click", function(event){
+            if(event.target === el){
+                hideForm();
+            }
+        });
     }
-    console.log(event.target);
-});
+})

@@ -19,21 +19,20 @@ app.get('/', (req, res) =>{
     res.sendFile('index.html')
 });
 app.get('/articles', (req,res) => {
-     connection.execute("SELECT a.id, a.title_tj AS 'Мавзӯъ', d.title_ru AS 'Самт', g.name AS 'Жанр', p.title_tj AS 'Нашриёт', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Соли нашр', IF(a.typeOf=1, 'Мақола', 'Китоб') AS 'Тип', CONCAT(au.lastName,' ', au.firstName, ' ', IFNULL(au.familyName, '')) AS 'Муалиф' FROM articles a JOIN authors au ON a.author_id=au.id LEFT JOIN directions d ON a.directionId=d.id LEFT JOIN genres g ON a.genreId=g.id LEFT JOIN publishers p  ON a.publisherId=p.id WHERE a.typeOf=1", (err, result) => {
+     connection.execute("SELECT a.id, a.title_tj AS 'Мавзӯъ', d.title_ru AS 'Самт', g.name AS 'Жанр', p.title_tj AS 'Нашриёт', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Соли нашр', IF(a.typeOf=1, 'Мақола', 'Китоб') AS 'Тип', CONCAT(au.lastName,' ', au.firstName, ' ', IFNULL(au.familyName, '')) AS 'Муалиф' FROM articles a JOIN authors au ON a.author_id=au.id LEFT JOIN directions d ON a.directionId=d.id LEFT JOIN genres g ON a.genreId=g.id LEFT JOIN publishers p  ON a.publisherId=p.id WHERE a.typeOf=2", (err, result) => {
         if(err) return console.log(err);
          selected_menuId=0;
          res.send([result, selected_menuId]);
 
-         console.log(selected_menuId);
     })
 });
 
 app.get('/books', (req,res) => {
-    connection.execute("SELECT a.id, a.title_tj AS 'Мавзӯъ', d.title_ru AS 'Самт', g.name AS 'Жанр', p.title_tj AS 'Нашриёт', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Соли нашр', IF(a.typeOf=1, 'Мақола', 'Китоб') AS 'Тип', CONCAT(au.lastName,' ', au.firstName, ' ', IFNULL(au.familyName, '')) AS 'Муалиф' FROM articles a JOIN authors au ON a.author_id=au.id LEFT JOIN directions d ON a.directionId=d.id LEFT JOIN genres g ON a.genreId=g.id LEFT JOIN publishers p  ON a.publisherId=p.id WHERE a.typeOf=0", (err, result) => {
+    connection.execute("SELECT a.id, a.title_tj AS 'Мавзӯъ', d.title_ru AS 'Самт', g.name AS 'Жанр', p.title_tj AS 'Нашриёт', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Соли нашр', IF(a.typeOf=1, 'Мақола', 'Китоб') AS 'Тип', CONCAT(au.lastName,' ', au.firstName, ' ', IFNULL(au.familyName, '')) AS 'Муалиф' FROM articles a JOIN authors au ON a.author_id=au.id LEFT JOIN directions d ON a.directionId=d.id LEFT JOIN genres g ON a.genreId=g.id LEFT JOIN publishers p  ON a.publisherId=p.id WHERE a.typeOf=1", (err, result) => {
         if(err) return console.log(err);
         selected_menuId=0;
         res.send([result, selected_menuId]);
-        console.log(selected_menuId);
+
     })
 });
 
@@ -85,7 +84,7 @@ app.get('/users', (req, res) => {
     })
 })
 
-//-----------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------------------------------------------------//
 app.get('/addPublisher', (req, res) => {
     res.sendFile(__dirname + '/public/addPublisher.html');
 });
@@ -134,6 +133,12 @@ app.get('/getAuthors', (req, res) => {
     });
 });
 
+app.get('/getType', (req, res) => {
+    connection.execute("SELECT id, title from typeOf", (err, result) => {
+        if (err) return console.log(err);
+        res.send(result);
+    });
+});
 
 app.post('/addAuthor', urlencodedParser, (req, res) => {
     const fullName = req.body.authorsName.split(' ');
@@ -233,10 +238,7 @@ app.post('/register', urlencodedParser, (req, res) => {
             });
         }
     });
-
 })
-
-
 
 app.listen(3000, "localhost", () => {
     console.log('Сервер дар порти 3000 ҷойгир шуд');

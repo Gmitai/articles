@@ -55,34 +55,6 @@ button:hover {
     background-color: #0056b3;
 }
 
-.main-link {
-    width: 45%;
-    display: block;
-    text-align: center;
-    padding: 10px;
-    background-color: #ff0000;
-    color: white;
-    border-radius: 4px;
-    text-decoration: none;
-    margin-left: 51%;
-    margin-top: -53px;
-}
-.main-link:hover {
-    background-color: #b30000;
-}
-.main-link-2 {
-    display: block;
-    text-align: center;
-    padding: 10px;
-    background-color: #ff0000;
-    color: white;
-    border-radius: 4px;
-    text-decoration: none;
-}
-.main-link-2:hover {
-    background-color: #b30000;
-}
-
 .add_article_overlay
 {
     position: fixed;
@@ -90,7 +62,7 @@ button:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(18, 17, 17, 0.49);
     display: none;
     z-index: 1000;
 }
@@ -131,6 +103,29 @@ button:hover {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 500px;
+
+}
+.modal-content {
+    background: rgba(0, 0, 0, 0.5);
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+}
+.close {
+    float: right;
+    cursor: pointer;
+    font-size: 24px;
+}
+
+.modal-iframe {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(18, 17, 17, 0.49);
+    display: none;
+    z-index: 1000;
 
 }
 
