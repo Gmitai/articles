@@ -201,16 +201,11 @@ html,body
     border-style: none;
     border-radius: 20px;
     background-color: rgb(0, 195, 16);
-
-    
     font-family: arial;
     color: white;
     font-weight: bold;
     font-size: 18px;
-    text-decoration: none;
     width: 150px;
     height: 33px;
-    text-align: center;
-    align-content: center;
 }
 

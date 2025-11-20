@@ -68,10 +68,6 @@ app.get('/users', (req, res) => {
 })
 
 //-----------------------------------------------------------------------------------//
-app.get('/addArticle', (req, res) => {
-    res.sendFile(__dirname + '/public//addArticle.html');
-});
-
 app.get('/addPublisher', (req, res) => {
     res.sendFile(__dirname + '/public/addPublisher.html');
 });
@@ -180,14 +176,14 @@ app.post('/addArticle', urlencodedParser, (req, res) => {
     connection.execute(`SELECT * FROM articles WHERE title_tj = '${title}' AND pagesCount='${pageCount}'`, function (err, result){
         if(result.length > 0){
             res.send("Чунин мақола аллакай дар БМ вуҷуд дорад!");
-            res.sendFile(__dirname + '/public/addArticle.html');
+            res.sendFile(__dirname + '/public/index.html');
         }
         else {
             const sql="Insert into articles (title_tj, pagesCount, publishYear, directionId, publisherId) VALUES (?,?,?,?,?)";
             connection.query(sql, [title, pageCount, publishDate, direction, publisher], (err, result) => {
                 if (err) {console.log(err)}
             });
-            res.sendFile(__dirname + '/public/addArticle.html');
+            res.sendFile(__dirname + '/public/index.html');
         }
     });
 })

@@ -1,14 +1,17 @@
 <!doctype html>
 <html lang="tj">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8" name="viewport" content="width=device-width,initial-scale=1" />
   <title>Мақолаҳо</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="Add_Select_Style.css">
+    <link rel="stylesheet" href="Forms_Style.css">
 
 </head>
 <body>
+<script src="getDirections.js" type="text/javascript"></script>
+<script src="getPublishers.js" type="text/javascript"></script>
+<script src="getAuthors.js" type="text/javascript"></script>
+
   <div class="app" role="application">
     <aside class="sidebar" aria-label="Главная навигация">
       <div class="brand">Articles</div>
@@ -33,52 +36,60 @@
         </div>
       </section>
     </main>
-      <div class="form_overlay">
-      <div id="select_field">
+      <div class="add_article_overlay">
+          <div class="form-container">
+              <h2>Бақайдгирии мақола</h2>
+              <form action="/addArticle" method="post">
+                  <div class="form-group">
+                      <label for="title">Номи мақола:</label>
+                      <input type="text" id="title" name="aricleName" required>
+                  </div>
 
-          <div id="txt_container">
-              <a id="txt_upper">Добавить</a>
-          </div>
+                  <div>
+                      <label for="authorsList">Муаллиф </label>
+                      <select id="authorsList" name="artAuthors" required>
+                          <option value="">Муаллифҳоро интихоб кунед</option>
+                      </select>
+                  </div>
 
-          <div id="btn_field">
-                <div class="btn_select" id="author">
+                  <div class="form-group">
+                      <label for="pageCount">Миқдори саҳифа:</label>
+                      <input type="number" id="pageCount" name="pCount" required>
+                  </div>
 
-                </div>
+                  <div class="form-group">
+                      <label for="yearOfPublish">Кадом сол чоп шудааст:</label>
+                      <input type="date" id="yearOfPublish" name="publishYear" required>
+                  </div>
 
-                <div class="btn_select" id="article">
+                  <div>
+                      <label for="directionsList"> Самт </label>
+                      <select id="directionsList" name="selDirect" required>
+                          <option value="">Самтро интихоб кунед</option>
+                      </select>
+                  </div>
+                  <div class="form-group">
+                      <label for="PublisherList"> Нашриёт </label>
+                      <select id="PublisherList" name="selPublisher" required>
+                          <option value="">Нашриётро интихобкунед</option>
+                      </select>
+                  </div>
 
-                </div>
+                  <div class="form-group">
+                      <button type="submit">Сабт</button>
+                  </div>
 
-              <div class="btn_select" id="book">
-
-              </div>
-
-              <div class="btn_select" id="publisher">
-
-              </div>
-
-              <div class="btn_select" id="city">
-
-              </div>
-
-              <div class="btn_select" id="genre">
-
-              </div>
-
-              <div class="btn_select" id="udk">
-
-              </div>
-
-          </div>
-
+                  <div class="form-group">
+                      <a href="index.html" class="main-link-2">Саҳифаи асоси</a>
+                  </div>
+              </form>
           </div>
       </div>
-
-  </div>
 
   <script src="menues.js" type="text/javascript"> </script>
   <script src="Hide_Show_Forms.js" type="text/javascript"> </script>
   <script src="Click.js" type="text/javascript"> </script>
+
 </body>
 </html>
 
