@@ -1,0 +1,273 @@
+body
+{
+    background-color: rgb(196, 196, 196);
+}
+
+#header
+{
+    background-color: white;
+    width: 1905px;
+    height: 140px;
+    margin-top: -8px;
+    margin-left: -8px;
+    align-content: center;
+    box-shadow: 0 4px 12px rgba(56, 27, 27, 0.377);
+}
+
+#iner_header
+{
+    /*border-style: solid;
+    border-color: black;
+    border-width: 1px;*/
+
+    height: 80px;
+    width: 1500px;
+    margin-left: 202px;
+    align-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+#search_box
+{
+    /*border-style: solid;
+    border-color: black;
+    border-width: 1px;*/
+
+    margin-left: 400px;
+    margin-top: -80px;
+    width: 600px;
+    height: 82px;
+    align-content: center;
+}
+
+#search
+{
+    border-style: solid;
+    border-right-style: none;
+    border-color: rgb(89, 0, 255);
+    border-width: 2px;
+    width: 517px;
+    height: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgb(199, 199, 199);
+}
+
+#search_button
+{
+    border-style: solid;
+    border-color: rgb(89, 0, 255);
+    border-width: 2px;
+    width: 100px;
+    height: 36px;
+    border-radius: 15px;
+    background-color: rgb(89, 0, 255);
+    font-weight: bold;
+    color: white;
+    margin-left: -27px;
+    box-shadow: 0 4px 12px rgb(199, 199, 199);
+}
+#search_button:hover
+{
+    background-color: rgb(100, 16, 255);
+    border-color:rgb(100, 16, 255);
+    box-shadow: 0 4px 12px rgba(155, 67, 255, 0.452);
+}
+
+#login_panel
+{
+    /*border-style: solid;
+    border-color: black;
+    border-width: 1px;*/
+
+    width: 300px;
+    height: 80px;
+    margin-left: 1198px;
+    margin-top: -82px;
+    align-items: center;
+    align-content: center;
+}
+
+#logo
+{
+    /*border-style: solid;
+    border-color: black;
+    border-width: 1px;*/
+
+    width: 80px;
+    height: 80px;
+    text-align: center;
+    align-content: center;
+    margin-left: 2px;
+}
+
+#title_text
+{
+    /*border-style: solid;
+    border-color: black;
+    border-width: 1px;*/
+
+    width: 310px;
+    height: 80px;
+    margin-top: -83px;
+    margin-left: 85px;
+    align-content: center;
+}
+
+#text
+{
+    font-family: arial;
+    font-weight: bold;
+    font-size: 32px;
+
+}
+
+#user_icon
+{
+    width: 70px;
+    height:65px;
+    margin-left: 225px;
+    border-radius: 12px;
+}
+
+#user_icon:hover
+{
+    background-color: rgba(216, 216, 216, 0.582);
+
+    #вход
+    {
+        color: rgb(0, 102, 255);
+    }
+}
+
+#img
+{
+    width: 70px;
+    height: 70px;
+}
+
+#img2
+{
+    width: 30px;
+    height:30px;
+    margin-left: 20px;
+    margin-top: 4px;
+
+}
+
+#вход
+{
+    margin-left: 4px;
+    font-weight: bold;
+    color: black;
+    font-weight: bold;
+    font-family: arial;
+    font-size: 14px;
+
+}
+
+#favorites_icon
+{
+    width: 85px;
+    height:65px;
+    margin-left: 130px;
+    border-radius: 12px;
+    margin-top: -65px;
+}
+
+#favorites_icon:hover
+{
+    background-color: rgba(216, 216, 216, 0.582);
+
+    #Избранное
+    {
+        color: rgb(0, 102, 255);
+    }
+}
+
+#img3
+{
+    width: 30px;
+    height:30px;
+    margin-left: 27px;
+    margin-top: 4px;
+
+}
+
+#Избранное
+{
+    margin-left: 5px;
+    font-weight: bold;
+    font-family: arial;
+    font-size: 14px;
+}
+
+
+#options
+{
+    /*border-style: solid;
+    border-color: black;
+    border-width: 1px;*/
+
+    height: 35px;
+    width: 1500px;
+    margin-left: 202px;
+    align-content: center;
+    align-items: center;
+}
+
+.S1
+{
+    font-family: arial;
+    font-weight: bold;
+    color: rgb(255, 0, 0);
+    margin-left: 10px;
+    text-decoration: none;
+}
+
+.S1:hover
+{
+    color: rgb(0, 47, 255);
+}
+
+.S2
+{
+    font-family: arial;
+    font-weight: bold;
+    color: rgb(0, 0, 0);
+    margin-left: 10px;
+    text-decoration: none;
+}
+
+.S2:hover
+{
+    color: rgb(0, 47, 255);
+}
+
+#body
+{
+    /*border-style: solid;
+    border-color: black;
+    border-width: 1px;*/
+    background-color: rgb(240, 240, 240);
+    height: 1000px;
+    width: 400px;
+    margin-left: -8px;
+
+}
+
+#line
+{
+    border-bottom-style: solid;
+    border-bottom-color: rgb(68, 0, 255);
+    border-width: 2px;
+    width: 1600px;
+    margin-left: 150px;
+
+}
+
+#fIcon
+{
+    margin-left: 400px;
+    margin-top: -5px;
+}

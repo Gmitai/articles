@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="tj">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Мақолаҳо</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="Add_Select_Style.css">
+
+</head>
+<body>
+  <div class="app" role="application">
+    <aside class="sidebar" aria-label="Главная навигация">
+      <div class="brand">Articles</div>
+      <nav class="nav" role="navigation" aria-label="Меню" id="nav">
+        
+      </nav>
+      <div class="sidebar-footer">Пользователь: <strong>Админ</strong></div>
+    </aside>
+
+    <main class="main">
+      <div class="header">
+        <h2 id="page-title">Китобхонаи илмии ДКМТ</h2>
+        <div class="actions" id="add_content">
+           <button id="add" onclick="showForm()" >Добавить</button>
+        </div>
+      </div>
+
+      <section id="main-content" class="content" tabindex="0" aria-live="polite">
+        <div class="placeholder" id="placeholder">
+          <div class="loader" aria-hidden="true"></div>
+          <div>Выберите таблицу в левой колонке, чтобы увидеть данные.</div>
+        </div>
+      </section>
+    </main>
+      <div class="form_overlay">
+      <div id="select_field">
+
+          <div id="txt_container">
+              <a id="txt_upper">Добавить</a>
+          </div>
+
+          <div id="btn_field">
+                <div class="btn_select" id="author">
+
+                </div>
+
+                <div class="btn_select" id="article">
+
+                </div>
+
+              <div class="btn_select" id="book">
+
+              </div>
+
+              <div class="btn_select" id="publisher">
+
+              </div>
+
+              <div class="btn_select" id="city">
+
+              </div>
+
+              <div class="btn_select" id="genre">
+
+              </div>
+
+              <div class="btn_select" id="udk">
+
+              </div>
+
+          </div>
+
+          </div>
+      </div>
+
+  </div>
+
+  <script src="menues.js" type="text/javascript"> </script>
+  <script src="Hide_Show_Forms.js" type="text/javascript"> </script>
+  <script src="Click.js" type="text/javascript"> </script>
+</body>
+</html>
+
+
