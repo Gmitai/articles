@@ -1,8 +1,7 @@
 const forms = [
-    ".modal-iframe",
-    ".add_article_overlay",
-    ".add_author_overlay",
-    ".add_publisher_overlay"
+    "#mIframe1",
+    "#mIframe2",
+    "#mIframe3"
 ];
 let frmId = 0;
 let article_form_layer = document.querySelector(forms[frmId]);
@@ -31,7 +30,6 @@ forms.forEach(selector => {
     //alert("Кнопка внутри iframe нажата!");
     const el = document.querySelector(selector);
     if(el){
-        alert("Кнопка внутри iframe нажата!");
         el.addEventListener("click", function(event){
             if(event.target === el){
                 hideForm();

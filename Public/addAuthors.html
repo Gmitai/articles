@@ -39,8 +39,8 @@
         </div>
 
         <div>
-            <label for="cityList"> Мамлакат </label>
-            <select id="cityList" name="selCity" required>
+            <label for="city_List"> Мамлакат </label>
+            <select id="city_List" name="selCity" required>
                 <option value="">Мамлакатро интихоб кунед</option>
             </select>
         </div>
@@ -53,23 +53,14 @@
             <button type="submit">Сабт</button>
         </div>
 
-        <div class="form-group">
-            <a href="index.html" class="main-link-2">Саҳифаи асоси</a>
+        <div class="exit">
+            <button onclick="window.parent.closeIframe()">
+                Саҳифаи асосӣ
+            </button>
         </div>
 
 </form>
+
 </div>
-
-<script>
-    let keyInput = document.getElementById("keyInput");
-    let keyOutput = document.getElementById("keyOutput");
-
-    keyInput.addEventListener('keydown', function(event)
-    {
-        keyOutput.textContent = `Шумо тугмаи ${event.key}- ро пахш кардед.
-        Коди тугма: ${event.keyCode}`;
-    });
-</script>
-
 </body>
 </html>

@@ -10,7 +10,7 @@ app.use(express.json());
 
 const connection =mysql.createConnection({
 host: 'localhost',
-user: 'admin',
+user: 'root',
 password: 'root',
 database: 'articles',
 port: 3306
@@ -128,13 +128,6 @@ app.get('/getPublishers', (req, res) => {
 
 app.get('/getAuthors', (req, res) => {
     connection.execute("SELECT id, CONCAT(lastName, ' ', firstName) AS lastName FROM authors", (err, result) => {
-        if (err) return console.log(err);
-        res.send(result);
-    });
-});
-
-app.get('/getType', (req, res) => {
-    connection.execute("SELECT id, title from typeOf", (err, result) => {
         if (err) return console.log(err);
         res.send(result);
     });

@@ -15,7 +15,6 @@
 <script src="getAuthors.js" type="text/javascript"></script>
 <script src="getLSItem.js" type="text/javascript"></script>
 <script src="getCities.js" type="text/javascript"></script>
-<script src="getType.js" type="text/javascript"></script>
 
   <div class="app" role="application">
     <aside class="sidebar" aria-label="Главная навигация">
@@ -41,143 +40,23 @@
         </div>
       </section>
     </main>
-      <!--div class="add_article_overlay"-->
 
-              <!--div class="modal-content"-->
-                  <iframe src="addAuthors.html" class="modal-iframe"></iframe>
-              <!--/div-->
+      <iframe src="addArticle.html" class="modal-iframe" id="mIframe1"></iframe>
+      <iframe src="addAuthors.html" class="modal-iframe"  id="mIframe2"></iframe>
+      <iframe src="addPublisher.html" class="modal-iframe"  id="mIframe3"></iframe>
 
-          <!--div class="form-container">
-              <h2>Бақайдгирии мақола ё китоб</h2>
-              <form action="/addArticle" method="post">
-                  <div class="form-group">
-                      <label for="title">Номи мақола:</label>
-                      <input type="text" id="title" name="aricleName" required>
-                  </div>
 
-                  <div>
-                      <label for="authorsList">Муаллиф </label>
-                      <select id="authorsList" name="artAuthors" required>
-                          <option value="">Муаллифҳоро интихоб кунед</option>
-                      </select>
-                  </div>
+  </div>
+<script src="menues.js" type="text/javascript"> </script>
+<script src="Hide_Show_Forms.js" type="text/javascript"> </script>
+<script src="Click.js" type="text/javascript"> </script>
 
-                  <div class="form-group">
-                      <label for="pageCount">Миқдори саҳифа:</label>
-                      <input type="number" id="pageCount" name="pCount" required>
-                  </div>
-
-                  <div>
-                      <label for="articleOrBook">Муаллиф </label>
-                      <select id="articleOrBook" name="artricleBook" required>
-                          <option value="">Намудро интихоб кунед</option>
-                      </select>
-                  </div>
-
-                  <div class="form-group">
-                      <label for="yearOfPublish">Кадом сол чоп шудааст:</label>
-                      <input type="date" id="yearOfPublish" name="publishYear" required>
-                  </div>
-
-                  <div>
-                      <label for="directionsList"> Самт </label>
-                      <select id="directionsList" name="selDirect" required>
-                          <option value="">Самтро интихоб кунед</option>
-                      </select>
-                  </div>
-                  <div class="form-group">
-                      <label for="PublisherList"> Нашриёт </label>
-                      <select id="PublisherList" name="selPublisher" required>
-                          <option value="">Нашриётро интихобкунед</option>
-                      </select>
-                  </div>
-
-                  <div class="form-group">
-                      <button type="submit">Сабт</button>
-                  </div>
-              </form>
-          </div-->
-      <!--/div-->
-
-      <div class="add_author_overlay">
-          <div class="form-container">
-              <h2>Бақайдгирии Муаллиф</h2>
-              <form action="/addAuthor" method="post">
-                  <div class="form-group">
-                      <label for="keyInput">Ному насаби муаллиф:</label>
-                      <input type="text" id="keyInput" name="authorsName" required>
-                      <p id="keyOutput" style="margin-top: 15px;"></p>
-                  </div>
-
-                  <div class="form-group">
-                      <label for="birthDate">Санаи таваллуд:</label>
-                      <input type="date" id="birthDate" name="birthDate" required>
-                  </div>
-
-                  <div class="form-group">
-                      <label for="phoneNumber">Номери телефон:</label>
-                      <input type="text" id="phoneNumber" name="phoneNum" required>
-                  </div>
-
-                  <div class="form-group">
-                      <label for="homePhoneNumber">Номери телефони хонагӣ:</label>
-                      <input type="text" id="homePhoneNumber" name="homePhoneNum" required>
-                  </div>
-
-                  <div class="form-group">
-                      <label for="workPhoneNumber">Номери телефони корӣ:</label>
-                      <input type="text" id="workPhoneNumber" name="workPhoneNum" required>
-                  </div>
-
-                  <div>
-                      <label for="cityList"> Мамлакат </label>
-                      <select id="cityList" name="selCity" required>
-                          <option value="">Мамлакатро интихоб кунед</option>
-                      </select>
-                  </div>
-
-                  <div class="form-group">
-                      <label for="address">Суроға</label>
-                      <input type="text" id="address" name="address" required>
-                  </div>
-                  <div class="form-group">
-                      <button type="submit">Сабт</button>
-                  </div>
-
-              </form>
-          </div>
-      </div>
-
-      <div class="add_publisher_overlay">
-          <div class="form-container">
-              <h2>Бақайдгирии нашриёт</h2>
-              <form action="/addPublisher" method="post">
-                  <div class="form-group">
-                      <label for="fullname">Номи нашриёт:</label>
-                      <input type="text" id="fullname" name="publisherName" required>
-                  </div>
-                  <div>
-                      <label for="city_List"> Мамлакат </label>
-                      <select id="city_List" name="selCity" required>
-                          <option value="">Мамлакатро интихоб кунед</option>
-                      </select>
-                  </div>
-                  <div class="form-group">
-                      <label for="add_ress">Суроға</label>
-                      <input type="text" id="add_ress" name="address" required>
-                  </div>
-                  <div class="form-group">
-                      <button type="submit">Сабт</button>
-                  </div>
-
-              </form>
-          </div>
-      </div>
-
-  <script src="menues.js" type="text/javascript"> </script>
-  <script src="Hide_Show_Forms.js" type="text/javascript"> </script>
-  <script src="Click.js" type="text/javascript"> </script>
-
+<script>
+    function closeIframe() {
+        const frame = document.querySelector('.modal-iframe');
+        if (frame) frame.style.display='none';
+    }
+</script>
 </body>
 </html>
 
