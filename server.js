@@ -2,6 +2,7 @@ const express = require('express');
 const mysql = require('mysql2');
 const urlencodedParser = express.urlencoded({extended: false});
 let selected_menuId=0;
+let flgBook=0;
 const app = express();
 app.use(express.static(__dirname + '/Public'));
 app.use(express.static(__dirname + '/js'))
@@ -22,6 +23,7 @@ app.get('/articles', (req,res) => {
     connection.execute("SELECT a.id, a.title_tj AS 'Мавзӯъ', d.title_ru AS 'Самт', g.name AS 'Жанр', p.title_tj AS 'Нашриёт', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Соли нашр', IF(a.typeOf=1, 'Мақола', 'Китоб') AS 'Тип' FROM articles a LEFT JOIN directions d ON a.directionId=d.id LEFT JOIN genres g ON a.genreId=g.id LEFT JOIN publishers p  ON a.publisherId=p.id WHERE a.typeOf=1", (err, result) => {
         if(err) return console.log(err);
         selected_menuId=0;
+        flgBook=1;
         connection.execute("SELECT a.id AS id, CONCAT(ath.lastName,' ', ath.firstName, ' ', IFNULL(ath.familyName, '')) AS author FROM articles a JOIN article_authors au JOIN authors ath ON au.id_article=a.id AND au.id_author=ath.id", (suberr, subresult) => {
             if(suberr) return console.log(err);
             subresult.forEach(item => {
@@ -44,6 +46,7 @@ app.get('/books', (req,res) => {
     connection.execute("SELECT a.id, a.title_tj AS 'Мавзӯъ', d.title_ru AS 'Самт', g.name AS 'Жанр', p.title_tj AS 'Нашриёт', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Соли нашр' FROM articles a LEFT JOIN directions d ON a.directionId=d.id LEFT JOIN genres g ON a.genreId=g.id LEFT JOIN publishers p  ON a.publisherId=p.id WHERE a.typeOf=0", (err, result) => {
         if(err) return console.log(err);
         selected_menuId=0;
+        flgBook=0;
         connection.execute("SELECT a.id AS id, CONCAT(ath.lastName,' ', ath.firstName, ' ', IFNULL(ath.familyName, '')) AS author FROM articles a JOIN article_authors au JOIN authors ath ON au.id_article=a.id AND au.id_author=ath.id", (suberr, subresult) => {
             if(suberr) return console.log(err);
             subresult.forEach(item => {
@@ -204,19 +207,28 @@ app.post('/addArticle', urlencodedParser, (req, res) => {
         }
         else {
             const sql="Insert into articles (title_tj, pagesCount, publishYear, directionId, publisherId, typeOf) VALUES (?,?,?,?,?,?)";
-            connection.query(sql, [title, pageCount, publishDate, direction, publisher, 1], (err, result) => {
+            connection.query(sql, [title, pageCount, publishDate, direction, publisher, flgBook], (err, result) => {
                 if (err)
                 {
                     console.log(err)
                 }
                 else {
-                    authors.forEach((author) => {
-                        connection.query("Insert into article_authors (id_article, id_author) VALUES (?,?)", [result.insertId, author], (err, res) => {
+                    if (Array.isArray(authors)) {
+                        authors.forEach((author) => {
+                            connection.query("Insert into article_authors (id_article, id_author) VALUES (?,?)", [result.insertId, author], (err, res) => {
+                                if (err) {
+                                    console.log(err)
+                                }
+                            });
+                        })
+                    }
+                    else{
+                        connection.query("Insert into article_authors (id_article, id_author) VALUES (?,?)", [result.insertId, authors], (err, res) => {
                             if (err) {
                                 console.log(err)
                             }
                         });
-                    })
+                    }
                 }
             });
 

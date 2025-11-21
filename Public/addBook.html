@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Бақайдгирии мақола</title>
     <link rel="stylesheet" href="Forms_Style.css">
+    <link rel="stylesheet" href="multiselect.css">
 </head>
 
 <body>
@@ -13,6 +14,7 @@
 <script src="getPublishers.js" type="text/javascript"></script>
 <script src="getAuthors.js" type="text/javascript"></script>
 <script src="getLSItem.js" type="text/javascript"></script>
+
 <div class="form-container">
     <h2>Бақайдгирии мақола</h2>
     <form action="/addArticle" method="post">
@@ -21,12 +23,23 @@
             <input type="text" id="title" name="aricleName" required>
         </div>
 
-        <div>
+        <div class="multiselect-container">
+            <div id="selected-values" class="selected-values">Выберите...</div>
+
+            <div class="dropdown" id="dropdown">
+                <label><input type="checkbox" value="Apple"> Apple</label>
+                <label><input type="checkbox" value="Banana"> Banana</label>
+                <label><input type="checkbox" value="Cherry"> Cherry</label>
+                <label><input type="checkbox" value="Grape"> Grape</label>
+            </div>
+        </div>
+
+        <!--div>
             <label for="authorsList">Муаллиф </label>
             <select id="authorsList" name="artAuthors" required>
                 <option value="">Муаллифҳоро интихоб кунед</option>
             </select>
-        </div>
+        </div-->
 
         <div class="form-group">
             <label for="pageCount">Миқдори саҳифа:</label>
@@ -62,6 +75,6 @@
         </div>
     </form>
 </div>
-
+<script src="multiselect.js" type="text/javascript"></script>
 </body>
 </html>
