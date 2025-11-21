@@ -8,7 +8,6 @@ const refreshBtn = document.getElementById('refreshBtn');
         "books",
         "authors",
         "publishers",
-        "cities",
         "directions",
         "genres",
         "users"
@@ -29,7 +28,7 @@ const refreshBtn = document.getElementById('refreshBtn');
     }
 
     function humanizeKey(key){
-      const map = {articles:'Мақолаҳо', authors:'Муалифҳо', publishers:'Нашриёт', cities:'Шаҳрҳо', directions:'Классификаторҳо', genres:'Жанрҳо', users:'Истифодабарандагон', books:'Китобҳо'};
+      const map = {articles:'Мақолаҳо', authors:'Муалифҳо', publishers:'Нашриёт', directions:'Классификаторҳо', genres:'Жанрҳо', users:'Истифодабарандагон', books:'Китобҳо'};
       return map[key]||key;
     }
 

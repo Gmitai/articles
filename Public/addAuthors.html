@@ -9,6 +9,7 @@
 
 <body>
 <script src="getCities.js" type="text/javascript"></script>
+<script src="getLSItem.js" type="text/javascript"></script>
 <div class="form-container">
     <h2>Бақайдгирии Муаллиф</h2>
     <form action="/addAuthor" method="post">
@@ -53,8 +54,8 @@
             <button type="submit">Сабт</button>
         </div>
 
-        <div class="exit">
-            <button onclick="window.parent.closeIframe()">
+        <div class="form-group">
+            <button type="button" onclick="window.parent.closeIframe(getFrmId())">
                 Саҳифаи асосӣ
             </button>
         </div>

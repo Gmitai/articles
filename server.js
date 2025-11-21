@@ -10,7 +10,7 @@ app.use(express.json());
 
 const connection =mysql.createConnection({
 host: 'localhost',
-user: 'root',
+user: 'admin',
 password: 'root',
 database: 'articles',
 port: 3306
@@ -19,20 +19,46 @@ app.get('/', (req, res) =>{
     res.sendFile('index.html')
 });
 app.get('/articles', (req,res) => {
-     connection.execute("SELECT a.id, a.title_tj AS 'Мавзӯъ', d.title_ru AS 'Самт', g.name AS 'Жанр', p.title_tj AS 'Нашриёт', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Соли нашр', IF(a.typeOf=1, 'Мақола', 'Китоб') AS 'Тип', CONCAT(au.lastName,' ', au.firstName, ' ', IFNULL(au.familyName, '')) AS 'Муалиф' FROM articles a JOIN authors au ON a.author_id=au.id LEFT JOIN directions d ON a.directionId=d.id LEFT JOIN genres g ON a.genreId=g.id LEFT JOIN publishers p  ON a.publisherId=p.id WHERE a.typeOf=2", (err, result) => {
+    connection.execute("SELECT a.id, a.title_tj AS 'Мавзӯъ', d.title_ru AS 'Самт', g.name AS 'Жанр', p.title_tj AS 'Нашриёт', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Соли нашр', IF(a.typeOf=1, 'Мақола', 'Китоб') AS 'Тип' FROM articles a LEFT JOIN directions d ON a.directionId=d.id LEFT JOIN genres g ON a.genreId=g.id LEFT JOIN publishers p  ON a.publisherId=p.id WHERE a.typeOf=1", (err, result) => {
         if(err) return console.log(err);
-         selected_menuId=0;
-         res.send([result, selected_menuId]);
-
+        selected_menuId=0;
+        connection.execute("SELECT a.id AS id, CONCAT(ath.lastName,' ', ath.firstName, ' ', IFNULL(ath.familyName, '')) AS author FROM articles a JOIN article_authors au JOIN authors ath ON au.id_article=a.id AND au.id_author=ath.id", (suberr, subresult) => {
+            if(suberr) return console.log(err);
+            subresult.forEach(item => {
+                const indx=result.findIndex(v=>v.id===item.id)
+                if(indx>-1){
+                    if(!('Муаллиф' in result[indx])) {
+                        result[indx] = Object.assign(result[indx], {"Муаллиф": item.author});
+                    }
+                    else {
+                        result[indx]['Муаллиф'] += ', ' + item.author;
+                    }
+                }
+            });
+            res.send([result, selected_menuId]);
+        });
     })
 });
 
 app.get('/books', (req,res) => {
-    connection.execute("SELECT a.id, a.title_tj AS 'Мавзӯъ', d.title_ru AS 'Самт', g.name AS 'Жанр', p.title_tj AS 'Нашриёт', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Соли нашр', IF(a.typeOf=1, 'Мақола', 'Китоб') AS 'Тип', CONCAT(au.lastName,' ', au.firstName, ' ', IFNULL(au.familyName, '')) AS 'Муалиф' FROM articles a JOIN authors au ON a.author_id=au.id LEFT JOIN directions d ON a.directionId=d.id LEFT JOIN genres g ON a.genreId=g.id LEFT JOIN publishers p  ON a.publisherId=p.id WHERE a.typeOf=1", (err, result) => {
+    connection.execute("SELECT a.id, a.title_tj AS 'Мавзӯъ', d.title_ru AS 'Самт', g.name AS 'Жанр', p.title_tj AS 'Нашриёт', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Соли нашр' FROM articles a LEFT JOIN directions d ON a.directionId=d.id LEFT JOIN genres g ON a.genreId=g.id LEFT JOIN publishers p  ON a.publisherId=p.id WHERE a.typeOf=0", (err, result) => {
         if(err) return console.log(err);
         selected_menuId=0;
-        res.send([result, selected_menuId]);
-
+        connection.execute("SELECT a.id AS id, CONCAT(ath.lastName,' ', ath.firstName, ' ', IFNULL(ath.familyName, '')) AS author FROM articles a JOIN article_authors au JOIN authors ath ON au.id_article=a.id AND au.id_author=ath.id", (suberr, subresult) => {
+            if(suberr) return console.log(err);
+            subresult.forEach(item => {
+                const indx=result.findIndex(v=>v.id===item.id)
+                if(indx>-1){
+                    if(!('Муаллиф' in result[indx])) {
+                        result[indx] = Object.assign(result[indx], {"Муаллиф": item.author});
+                    }
+                    else {
+                        result[indx]['Муаллиф'] += ', ' + item.author;
+                    }
+                }
+            });
+            res.send([result, selected_menuId]);
+        });
     })
 });
 
