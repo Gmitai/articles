@@ -5,8 +5,8 @@ async function getAuthors(){
     const data = await response.json();
     let authors = [];
     data.forEach(author => {
-        authors.push(`<option value="${author.id}">${author.lastName}</option>`);
+        authors.push(`<label><input type="checkbox" name="authors" value="${author.id}">${author.lastName}</label>`);
     });
-    document.getElementById("authorsList").innerHTML =authors.join("\n");
+    document.getElementById("dropdown").innerHTML =authors.join("\n");
     console.log(data);
 }

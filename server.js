@@ -111,25 +111,6 @@ app.get('/users', (req, res) => {
 })
 
 //----------------------------------------------------------------------------------------------------------------------//
-app.get('/addPublisher', (req, res) => {
-    res.sendFile(__dirname + '/public/addPublisher.html');
-});
-
-app.get('/addAuthor', (req, res) => {
-    res.sendFile(__dirname + '/public/addAuthors.html');
-});
-
-app.get('/register', (req, res) => {
-    res.sendFile(__dirname + '/public/register.html');
-});
-
-app.get('/login', (req, res) => {
-    res.sendFile(__dirname + '/public/login.html');
-});
-
-app.get('/Catalog', (req, res) => {
-    res.sendFile(__dirname + '/public/Catalog.html');
-});
 
 app.get('/getCities', (req, res) => {
     connection.execute("SELECT id, title FROM cities WHERE typeOf = 1", (err, result) => {
@@ -214,21 +195,58 @@ app.post('/addArticle', urlencodedParser, (req, res) => {
     const publishDate=req.body.publishYear;
     const direction=req.body.selDirect;
     const publisher=req.body.selPublisher;
-
+    const authors=req.body.authors;
+    console.log(req.body);
     connection.execute(`SELECT * FROM articles WHERE title_tj = '${title}' AND pagesCount='${pageCount}'`, function (err, result){
         if(result.length > 0){
             res.send("Чунин мақола аллакай дар БМ вуҷуд дорад!");
             res.sendFile(__dirname + '/public/index.html');
         }
         else {
-            const sql="Insert into articles (title_tj, pagesCount, publishYear, directionId, publisherId) VALUES (?,?,?,?,?)";
+            const sql="Insert into articles (title_tj, pagesCount, publishYear, directionId, publisherId, typeOf) VALUES (?,?,?,?,?,?)";
+            connection.query(sql, [title, pageCount, publishDate, direction, publisher, 1], (err, result) => {
+                if (err)
+                {
+                    console.log(err)
+                }
+                else {
+                    authors.forEach((author) => {
+                        connection.query("Insert into article_authors (id_article, id_author) VALUES (?,?)", [result.insertId, author], (err, res) => {
+                            if (err) {
+                                console.log(err)
+                            }
+                        });
+                    })
+                }
+            });
+
+
+        }
+    });
+})
+
+/*app.post('/addArticle', urlencodedParser, (req, res) => {
+    const title=req.body.bookName;
+    const pageCount=req.body.pCount;
+    const publishDate=req.body.publishYear;
+    const direction=req.body.selDirect;
+    const publisher=req.body.selPublisher;
+    const typeOf=1;
+
+    connection.execute(`SELECT * FROM articles WHERE title_tj = '${title}' AND pagesCount='${pageCount}'`, function (err, result){
+        if(result.length > 0){
+            res.send("Чунин китоб аллакай дар БМ вуҷуд дорад!");
+            res.sendFile(__dirname + '/public/index.html');
+        }
+        else {
+            const sql="Insert into articles (title_tj, pagesCount, publishYear, directionId, publisherId, typeOf) VALUES (?,?,?,?,?)";
             connection.query(sql, [title, pageCount, publishDate, direction, publisher], (err, result) => {
                 if (err) {console.log(err)}
             });
             res.sendFile(__dirname + '/public/index.html');
         }
     });
-})
+})*/
 
 app.post('/register', urlencodedParser, (req, res) => {
     const fullName = req.body.fName.split(' ');

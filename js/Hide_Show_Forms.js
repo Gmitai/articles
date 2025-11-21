@@ -11,6 +11,7 @@ function showForm(fId) {
 
         article_form_layer = document.querySelector(forms[fId]);
         if(article_form_layer){
+            console.log(article_form_layer);
             article_form_layer.style.display = "block";
             frmId = fId;
         }

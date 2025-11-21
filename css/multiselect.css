@@ -1,0 +1,28 @@
+.multiselect-container {
+    width: 200px;
+    position: relative;
+    font-family: sans-serif;
+}
+
+.selected-values {
+    padding: 8px;
+    border: 1px solid #aaa;
+    cursor: pointer;
+    background: #fff;
+}
+
+.dropdown {
+    display: none;
+    border: 1px solid #aaa;
+    border-top: none;
+    background: #fff;
+    position: absolute;
+    width: 100%;
+    z-index: 10;
+    padding: 8px;
+}
+
+.dropdown label {
+    display: block;
+    cursor: pointer;
+}
