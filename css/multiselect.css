@@ -9,6 +9,7 @@
     border: 1px solid #aaa;
     cursor: pointer;
     background: #fff;
+    width: 100%;
 }
 
 .dropdown {

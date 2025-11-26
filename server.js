@@ -1,9 +1,21 @@
 const express = require('express');
 const mysql = require('mysql2');
 const urlencodedParser = express.urlencoded({extended: false});
+const multer = require('multer');
+const {extname} = require("node:path");
 let selected_menuId=0;
 let flgBook=0;
 const app = express();
+const storageConfig = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads');
+        },
+    filename:(req, file, cb) => {
+        const uniSufix=Date.now()+'-'+Math.round(Math.random()*1E9);
+        cb(null, file.originalname.substring(0, file.originalname.length-4)+'-'+uniSufix+extname(file.originalname));
+    }
+});
+
 app.use(express.static(__dirname + '/Public'));
 app.use(express.static(__dirname + '/js'))
 app.use(express.static(__dirname + '/css'))
@@ -19,6 +31,8 @@ port: 3306
 app.get('/', (req, res) =>{
     res.sendFile('index.html')
 });
+
+
 app.get('/articles', (req,res) => {
     connection.execute("SELECT a.id, a.title_tj AS 'Мавзӯъ', d.title_ru AS 'Самт', g.name AS 'Жанр', p.title_tj AS 'Нашриёт', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Соли нашр', IF(a.typeOf=1, 'Мақола', 'Китоб') AS 'Тип' FROM articles a LEFT JOIN directions d ON a.directionId=d.id LEFT JOIN genres g ON a.genreId=g.id LEFT JOIN publishers p  ON a.publisherId=p.id WHERE a.typeOf=1", (err, result) => {
         if(err) return console.log(err);
@@ -192,27 +206,37 @@ app.post('/addPublisher', urlencodedParser, (req, res) => {
 
 })
 
-app.post('/addArticle', urlencodedParser, (req, res) => {
+app.use(multer({storage:storageConfig}).single('fileData'));
+app.post('/addArticle', urlencodedParser, (req, res, next) => {
+
     const title=req.body.aricleName;
     const pageCount=req.body.pCount;
     const publishDate=req.body.publishYear;
     const direction=req.body.selDirect;
     const publisher=req.body.selPublisher;
     const authors=req.body.authors;
-    console.log(req.body);
+
+
+
     connection.execute(`SELECT * FROM articles WHERE title_tj = '${title}' AND pagesCount='${pageCount}'`, function (err, result){
         if(result.length > 0){
             res.send("Чунин мақола аллакай дар БМ вуҷуд дорад!");
             res.sendFile(__dirname + '/public/index.html');
         }
         else {
-            const sql="Insert into articles (title_tj, pagesCount, publishYear, directionId, publisherId, typeOf) VALUES (?,?,?,?,?,?)";
-            connection.query(sql, [title, pageCount, publishDate, direction, publisher, flgBook], (err, result) => {
+            let filedata=req.file;
+
+            if(!filedata){
+                res.send('Ошибка при загрузке файла')
+            }
+            const sql="Insert into articles (title_tj, pagesCount, publishYear, directionId, publisherId, typeOf, filePath) VALUES (?,?,?,?,?,?,?)";
+            connection.query(sql, [title, pageCount, publishDate, direction, publisher, flgBook, filedata.filename], (err, result) => {
                 if (err)
                 {
                     console.log(err)
                 }
                 else {
+
                     if (Array.isArray(authors)) {
                         authors.forEach((author) => {
                             connection.query("Insert into article_authors (id_article, id_author) VALUES (?,?)", [result.insertId, author], (err, res) => {
@@ -289,6 +313,6 @@ app.post('/register', urlencodedParser, (req, res) => {
     });
 })
 
-app.listen(3000, "localhost", () => {
+app.listen(3000, "192.168.31.103", () => {
     console.log('Сервер дар порти 3000 ҷойгир шуд');
 });

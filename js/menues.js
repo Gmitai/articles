@@ -92,6 +92,15 @@ const refreshBtn = document.getElementById('refreshBtn');
           td.textContent = r[c] === null ? '' : r[c];
           tr.appendChild(td);
         });
+        const tdNew = document.createElement('td');
+        const button = document.createElement('button');
+        button.textContent ='Таҳрир';
+        button.setAttribute('id', 'edit');
+        button.addEventListener('click', () =>{
+            showForm(0)
+        });
+        tdNew.appendChild(button);
+        tr.appendChild(tdNew);
         tbody.appendChild(tr);
       });
       table.appendChild(tbody);
