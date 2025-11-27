@@ -111,4 +111,3 @@ const refreshBtn = document.getElementById('refreshBtn');
       const active = document.querySelector('.nav button.active');
       if(active) loadForKey(active.dataset.key);
     });
-    
