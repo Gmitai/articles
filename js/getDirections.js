@@ -9,4 +9,5 @@ async function getDirections() {
     });
     document.getElementById("directionsList").innerHTML =directions.join("\n");
     console.log(data);
+    document.getElementById("directionsList").value = ;
 }

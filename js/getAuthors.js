@@ -8,5 +8,6 @@ async function getAuthors(){
         authors.push(`<label><input type="checkbox" name="authors" value="${author.id}">${author.lastName}</label>`);
     });
     document.getElementById("dropdown").innerHTML =authors.join("\n");
+    document.getElementById("selected-values").value = localStorage.getItem('rowId');
     console.log(data);
 }

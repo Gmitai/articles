@@ -32,9 +32,11 @@ app.get('/', (req, res) =>{
     res.sendFile('index.html')
 });
 
-
+function getDirectionIdByArtId(artId){
+    connection.execute("SELECT ")
+}
 app.get('/articles', (req,res) => {
-    connection.execute("SELECT a.id, a.title_tj AS 'Мавзӯъ', d.title_ru AS 'Самт', g.name AS 'Жанр', p.title_tj AS 'Нашриёт', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Соли нашр', IF(a.typeOf=1, 'Мақола', 'Китоб') AS 'Тип' FROM articles a LEFT JOIN directions d ON a.directionId=d.id LEFT JOIN genres g ON a.genreId=g.id LEFT JOIN publishers p  ON a.publisherId=p.id WHERE a.typeOf=1", (err, result) => {
+    connection.execute("SELECT a.id, d.id, a.title_tj AS 'Мавзӯъ', d.title_ru AS 'Самт', g.name AS 'Жанр', p.title_tj AS 'Нашриёт', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Соли нашр', IF(a.typeOf=1, 'Мақола', 'Китоб') AS 'Тип' FROM articles a LEFT JOIN directions d ON a.directionId=d.id LEFT JOIN genres g ON a.genreId=g.id LEFT JOIN publishers p  ON a.publisherId=p.id WHERE a.typeOf=1", (err, result) => {
         if(err) return console.log(err);
         selected_menuId=0;
         flgBook=1;
@@ -104,7 +106,7 @@ app.get('/cities', (req, res) => {
 })
 
 app.get('/directions', (req, res) => {
-    connection.execute("SELECT title_ru as 'Самт', udc as 'Классификатор-udc' FROM directions order by udc", (err, result) => {
+    connection.execute("SELECT title_ru as 'Самт', udc as 'УДК' FROM directions order by udc", (err, result) => {
         if(err) return console.log(err);
         selected_menuId=4;
         res.send([result, selected_menuId]);
@@ -112,7 +114,7 @@ app.get('/directions', (req, res) => {
 })
 
 app.get('/genres', (req, res) => {
-    connection.execute("SELECT `name` AS 'Жанр', `status` AS 'Статус' FROM genres", (err, result) => {
+    connection.execute("SELECT `name` AS 'Жанр' FROM genres", (err, result) => {
         if(err) return console.log(err);
         selected_menuId=5;
         res.send([result, selected_menuId]);
@@ -156,6 +158,10 @@ app.get('/getAuthors', (req, res) => {
         res.send(result);
     });
 });
+
+/*app.get('/articleData', (req, res)=>{
+    connection.execute("SELECT" from articles a left join authors au on)
+}*/
 
 app.post('/addAuthor', urlencodedParser, (req, res) => {
     const fullName = req.body.authorsName.split(' ');
@@ -260,29 +266,6 @@ app.post('/addArticle', urlencodedParser, (req, res, next) => {
         }
     });
 })
-
-/*app.post('/addArticle', urlencodedParser, (req, res) => {
-    const title=req.body.bookName;
-    const pageCount=req.body.pCount;
-    const publishDate=req.body.publishYear;
-    const direction=req.body.selDirect;
-    const publisher=req.body.selPublisher;
-    const typeOf=1;
-
-    connection.execute(`SELECT * FROM articles WHERE title_tj = '${title}' AND pagesCount='${pageCount}'`, function (err, result){
-        if(result.length > 0){
-            res.send("Чунин китоб аллакай дар БМ вуҷуд дорад!");
-            res.sendFile(__dirname + '/public/index.html');
-        }
-        else {
-            const sql="Insert into articles (title_tj, pagesCount, publishYear, directionId, publisherId, typeOf) VALUES (?,?,?,?,?)";
-            connection.query(sql, [title, pageCount, publishDate, direction, publisher], (err, result) => {
-                if (err) {console.log(err)}
-            });
-            res.sendFile(__dirname + '/public/index.html');
-        }
-    });
-})*/
 
 app.post('/register', urlencodedParser, (req, res) => {
     const fullName = req.body.fName.split(' ');
