@@ -96,7 +96,7 @@ const refreshBtn = document.getElementById('refreshBtn');
 
         const tdNew = document.createElement('td');
         const button = document.createElement('button');
-        button.textContent ='Таҳрир';
+        button.textContent ='Намоиш';
         button.setAttribute('id', 'edit');
         button.addEventListener('click', () =>{
             showForm(getFrmId(), r['id'])
@@ -113,3 +113,6 @@ const refreshBtn = document.getElementById('refreshBtn');
       const active = document.querySelector('.nav button.active');
       if(active) loadForKey(active.dataset.key);
     });
+
+
+

@@ -139,6 +139,25 @@ button:hover {
     z-index: 1000;
 }
 
+#pageCount
+{
+    width: 30%;
+    height: 25px;
+}
+
+#yearOfPublish
+{
+    width: 30%;
+    height: 25px;
+}
+
+#1
+{
+    border-style: solid;
+    border-width: 1px;
+    border-color: rgba(18, 17, 17, 0.49);
+}
+
 
 
 

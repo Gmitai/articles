@@ -90,7 +90,7 @@ app.get('/authors', (req, res) => {
 });
 
 app.get('/publishers', (req, res) => {
-    connection.execute("SELECT p.title_tj as 'Номи нашриёт', c.title as 'Шаҳр', address as 'Суроға' from publishers p left join cities c on p.cityId=c.id", (err, result) => {
+    connection.execute("SELECT p.id, p.title_tj as 'Номи нашриёт', c.title as 'Шаҳр', address as 'Суроға' from publishers p left join cities c on p.cityId=c.id", (err, result) => {
         if(err) return console.log(err);
         selected_menuId=2;
         res.send([result, selected_menuId]);
@@ -130,7 +130,12 @@ app.get('/users', (req, res) => {
 })
 
 //----------------------------------------------------------------------------------------------------------------------//
-
+app.get('/getArticles', (req, res) => {
+    connection.execute("SELECT a.id, CONCAT(d.udc,' ', d.title_ru) AS title_ru, g.name,   FROM articles a left join article_authors aau on a.id=aau.id_article left join ", (err, result) => {
+        if (err) return console.log(err);
+        res.send(result);
+    });
+});
 app.get('/getCities', (req, res) => {
     connection.execute("SELECT id, title FROM cities WHERE typeOf = 1", (err, result) => {
         if (err) return console.log(err);

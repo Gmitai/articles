@@ -1,6 +1,6 @@
-getDirections();
 
-async function getDirections() {
+
+async function getArticleData() {
     const response = await fetch("/getDirections");
     const data = await response.json();
     let directions = [];
