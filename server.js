@@ -136,6 +136,14 @@ app.get('/getArticles', (req, res) => {
         res.send(result);
     });
 });
+
+app.get('/getview', (req, res) => {
+    connection.execute("SELECT a.id, a.title_tj, GROUP_CONCAT(CONCAT(au.lastName, ' ', au.firstName) SEPARATOR ', ') AS 'Ному насаб', a.pagesCount, a.publishYear, d.title_ru AS 'Направление', p.title_tj AS 'Издательство', a.filePath FROM articles a LEFT JOIN article_authors aa ON a.id = aa.id_article LEFT JOIN AUTHORS au ON aa.id_author = au.id LEFT JOIN directions d ON a.directionId = d.id LEFT JOIN publishers p ON a.publisherId = p.id GROUP BY a.id ORDER BY a.id;", (err, result) => {
+        if (err) return console.log(err);
+        res.send(result);
+    });
+});
+
 app.get('/getCities', (req, res) => {
     connection.execute("SELECT id, title FROM cities WHERE typeOf = 1", (err, result) => {
         if (err) return console.log(err);
