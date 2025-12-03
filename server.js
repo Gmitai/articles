@@ -5,6 +5,7 @@ const multer = require('multer');
 const {extname} = require("node:path");
 let selected_menuId=0;
 let flgBook=0;
+
 const app = express();
 const storageConfig = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -36,7 +37,7 @@ function getDirectionIdByArtId(artId){
     connection.execute("SELECT ")
 }
 app.get('/articles', (req,res) => {
-    connection.execute("SELECT a.id, d.id, a.title_tj AS 'Мавзӯъ', d.title_ru AS 'Самт', g.name AS 'Жанр', p.title_tj AS 'Нашриёт', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Соли нашр', IF(a.typeOf=1, 'Мақола', 'Китоб') AS 'Тип' FROM articles a LEFT JOIN directions d ON a.directionId=d.id LEFT JOIN genres g ON a.genreId=g.id LEFT JOIN publishers p  ON a.publisherId=p.id WHERE a.typeOf=1", (err, result) => {
+    connection.execute("SELECT a.id, a.title_tj AS 'Мавзӯъ', d.title_ru AS 'Самт', g.name AS 'Жанр', p.title_tj AS 'Нашриёт', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Соли нашр', IF(a.typeOf=1, 'Мақола', 'Китоб') AS 'Тип' FROM articles a LEFT JOIN directions d ON a.directionId=d.id LEFT JOIN genres g ON a.genreId=g.id LEFT JOIN publishers p  ON a.publisherId=p.id WHERE a.typeOf=1", (err, result) => {
         if(err) return console.log(err);
         selected_menuId=0;
         flgBook=1;
@@ -128,6 +129,30 @@ app.get('/users', (req, res) => {
         res.send([result, selected_menuId]);
     })
 })
+//----------------------------------------------------------------------------------------------------------------------//
+// ---------- 1) ПОЛУЧЕНИЕ СТАТЬИ ДЛЯ РЕДАКТИРОВАНИЯ ----------
+app.get('/getArticleById', (req, res) => {
+    const id = req.query.id;
+
+    const sql1 ="SELECT id, title_tj, pagesCount, publishYear, directionId, publisherId, filePath FROM articles WHERE id = ?";
+
+    connection.execute(sql1, [id], (err, articleRows) => {
+        if (err) return res.status(500).send(err);
+
+        connection.execute( "SELECT a.id as id, CONCAT(a.lastName, ' ', a.firstName) AS authorName FROM authors a JOIN article_authors b  ON b.id_author=a.id WHERE b.id_article = ?",
+            [id], (err2, authorRows) => {
+                if (err2) return res.status(500).send(err2);
+
+                const authors = authorRows;
+                res.json({ ...articleRows[0], authors });
+                console.log(articleRows[0]);
+            }
+        );
+    });
+});
+
+// ---------- 2) ОБНОВЛЕНИЕ СТАТЬИ ----------
+
 
 //----------------------------------------------------------------------------------------------------------------------//
 app.get('/getArticles', (req, res) => {
@@ -141,7 +166,9 @@ app.get('/getview', (req, res) => {
     connection.execute("SELECT a.id, a.title_tj, GROUP_CONCAT(CONCAT(au.lastName, ' ', au.firstName) SEPARATOR ', ') AS 'Ному насаб', a.pagesCount, a.publishYear, d.title_ru AS 'Направление', p.title_tj AS 'Издательство', a.filePath FROM articles a LEFT JOIN article_authors aa ON a.id = aa.id_article LEFT JOIN AUTHORS au ON aa.id_author = au.id LEFT JOIN directions d ON a.directionId = d.id LEFT JOIN publishers p ON a.publisherId = p.id GROUP BY a.id ORDER BY a.id;", (err, result) => {
         if (err) return console.log(err);
         res.send(result);
+        console.log(result);
     });
+
 });
 
 app.get('/getCities', (req, res) => {
@@ -278,7 +305,56 @@ app.post('/addArticle', urlencodedParser, (req, res, next) => {
 
         }
     });
+});
+
+app.post('/updateArticle', urlencodedParser, (req, res, next) => {
+    const id = req.body.rowId ;
+    const title=req.body.aricleName;
+    const pageCount=req.body.pCount;
+    const publishDate=req.body.publishYear;
+    const direction=req.body.selDirect;
+    const publisher=req.body.selPublisher;
+    const authors=req.body.authors;
+
+
+            let filedata=req.file;
+    let sql="UPDATE articles set title_tj=?, pagesCount=?, publishYear=?, directionId=?, publisherId=?, typeOf=? where id=?";
+
+    let sqlparams=[title, pageCount, publishDate, direction, publisher, flgBook, id];
+            if(filedata) {
+                sql="UPDATE articles set title_tj=?, pagesCount=?, publishYear=?, directionId=?, publisherId=?, typeOf=?, filePath=? where id=?";
+                sqlparams=[title, pageCount, publishDate, direction, publisher, flgBook, filedata.filename, id];
+            }
+            connection.query(sql, sqlparams, (err, result) => {
+                if (err)
+                {
+                    console.log(err)
+                }
+                else {
+connection.query("DELETE FROM article_authors WHERE id_article=?", id, (err, res) => {
+    if (err) {console.log(err)}
 })
+                    if (Array.isArray(authors)) {
+                        authors.forEach((author) => {
+                            connection.query("Insert into article_authors (id_article, id_author) VALUES (?,?)", [id, author], (err, res) => {
+                                if (err) {
+                                    console.log(err)
+                                }
+                            });
+                        })
+                    }
+                    else{
+                        connection.query("Insert into article_authors (id_article, id_author) VALUES (?,?)", [id, authors], (err, res) => {
+                            if (err) {
+                                console.log(err)
+                            }
+                        });
+                    }
+
+                }
+            });
+
+});
 
 app.post('/register', urlencodedParser, (req, res) => {
     const fullName = req.body.fName.split(' ');

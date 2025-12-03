@@ -96,7 +96,7 @@ const refreshBtn = document.getElementById('refreshBtn');
 
         const tdNew = document.createElement('td');
         const button = document.createElement('button');
-        button.textContent ='Намоиш';
+        button.textContent ='Таҳрир';
         button.setAttribute('id', 'edit');
         button.addEventListener('click', () =>{
             showForm(getFrmId(), r['id'])

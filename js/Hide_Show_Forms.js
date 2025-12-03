@@ -13,22 +13,35 @@ let article_form_layer = document.querySelector(forms[frmId]);
 let earticle_form_layer = document.querySelector(eforms[frmId]);
 let editMode = false;
 
-function showForm(fId, rowId=0) {
-    if (fId >= 0) {
+function showForm(fId, rowId = 0) {
+    let articleFormLayer;
+    if (rowId > 0) {
+        articleFormLayer = document.querySelector(eforms[fId]);
+        localStorage.setItem('rowId', JSON.stringify(rowId));
+        editMode = true;
+    } else {
+        articleFormLayer = document.querySelector(forms[fId]);
+        editMode = false;
+    }
 
-        if (rowId>0){
-            article_form_layer=document.querySelector(eforms[fId]);
-            localStorage.setItem('rowId', JSON.stringify(rowId));
-            editMode=true;
-        }
-        else {
-            article_form_layer=document.querySelector(forms[fId]);
-            editMode=false;
-        }
-        if(article_form_layer){
-            article_form_layer.style.display = "block";
-            frmId = fId;
+    if (articleFormLayer) {
+        articleFormLayer.style.display = "block";
+        frmId = fId;
 
+        if (editMode) {
+            // Пытаемся дождаться готовности DOM iframe
+            const tryLoad = () => {
+                const iframeDoc = articleFormLayer.contentDocument || articleFormLayer.contentWindow.document;
+                if (iframeDoc.readyState === "complete") {
+                    // Вызываем функцию внутри iframe
+                    if (articleFormLayer.contentWindow.loadArticleData) {
+                        articleFormLayer.contentWindow.loadArticleData(rowId);
+                    }
+                } else {
+                    setTimeout(tryLoad, 50); // пробуем через 50ms
+                }
+            };
+            tryLoad();
         }
     }
 }
