@@ -8,5 +8,5 @@ async function getType() {
         types.push(`<option value="${type.id}">${type.title}</option>`);
     });
     document.getElementById("articleOrBook").innerHTML =types.join("\n");
-    console.log(data);
+
 }

@@ -8,5 +8,5 @@ async function getDirections() {
         directions.push(`<option value="${direction.id}">${direction.title_ru}</option>`);
     });
     document.getElementById("directionsList").innerHTML =directions.join("\n");
-    console.log(data);
+
 }

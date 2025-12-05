@@ -8,5 +8,5 @@ async function getPublishers(){
         publishers.push(`<option value="${publisher.id}">${publisher.title_tj}</option>`);
     });
     document.getElementById("PublisherList").innerHTML =publishers.join("\n");
-    console.log(data);
+
 }

@@ -145,14 +145,34 @@ app.get('/getArticleById', (req, res) => {
 
                 const authors = authorRows;
                 res.json({ ...articleRows[0], authors });
-                console.log(articleRows[0]);
             }
         );
     });
 });
 
-// ---------- 2) ОБНОВЛЕНИЕ СТАТЬИ ----------
+// ---------- ПОЛУЧЕНИЕ АВТОРА ДЛЯ РЕДАКТИРОВАНИЯ ----------//
+app.get('/getAuthorById', (req, res) => {
+    const id = req.query.id;
 
+    const sqlAuthor = `SELECT a.id,CONCAT(a.lastName, ' ', a.firstName, ' ', IFNULL(a.familyName, '')) AS fullName, DATE_FORMAT(a.birthDate, '%Y-%m-%d') AS birthDate, a.mobilePhone, a.cityId, c.title AS city, a.address FROM authors a LEFT JOIN cities c ON a.cityId = c.id WHERE a.id = ?`;
+
+    connection.execute(sqlAuthor, [id], (err, authorRows) => {
+        if (err) return res.status(500).send(err);
+        if (!authorRows.length) return res.status(404).json({ error: "Автор не найден" });
+
+        res.json(authorRows[0]);
+    });
+});
+
+app.post('/updateAuthor', express.json(), (req, res) => {
+    const { rowId, lastName, firstName, familyName, birthDate, phone, cityId, address } = req.body;
+
+    const sql = `UPDATE authors SET lastName=?, firstName=?, familyName=?, birthDate=?, mobilePhone=?, cityId=?, address=? WHERE id=?`;
+    connection.execute(sql, [lastName, firstName, familyName, birthDate, phone, cityId, address, rowId], (err, result) => {
+        if (err) return res.status(500).send(err);
+        res.json({ message: "Автор успешно обновлен!" });
+    });
+});
 
 //----------------------------------------------------------------------------------------------------------------------//
 app.get('/getArticles', (req, res) => {
@@ -160,15 +180,6 @@ app.get('/getArticles', (req, res) => {
         if (err) return console.log(err);
         res.send(result);
     });
-});
-
-app.get('/getview', (req, res) => {
-    connection.execute("SELECT a.id, a.title_tj, GROUP_CONCAT(CONCAT(au.lastName, ' ', au.firstName) SEPARATOR ', ') AS 'Ному насаб', a.pagesCount, a.publishYear, d.title_ru AS 'Направление', p.title_tj AS 'Издательство', a.filePath FROM articles a LEFT JOIN article_authors aa ON a.id = aa.id_article LEFT JOIN AUTHORS au ON aa.id_author = au.id LEFT JOIN directions d ON a.directionId = d.id LEFT JOIN publishers p ON a.publisherId = p.id GROUP BY a.id ORDER BY a.id;", (err, result) => {
-        if (err) return console.log(err);
-        res.send(result);
-        console.log(result);
-    });
-
 });
 
 app.get('/getCities', (req, res) => {
@@ -199,16 +210,10 @@ app.get('/getAuthors', (req, res) => {
     });
 });
 
-/*app.get('/articleData', (req, res)=>{
-    connection.execute("SELECT" from articles a left join authors au on)
-}*/
-
 app.post('/addAuthor', urlencodedParser, (req, res) => {
     const fullName = req.body.authorsName.split(' ');
     const birthDate=req.body.birthDate;
-    const phoneNumber=req.body.phone;
-    const homePhoneNumber=req.body.homePhoneNum;
-    const workPhoneNumber=req.body.workPhoneNum;
+    const phoneNumber=req.body.phoneNum;
     const selCity=req.body.selCity;
     const address=req.body.address;
     const lastName=fullName[0].charAt(0).toUpperCase() + fullName[0].substring(1).toLowerCase();

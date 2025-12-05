@@ -7,7 +7,6 @@ async function getAuthors(){
     data.forEach(author => {
         authors.push(`<label><input type="checkbox" name="authors" value="${author.id}" required>${author.lastName}</label>`);
     });
-    document.getElementById("dropdown").innerHTML =authors.join("\n");
+    document.getElementById("dropdown").innerHTML = authors.join("\n");
     document.getElementById("selected-values").value = localStorage.getItem('rowId');
-    console.log(data);
 }

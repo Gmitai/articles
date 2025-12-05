@@ -100,6 +100,7 @@ const refreshBtn = document.getElementById('refreshBtn');
         button.setAttribute('id', 'edit');
         button.addEventListener('click', () =>{
             showForm(getFrmId(), r['id'])
+            refresh()
         });
         tdNew.appendChild(button);
         tr.appendChild(tdNew);
@@ -113,6 +114,11 @@ const refreshBtn = document.getElementById('refreshBtn');
       const active = document.querySelector('.nav button.active');
       if(active) loadForKey(active.dataset.key);
     });
+
+    function refresh() {
+    const iframe = document.getElementById('meIframe2');
+    iframe.contentWindow.location.reload();
+}
 
 
 

@@ -3,24 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Таҳрири муаллиф</title>
+    <title>Таҳрири Муаллиф</title>
     <link rel="stylesheet" href="Forms_Style.css">
 </head>
-
 <body>
-<script src="getCities.js" type="text/javascript"></script>
-<script src="getLSItem.js" type="text/javascript"></script>
 <div class="form-container">
     <h2>Таҳрири Муаллиф</h2>
-    <form action="/addAuthor" method="post">
+
+    <form id="editForm" onsubmit="submitAuthorForm(); return false;">
+        <input type="hidden" id="rowId" name="rowId">
+
         <div class="form-group">
-            <label for="keyInput">Ному насаби муаллиф:</label>
-            <input type="text" id="keyInput" name="authorsName" required>
-            <p id="keyOutput" style="margin-top: 15px;"></p>
+            <label for="name">Ному насаб:</label>
+            <input type="text" id="name" name="fullName" required>
         </div>
 
         <div class="form-group">
-            <label for="birthDate">Санаи таваллуд:</label>
+            <label for="birthDate">Соли тавалуд:</label>
             <input type="date" id="birthDate" name="birthDate" required>
         </div>
 
@@ -30,38 +29,27 @@
         </div>
 
         <div class="form-group">
-            <label for="homePhoneNumber">Номери телефони хонагӣ:</label>
-            <input type="text" id="homePhoneNumber" name="homePhoneNum" required>
+            <label for="city_List">Шаҳр/Давлат:</label>
+            <select id="city_List" name="selCity" required></select>
         </div>
 
         <div class="form-group">
-            <label for="workPhoneNumber">Номери телефони корӣ:</label>
-            <input type="text" id="workPhoneNumber" name="workPhoneNum" required>
-        </div>
-
-        <div>
-            <label for="city_List"> Мамлакат </label>
-            <select id="city_List" name="selCity" required>
-                <option value="">Мамлакатро интихоб кунед</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label for="address">Суроға</label>
+            <label for="address">Суроға:</label>
             <input type="text" id="address" name="address" required>
         </div>
+
         <div class="form-group">
             <button type="submit">Сабт</button>
+            <button type="button" onclick="window.parent.closeIframe(getFrmId())">Саҳифаи асосӣ</button>
         </div>
-
-        <div class="form-group">
-            <button type="button" onclick="window.parent.closeIframe(getFrmId())">
-                Саҳифаи асосӣ
-            </button>
-        </div>
-
-</form>
-
+    </form>
 </div>
+
+<script src="getDirections.js"></script>
+<script src="getCities.js"></script>
+<script src="getPublishers.js"></script>
+<script src="multiselect.js"></script>
+<script src="getLSItem.js" type="text/javascript"></script>
+<script src="dataForAuthorForm.js"></script>
 </body>
 </html>

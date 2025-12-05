@@ -28,6 +28,7 @@ select {
     box-sizing: border-box; /* Ensures padding doesn't affect the width */
 }
 button {
+    margin-top: 10px;
     width: 100%;
     padding: 10px;
     background-color: #007BFF;
@@ -139,6 +140,10 @@ button:hover {
     z-index: 1000;
 }
 
+#Back
+{
+    margin-top: -10px;
+}
 
 
 

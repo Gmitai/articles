@@ -8,5 +8,5 @@ async function getCities() {
        cities.push(`<option value="${city.id}">${city.title}</option>`);
     });
     document.getElementById("city_List").innerHTML =cities.join("\n");
-    console.log(data);
+
 }
