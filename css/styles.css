@@ -149,9 +149,7 @@ html,body
 {
     width:100%;
     border-collapse:collapse;
-    border-top-color: #0e0e10;
-    border-top-style: solid;
-    border-top-width:3px;
+
 }
 
 .data-table th,.data-table td
@@ -160,9 +158,7 @@ html,body
     padding:10px;
     text-align:left;
     font-size:14px;
-    border-top-color: #0e0e10;
-    border-top-style: solid;
-    border-top-width:2px;
+
 }
 
 .data-table thead th

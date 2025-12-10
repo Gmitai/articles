@@ -50,8 +50,8 @@ const refreshBtn = document.getElementById('refreshBtn');
         const res = await fetch(`/${encodeURIComponent(key)}`);
         if(!res.ok) throw new Error(res.statusText||'Ошибка сети');
         const data = await res.json();
-        renderTable(key, data[0]);
         localStorage.setItem('frmId', JSON.stringify(data[1]));
+        renderTable(key, data[0]);
 
       }catch(err){
         showError(err);
@@ -116,16 +116,22 @@ const refreshBtn = document.getElementById('refreshBtn');
             refresh()
         });
         tdNew.appendChild(button);
+          tr.appendChild(tdNew);
+          let frmId = parseInt(localStorage.getItem('frmId'));
+            if(frmId===0) {
+                const td2 = document.createElement('td');
+                const button1 = document.createElement('button');
+                button1.appendChild(img2);
+                button1.setAttribute('id', 'loading');
+                button1.addEventListener('click', () => {
+                    console.log(r['id']);
+                    getFileName(r['id']).then(res=>console.log(res+'ok'));
+                   //downloadPDF();
+                });
+                td2.appendChild(button1);
+                tr.appendChild(td2);
+            }
 
-          const button1 = document.createElement('button');
-          button1.appendChild(img2);
-          button1.setAttribute('id', 'loading');
-          button1.addEventListener('click', () =>{
-              window.location.href='404.html'
-          });
-          tdNew.appendChild(button1);
-
-        tr.appendChild(tdNew);
         tbody.appendChild(tr);
       });
       table.appendChild(tbody);
@@ -141,6 +147,4 @@ const refreshBtn = document.getElementById('refreshBtn');
     const iframe = document.getElementById('meIframe2');
     iframe.contentWindow.location.reload();
 }
-
-
 

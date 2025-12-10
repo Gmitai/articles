@@ -3,6 +3,8 @@ const mysql = require('mysql2');
 const urlencodedParser = express.urlencoded({extended: false});
 const multer = require('multer');
 const {extname} = require("node:path");
+const fs = require('fs');
+const path = require("path");
 let selected_menuId=0;
 let flgBook=0;
 
@@ -32,10 +34,32 @@ port: 3306
 app.get('/', (req, res) =>{
     res.sendFile('index.html')
 });
+app.get('/articleFileName/:id', (req, res) => {
+    const articleId = req.params.id;
+    connection.execute(`SELECT filePath
+                        FROM articles
+                        WHERE id = ${articleId}`, (err, result) => {
+        if (err) throw err;
+        res.send(result);
+    });
+});
 
-function getDirectionIdByArtId(artId){
-    connection.execute("SELECT ")
-}
+
+app.get('download/:filename' , (req, res) => {
+    const fileName = req.params.filename;
+    const filepath = path.join(__dirname, 'uploads', fileName);
+
+    if (!fs.existsSync(filepath)){
+        return res.sendStatus(404).json({error: 'PDF Не найден'});
+    }
+
+    res.download(filepath, filepath, (err) => {
+        if (err) {
+            res.status(500).send('Ошибка скачивания');
+        }
+    });
+});
+
 app.get('/articles', (req,res) => {
     connection.execute("SELECT a.id, a.title_tj AS 'Мавзӯъ', d.title_ru AS 'Самт', g.name AS 'Жанр', p.title_tj AS 'Нашриёт', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Соли нашр', IF(a.typeOf=1, 'Мақола', 'Китоб') AS 'Тип' FROM articles a LEFT JOIN directions d ON a.directionId=d.id LEFT JOIN genres g ON a.genreId=g.id LEFT JOIN publishers p  ON a.publisherId=p.id WHERE a.typeOf=1", (err, result) => {
         if(err) return console.log(err);
@@ -412,6 +436,6 @@ app.post('/register', urlencodedParser, (req, res) => {
     });
 })
 
-app.listen(3000, "localhost", () => {
+app.listen(3000, "192.168.31.103", () => {
     console.log('Сервер дар порти 3000 ҷойгир шуд');
 });
