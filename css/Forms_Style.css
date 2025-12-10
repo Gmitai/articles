@@ -129,7 +129,7 @@ button:hover {
     z-index: 1000;
 
 }
-.modal-iframe1, .modal-iframe2, .modal-iframe3, .modal-iframe4, .modal-iframe5 , .modal-iframe6{
+.modal-iframe1, .modal-iframe2, .modal-iframe3, .modal-iframe4, .modal-iframe5 , .modal-iframe6, .modal-iframe7{
     position: fixed;
     top: 0;
     left: 0;
@@ -145,5 +145,14 @@ button:hover {
     margin-top: -10px;
 }
 
+#edit, #loading
+{
+    background-color: rgba(0, 0, 0, 0);
+}
+
+#edit:hover, #loading:hover
+{
+    background-color: rgba(38, 207, 32, 0.34);
+}
 
 

@@ -1,16 +1,18 @@
 const forms = [
     "#mIframe1",
     "#mIframe2",
-    "#mIframe3"
+    "#mIframe3",
+
 ];
 const eforms = [
     "#meIframe1",
     "#meIframe2",
-    "#meIframe3"
+    "#meIframe3",
+    "#meIframe4",
+    "#meIframe5"
 ];
 let frmId = 0;
-let article_form_layer = document.querySelector(forms[frmId]);
-let earticle_form_layer = document.querySelector(eforms[frmId]);
+
 let editMode = false;
 
 function showForm(fId, rowId = 0) {
@@ -51,4 +53,3 @@ function closeIframe(fId)
     const frame = editMode? document.querySelector(eforms[fId]): document.querySelector(forms[fId]);
     if (frame) frame.style.display='none';
 }
-

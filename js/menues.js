@@ -94,15 +94,37 @@ const refreshBtn = document.getElementById('refreshBtn');
           tr.appendChild(td);
         });
 
+
+          const img = document.createElement('img');
+          img.src = 'edit-icon.png';
+          img.alt = 'Редактировать';
+          img.style.width = '32px';
+          img.style.height = '32px';
+
+          const img2 = document.createElement('img');
+          img2.src = 'load-icon.png';
+          img2.alt = 'Загрузить';
+          img2.style.width = '32px';
+          img2.style.height = '32px';
+
         const tdNew = document.createElement('td');
         const button = document.createElement('button');
-        button.textContent ='Таҳрир';
+        button.appendChild(img);
         button.setAttribute('id', 'edit');
         button.addEventListener('click', () =>{
             showForm(getFrmId(), r['id'])
             refresh()
         });
         tdNew.appendChild(button);
+
+          const button1 = document.createElement('button');
+          button1.appendChild(img2);
+          button1.setAttribute('id', 'loading');
+          button1.addEventListener('click', () =>{
+              window.location.href='404.html'
+          });
+          tdNew.appendChild(button1);
+
         tr.appendChild(tdNew);
         tbody.appendChild(tr);
       });

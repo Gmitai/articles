@@ -174,6 +174,28 @@ app.post('/updateAuthor', express.json(), (req, res) => {
     });
 });
 
+// ---------- ПОЛУЧЕНИЕ РЕДАКЦИИ ДЛЯ РЕДАКТИРОВАНИЯ ----------//
+app.get('/getPublisherById', (req, res) => {
+    const id = req.query.id;
+
+    const sqlPublisher =`SELECT p.id, p.title_tj, p.cityId, c.title AS cityName, p.address FROM publishers p LEFT JOIN cities c ON p.cityId = c.id WHERE p.id = ?`;
+    connection.execute(sqlPublisher, [id], (err, authorRows) => {
+        if (err) return res.status(500).send(err);
+        if (!authorRows.length) return res.status(404).json({ error: "Редакция не найдена" });
+        res.json(authorRows[0]);
+    });
+});
+
+app.post('/updatePublisher', express.json(), (req, res) => {
+    const { rowId, publisherName, selCity, address } = req.body;
+
+    const sql = `UPDATE publishers SET title_tj=?, cityId=?, address=? WHERE id=?`;
+    connection.execute(sql, [publisherName, selCity, address, rowId], (err, result) => {
+        if (err) return res.status(500).send(err);
+        res.json({ message: "Редакция успешно обновлена!" });
+    });
+});
+
 //----------------------------------------------------------------------------------------------------------------------//
 app.get('/getArticles', (req, res) => {
     connection.execute("SELECT a.id, CONCAT(d.udc,' ', d.title_ru) AS title_ru, g.name,   FROM articles a left join article_authors aau on a.id=aau.id_article left join ", (err, result) => {
@@ -234,7 +256,6 @@ app.post('/addAuthor', urlencodedParser, (req, res) => {
             });
         }
     });
-
 })
 
 app.post('/addPublisher', urlencodedParser, (req, res) => {
@@ -359,6 +380,7 @@ connection.query("DELETE FROM article_authors WHERE id_article=?", id, (err, res
                 }
             });
 
+
 });
 
 app.post('/register', urlencodedParser, (req, res) => {
@@ -390,6 +412,6 @@ app.post('/register', urlencodedParser, (req, res) => {
     });
 })
 
-app.listen(3000, "192.168.31.103", () => {
+app.listen(3000, "localhost", () => {
     console.log('Сервер дар порти 3000 ҷойгир шуд');
 });
