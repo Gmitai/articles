@@ -10,6 +10,7 @@ function loadArticleData(rowId) {
 
     fetch(`/getArticleById?id=${rowId}`)
         .then(res => res.json())
+
         .then(data => {
             if (!data) return;
 
@@ -36,6 +37,7 @@ function loadArticleData(rowId) {
 
         })
         .catch(err => console.error("Ошибка при загрузке статьи:", err));
+
 }
 
 // При загрузке страницы автоматически загружаем данные статьи

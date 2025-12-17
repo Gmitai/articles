@@ -53,6 +53,7 @@ const refreshBtn = document.getElementById('refreshBtn');
         localStorage.setItem('frmId', JSON.stringify(data[1]));
         renderTable(key, data[0]);
 
+
       }catch(err){
         showError(err);
       }
@@ -106,28 +107,26 @@ const refreshBtn = document.getElementById('refreshBtn');
           img2.alt = 'Загрузить';
           img2.style.width = '32px';
           img2.style.height = '32px';
-
-        const tdNew = document.createElement('td');
-        const button = document.createElement('button');
-        button.appendChild(img);
-        button.setAttribute('id', 'edit');
-        button.addEventListener('click', () =>{
-            showForm(getFrmId(), r['id'])
-            refresh()
-        });
-        tdNew.appendChild(button);
-          tr.appendChild(tdNew);
           let frmId = parseInt(localStorage.getItem('frmId'));
+        if(frmId<2) {
+            const tdNew = document.createElement('td');
+            const button = document.createElement('button');
+            button.appendChild(img);
+            button.setAttribute('id', 'edit');
+            button.addEventListener('click', () => {
+                showForm(getFrmId(), r['id'])
+                refresh()
+            });
+            tdNew.appendChild(button);
+            tr.appendChild(tdNew);
+        }
+
             if(frmId===0) {
                 const td2 = document.createElement('td');
                 const button1 = document.createElement('button');
                 button1.appendChild(img2);
                 button1.setAttribute('id', 'loading');
-                button1.addEventListener('click', () => {
-                    console.log(r['id']);
-                    getFileName(r['id']).then(res=>console.log(res+'ok'));
-                   //downloadPDF();
-                });
+                button1.addEventListener('click', () => { getFileName(r['id']) });
                 td2.appendChild(button1);
                 tr.appendChild(td2);
             }

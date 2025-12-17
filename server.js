@@ -22,6 +22,8 @@ const storageConfig = multer.diskStorage({
 app.use(express.static(__dirname + '/Public'));
 app.use(express.static(__dirname + '/js'))
 app.use(express.static(__dirname + '/css'))
+app.use(express.static(__dirname + '/icons'))
+app.use(express.static(__dirname + '/uploads'))
 app.use(express.json());
 
 const connection =mysql.createConnection({
@@ -41,23 +43,32 @@ app.get('/articleFileName/:id', (req, res) => {
                         WHERE id = ${articleId}`, (err, result) => {
         if (err) throw err;
         res.send(result);
+
+
     });
 });
 
 
-app.get('download/:filename' , (req, res) => {
+app.get('/download/:filename' , (req, res) => {
     const fileName = req.params.filename;
+    console.log(fileName);
     const filepath = path.join(__dirname, 'uploads', fileName);
+    res.set('Content-Disposition', 'attachment; filename=' + fileName);
+    res.set('Content-Type', 'application/octet-stream');
+
 
     if (!fs.existsSync(filepath)){
         return res.sendStatus(404).json({error: 'PDF Не найден'});
+        console.log(filepath +'не найден');
     }
 
-    res.download(filepath, filepath, (err) => {
+    res.download(filepath,"myfile.pdf", (err) => {
         if (err) {
             res.status(500).send('Ошибка скачивания');
         }
+
     });
+
 });
 
 app.get('/articles', (req,res) => {
@@ -79,6 +90,7 @@ app.get('/articles', (req,res) => {
                 }
             });
             res.send([result, selected_menuId]);
+
         });
     })
 });
@@ -277,6 +289,7 @@ app.post('/addAuthor', urlencodedParser, (req, res) => {
             const sql="Insert into authors (firstName, lastName, familyName, birthDate, mobilePhone, cityId, address) VALUES (?,?,?,?,?,?,?)";
             connection.query(sql, [firstName, lastName, familyName, birthDate, phoneNumber, selCity, address], (err, result) => {
                 if (err) {console.log(err)}
+
             });
         }
     });
@@ -403,6 +416,7 @@ connection.query("DELETE FROM article_authors WHERE id_article=?", id, (err, res
 
                 }
             });
+
 
 
 });
