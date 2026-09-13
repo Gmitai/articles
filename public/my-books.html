@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои книги</title>
+    <link rel="stylesheet" href="/css/user.css">
+    <link rel="stylesheet" href="/css/my-books.css">
+</head>
+<body>
+
+<header class="user-header">
+    <div class="logo">
+        📚 Онлайн библиотека
+    </div>
+
+    <div class="auth-buttons">
+        <button class="home-btn" id="homeBtn">
+            🏠 На главную
+        </button>
+    </div>
+</header>
+
+<main class="my-books-main">
+
+    <section class="my-books-header">
+        <h1>📚 Мои книги</h1>
+        <p>Управляйте своими загрузками и избранными книгами</p>
+    </section>
+
+    <div class="books-tabs">
+
+        <button class="books-tab active" data-tab="uploads">
+            📚 Мои загрузки
+        </button>
+
+        <button class="books-tab" data-tab="favorites">
+            ⭐ Избранное
+        </button>
+
+    </div>
+
+    <section id="uploads" class="books-panel active">
+
+        <div class="panel-header">
+
+            <div>
+                <h2>📚 Мои загрузки</h2>
+                <p>Здесь будут отображаться книги и статьи, которые вы загрузили</p>
+            </div>
+
+            <div class="add-book-dropdown">
+
+                <button
+                        type="button"
+                        class="add-book-btn"
+                        id="addBookBtn"
+                >
+                    ＋ Добавить
+                </button>
+
+                <div
+                        class="add-book-menu"
+                        id="addBookMenu"
+                >
+
+                    <button
+                            type="button"
+                            id="addArticleBtn"
+                    >
+                        📄 Добавить статью
+                    </button>
+
+                    <button
+                            type="button"
+                            id="addBookBtnMenu"
+                    >
+                        📚 Добавить книгу
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div
+                id="uploadsContainer"
+                class="my-books-grid"
+        >
+
+            <div class="empty-books">
+
+                <div class="empty-books-icon">
+                    📚
+                </div>
+
+                <h3>
+                    У вас пока нет загруженных книг
+                </h3>
+
+                <p>
+                    Загруженные вами книги и статьи появятся здесь.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <section id="favorites" class="books-panel">
+
+        <div class="panel-header">
+
+            <div>
+                <h2>⭐ Избранное</h2>
+                <p>
+                    Здесь будут отображаться книги,
+                    которые вы добавили в избранное
+                </p>
+            </div>
+
+        </div>
+
+        <div
+                id="favoritesContainer"
+                class="my-books-grid"
+        ></div>
+
+    </section>
+
+</main>
+
+<script>
+    const tabs = document.querySelectorAll('.books-tab');
+    const panels = document.querySelectorAll('.books-panel');
+
+    const homeBtn = document.getElementById('homeBtn');
+
+    const addBookBtn = document.getElementById('addBookBtn');
+    const addBookMenu = document.getElementById('addBookMenu');
+
+    const addArticleBtn = document.getElementById('addArticleBtn');
+    const addBookBtnMenu = document.getElementById('addBookBtnMenu');
+
+    tabs.forEach(tab => {
+
+        tab.addEventListener('click', () => {
+
+            const target = tab.dataset.tab;
+
+            tabs.forEach(item => {
+                item.classList.remove('active');
+            });
+
+            panels.forEach(panel => {
+                panel.classList.remove('active');
+            });
+
+            tab.classList.add('active');
+
+            document
+                .getElementById(target)
+                .classList.add('active');
+
+            if (target === 'favorites') {
+                if (typeof loadFavorites === 'function') {
+                    loadFavorites();
+                }
+            }
+
+            if (target === 'uploads') {
+                if (typeof loadUploads === 'function') {
+                    loadUploads();
+                }
+            }
+
+        });
+
+    });
+
+    homeBtn.addEventListener('click', () => {
+        window.location.href = '/user-index.html';
+    });
+
+    addBookBtn.addEventListener('click', event => {
+
+        event.stopPropagation();
+
+        addBookMenu.classList.toggle('open');
+
+    });
+
+    addArticleBtn.addEventListener('click', () => {
+
+        addBookMenu.classList.remove('open');
+
+        window.location.href =
+            '/addArticle.html?type=article';
+
+    });
+
+    addBookBtnMenu.addEventListener('click', () => {
+
+        addBookMenu.classList.remove('open');
+
+        window.location.href =
+            '/addArticle.html?type=book';
+
+    });
+
+    document.addEventListener('click', event => {
+
+        if (!event.target.closest('.add-book-dropdown')) {
+            addBookMenu.classList.remove('open');
+        }
+
+    });
+</script>
+
+<script src="/js/my-books.js"></script>
+
+</body>
+</html>

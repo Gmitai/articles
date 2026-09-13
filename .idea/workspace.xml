@@ -5,7 +5,38 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fe834628-b3fc-4675-bd87-9a32f97eadd9" name="Changes" comment="v1.5">
+      <change afterPath="$PROJECT_DIR$/css/my-books.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/css/user-profile.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/css/user.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/db/user_auth_migration.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/icons/default-avatar.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/js/creatTreeView.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/js/my-books.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/js/refresh.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/js/user-auth.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/js/user-library.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/js/user-profile.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/my-books.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/profile.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/user-index.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/routes/auth.routes.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/routes/profile.routes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/getAuthors.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/getAuthors.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/getCities.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/getCities.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/getDirections.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/getDirections.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/getPublishers.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/getPublishers.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/addArticle.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/addArticle.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/addAuthors.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/addAuthors.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/addPublisher.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/addPublisher.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/login.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/register.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ru1.png" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -16,8 +47,9 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="tsconfig.json" />
-        <option value="JavaScript File" />
         <option value="HTML File" />
+        <option value="CSS File" />
+        <option value="JavaScript File" />
       </list>
     </option>
   </component>
@@ -51,8 +83,8 @@
 }</component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;git@github.com:Gmitai/articles.git&quot;,
-    &quot;accountId&quot;: &quot;c214bdf0-225d-45ea-bd9b-ccbcb479166b&quot;
+    &quot;url&quot;: &quot;https://github.com/Gmitai/articles.git&quot;,
+    &quot;accountId&quot;: &quot;3c3bcadc-aa87-4fe1-9aa5-57299862b6b5&quot;
   }
 }</component>
   <component name="ProblemsViewState">
@@ -62,6 +94,9 @@
   &quot;associatedIndex&quot;: 8
 }</component>
   <component name="ProjectId" id="33lzKxX1HqCYkdFrC3Cd3PEpuO5" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -73,19 +108,28 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
     "git-widget-placeholder": "main",
     "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "D:/ProjectAI/articles",
+    "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "E:/articles2",
+    "list.type.of.created.stylesheet": "CSS",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_interpreter_path": "C:/Users/user/AppData/Roaming/JetBrains/WebStorm2025.2/node/versions/24.21.0/node",
     "nodejs_package_manager_path": "npm",
+    "to.speed.mode.migration.done": "true",
     "ts.external.directory.path": "C:\\Program Files\\JetBrains\\WebStorm 2025.2.3\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\articles1\icons" />
+      <recent name="D:\ProjectAI\articles\js" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\My_app\js" />
       <recent name="D:\My_app\public" />
@@ -120,6 +164,18 @@
       <workItem from="1761975679527" duration="366000" />
       <workItem from="1762226036958" duration="139000" />
       <workItem from="1762312481518" duration="14441000" />
+      <workItem from="1762491141230" duration="1060000" />
+      <workItem from="1762494662099" duration="12000" />
+      <workItem from="1778556171552" duration="1026000" />
+      <workItem from="1778560571535" duration="12345000" />
+      <workItem from="1778641765590" duration="11662000" />
+      <workItem from="1778765519684" duration="10110000" />
+      <workItem from="1779335284987" duration="3708000" />
+      <workItem from="1779416725380" duration="7719000" />
+      <workItem from="1779442367565" duration="289000" />
+      <workItem from="1780459849022" duration="19000" />
+      <workItem from="1789225172057" duration="10358000" />
+      <workItem from="1789291591175" duration="20039000" />
     </task>
     <task id="LOCAL-00001" summary="v1.2">
       <option name="closed" value="true" />

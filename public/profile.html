@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мой профиль</title>
+    <link rel="stylesheet" href="/css/user-profile.css">
+</head>
+<body>
+<header class="profile-header">
+    <a href="/" class="back-button">← На главную</a>
+    <h1>Мой профиль</h1>
+</header>
+
+<main class="profile-page">
+    <section class="profile-card">
+        <div class="profile-photo-section">
+            <img id="profilePhoto" class="profile-photo" src="/icons/default-avatar.png" alt="Фото профиля">
+            <button id="changePhotoBtn" class="change-photo-btn">Изменить фото</button>
+            <input id="photoInput" type="file" accept="image/*" hidden>
+        </div>
+
+        <div class="profile-content">
+            <div class="profile-title">
+                <div>
+                    <h2 id="profileFullName">Пользователь</h2>
+                    <p id="profileEmail">Email не указан</p>
+                </div>
+                <button id="editProfileBtn" class="edit-button">Редактировать</button>
+            </div>
+
+            <div id="profileView" class="profile-fields">
+                <div class="profile-field">
+                    <span class="field-label">Логин</span>
+                    <span id="profileLogin" class="field-value">—</span>
+                </div>
+                <div class="profile-field">
+                    <span class="field-label">Имя</span>
+                    <span id="profileFirstName" class="field-value">—</span>
+                </div>
+                <div class="profile-field">
+                    <span class="field-label">Фамилия</span>
+                    <span id="profileLastName" class="field-value">—</span>
+                </div>
+                <div class="profile-field">
+                    <span class="field-label">Отчество</span>
+                    <span id="profileFamilyName" class="field-value">—</span>
+                </div>
+                <div class="profile-field">
+                    <span class="field-label">Дата рождения</span>
+                    <span id="profileBirthDate" class="field-value">—</span>
+                </div>
+                <div class="profile-field">
+                    <span class="field-label">Телефон</span>
+                    <span id="profileMobilePhone" class="field-value">—</span>
+                </div>
+                <div class="profile-field">
+                    <span class="field-label">Город</span>
+                    <span id="profileCity" class="field-value">—</span>
+                </div>
+                <div class="profile-field">
+                    <span class="field-label">Адрес</span>
+                    <span id="profileAddress" class="field-value">—</span>
+                </div>
+                <div class="profile-field">
+                    <span class="field-label">Псевдоним</span>
+                    <span id="profilePseudonym" class="field-value">—</span>
+                </div>
+                <div class="profile-field">
+                    <span class="field-label">Email</span>
+                    <span id="profileEmailField" class="field-value">—</span>
+                </div>
+            </div>
+
+            <form id="editProfileForm" class="edit-profile-form" hidden>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="editFirstName">Имя</label>
+                        <input id="editFirstName" name="firstName" type="text">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editLastName">Фамилия</label>
+                        <input id="editLastName" name="lastName" type="text">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editFamilyName">Отчество</label>
+                        <input id="editFamilyName" name="familyName" type="text">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editBirthDate">Дата рождения</label>
+                        <input id="editBirthDate" name="birthDate" type="date">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editMobilePhone">Телефон</label>
+                        <input id="editMobilePhone" name="mobilePhone" type="text">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editCity">Город</label>
+                        <select id="editCity" name="cityId">
+                            <option value="">Выберите город</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group form-group-full">
+                        <label for="editAddress">Адрес</label>
+                        <input id="editAddress" name="address" type="text">
+                    </div>
+
+                    <div class="form-group form-group-full">
+                        <label for="editPseudonym">Псевдоним</label>
+                        <input id="editPseudonym" name="pseudonym" type="text">
+                    </div>
+
+                    <div class="form-group form-group-full">
+                        <label for="editEmail">Email</label>
+                        <input id="editEmail" name="eMail" type="email">
+                    </div>
+                </div>
+
+                <div class="edit-actions">
+                    <button type="submit" class="save-button">Сохранить</button>
+                    <button type="button" id="cancelEditBtn" class="cancel-button">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </section>
+</main>
+
+<script src="/js/user-profile.js"></script>
+</body>
+</html>

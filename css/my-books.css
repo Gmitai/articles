@@ -1,0 +1,222 @@
+.my-books-main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px;
+}
+
+.my-books-header {
+    text-align: center;
+    margin-bottom: 35px;
+}
+
+.my-books-header h1 {
+    margin: 0 0 10px;
+    font-size: 32px;
+    color: #222;
+}
+
+.my-books-header p {
+    margin: 0;
+    color: #666;
+}
+
+.books-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.books-tab {
+    padding: 13px 25px;
+    border: none;
+    border-radius: 10px;
+    background: #e8e8e8;
+    color: #333;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.books-tab:hover {
+    transform: translateY(-1px);
+}
+
+.books-tab.active {
+    background: #058601;
+    color: white;
+}
+
+.books-panel {
+    display: none;
+}
+
+.books-panel.active {
+    display: block;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.panel-header h2 {
+    margin: 0 0 5px;
+    color: #222;
+}
+
+.panel-header p {
+    margin: 0;
+    color: #777;
+}
+
+.add-book-dropdown {
+    position: relative;
+}
+
+.add-book-btn {
+    padding: 11px 18px;
+    border: none;
+    border-radius: 8px;
+    background: #058601;
+    color: white;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.add-book-btn:hover {
+    background: #046d01;
+}
+
+.add-book-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 220px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    z-index: 1000;
+}
+
+.add-book-menu.open {
+    display: block;
+}
+
+.add-book-menu button {
+    display: block;
+    width: 100%;
+    padding: 13px 16px;
+    border: none;
+    background: white;
+    color: #333;
+    text-align: left;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.add-book-menu button:hover {
+    background: #eaffea;
+}
+
+.empty-books {
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 40px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #d8d8d8;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+.empty-books-icon {
+    font-size: 65px;
+    margin-bottom: 15px;
+}
+
+.empty-books h3 {
+    margin: 0 0 10px;
+    font-size: 21px;
+    color: #333;
+}
+
+.empty-books p {
+    margin: 0;
+    color: #777;
+}
+
+.my-books-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.my-books-grid .empty-books {
+    grid-column: 1 / -1;
+}
+
+.home-btn {
+    height: 42px;
+    padding: 0 18px;
+    border: none;
+    border-radius: 8px;
+    background: white;
+    color: #058601;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.home-btn:hover {
+    background: #eaffea;
+    transform: translateY(-1px);
+}
+
+@media (max-width: 700px) {
+
+    .my-books-main {
+        padding: 20px;
+    }
+
+    .panel-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .books-tabs {
+        flex-direction: column;
+    }
+
+    .books-tab {
+        width: 100%;
+    }
+
+    .home-btn {
+        width: 100%;
+    }
+
+    .add-book-dropdown {
+        width: 100%;
+    }
+
+    .add-book-btn {
+        width: 100%;
+    }
+
+    .add-book-menu {
+        left: 0;
+        right: auto;
+        width: 100%;
+    }
+}

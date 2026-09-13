@@ -1,103 +1,60 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="tj">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-
-    <style>
-	
-	body
-    {
-        background-color: rgb(212, 232, 255);
-    }
-
-    #header
-    {
-        
-        background-color: rgb(255, 255, 255);
-        border-bottom-style: solid;
-        border-bottom-color: rgb(0, 60, 255);
-        width: 105%;
-        height: 105px;
-        margin-left: -10px;
-        margin-top: -10px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-        align-items: center;
-        align-content: center;
-    }
-
-    #items
-    {
-        border-style: solid;
-        border-color: black;
-        border-width: 1px;
-        width: 1030px;
-        height: 70px;
-        margin-left: 120px;
-        align-items: center;
-        align-content: center;
-    }
-
-     #headText
-    {
-        border-style: solid;
-        border-color: black;
-        border-width: 1px;
-        width: 617px;
-        height: 50px;
-        margin-left: 70px;
-        
-    }
-
-      #headButtons
-    {
-        border-style: solid;
-        border-color: black;
-        border-width: 1px;
-        width: 317px;
-        height: 50px;
-        margin-left: 700px;
-        margin-top: -51px;
-        
-       
-    }
-
-      #logo
-    {
-        border-style: solid;
-        border-color: black;
-        border-width: 1px;
-        width: 50px;
-        height: 50px;
-        margin-left: 10px;
-        margin-top: -51px;
-        align-content: center;
-        text-align: center;
-        
-    }
-	
-	
-</style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мақолаҳо</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/Forms_Style.css">
 </head>
 <body>
-<div id ="header">
-    <div id ="items">
+<div class="app" role="application">
+    <aside class="sidebar" aria-label="Главная навигация">
+        <div class="brand">Articles</div>
+        <nav class="nav" role="navigation" aria-label="Меню" id="nav">
+        </nav>
+        <div class="sidebar-footer">Пользователь: <strong>Админ</strong></div>
+    </aside>
 
-        <div id="headText">
-            <h1>Китобхонаи илмии Донишкадаи куҳйғметаллургии Тоҷикистон</h1>
+    <main class="main">
+        <div class="header">
+            <h2 id="page-title">Ташвиқот 2026-2027</h2>
+
+            <div class="actions" id="add_content">
+                <button id="homeBtn" type="button">Главная</button>
+                <button id="add" onclick="showForm(getFrmId())">Илова кардан</button>
+            </div>
         </div>
 
-        <div id="headButtons">
+        <section id="main-content" class="content" tabindex="0" aria-live="polite">
+            <div class="placeholder" id="placeholder">
+                <div class="loader" aria-hidden="true"></div>
+                <div>Выберите таблицу в левой колонке, чтобы увидеть данные.</div>
+            </div>
+        </section>
+    </main>
 
-        </div>
-
-        <div id="logo">
-            <label>LOGO</label>
-        </div>
-
-    </div>
+    <iframe src="/addArticle.html" class="modal-iframe" id="mIframe1"></iframe>
+    <iframe src="/addAuthors.html" class="modal-iframe1" id="mIframe2"></iframe>
+    <iframe src="/addPublisher.html" class="modal-iframe3" id="mIframe3"></iframe>
+    <iframe src="/editArticle.html" class="modal-iframe4" id="meIframe1"></iframe>
+    <iframe src="/editAuthors.html" class="modal-iframe5" id="meIframe2"></iframe>
+    <iframe src="/editPublisher.html" class="modal-iframe6" id="meIframe3"></iframe>
 </div>
+
+<script src="/js/getDirections.js" type="text/javascript" defer></script>
+<script src="/js/getPublishers.js" type="text/javascript"></script>
+<script src="/js/getAuthors.js" type="text/javascript"></script>
+<script src="/js/getLSItem.js" type="text/javascript"></script>
+<script src="/js/getCities.js" type="text/javascript"></script>
+<script src="/js/menues.js" type="text/javascript"></script>
+<script src="/js/Hide_Show_Forms.js" type="text/javascript"></script>
+<script src="/js/downloadFile.js" type="text/javascript"></script>
+
+<script>
+    document.getElementById('homeBtn').addEventListener('click', () => {
+        window.location.href = '/';
+    });
+</script>
 </body>
-
-
 </html>

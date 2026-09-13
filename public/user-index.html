@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Онлайн библиотека</title>
+    <link rel="stylesheet" href="/css/user.css">
+</head>
+<body>
+
+<header class="user-header">
+    <div class="logo">
+        📚 Онлайн библиотека
+    </div>
+
+    <div class="auth-buttons">
+        <button id="registerBtn" class="auth-btn">
+            👤 Регистрация
+        </button>
+
+        <button id="loginBtn" class="auth-btn">
+            🔑 Войти
+        </button>
+
+        <div class="profile-container" id="profileContainer" hidden>
+            <button id="profileBtn" class="profile-btn">
+                <img
+                        id="profileImage"
+                        class="profile-image"
+                        src="/icons/default-avatar.png"
+                        alt="Профиль"
+                >
+                <span id="profileName">Профиль</span>
+                <span class="profile-arrow">⌄</span>
+            </button>
+
+            <div id="profileMenu" class="profile-menu">
+                <div class="profile-menu-header">
+                    <img
+                            id="menuProfileImage"
+                            class="menu-profile-image"
+                            src="/icons/default-avatar.png"
+                            alt="Фото профиля"
+                    >
+
+                    <div class="profile-info">
+                        <div id="menuProfileName" class="menu-profile-name">
+                            Пользователь
+                        </div>
+
+                        <div id="menuProfileEmail" class="menu-profile-email">
+                            email
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-divider"></div>
+
+                <button class="profile-menu-item" id="myProfileBtn">
+                    👤
+                    <span>Мой профиль</span>
+                </button>
+
+                <button class="profile-menu-item" id="myBooksBtn">
+                    📚
+                    <span>Мои книги</span>
+                </button>
+
+                <button class="profile-menu-item" id="settingsBtn">
+                    ⚙️
+                    <span>Настройки</span>
+                </button>
+
+                <div class="profile-divider"></div>
+
+                <button
+                        class="profile-menu-item logout-item"
+                        id="menuLogoutBtn"
+                >
+                    🚪
+                    <span>Выйти</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="user-main">
+
+    <section class="welcome">
+        <h1>Добро пожаловать в онлайн библиотеку</h1>
+        <h1>Горно металлургического института Таджикистана</h1>
+
+        <p>
+            Здесь вы сможете находить, читать и скачать книги и статьи.
+        </p>
+    </section>
+
+    <section class="library-content">
+
+        <div class="search-box">
+
+            <div class="search-main">
+
+                <div class="search-input-wrapper">
+                    <input
+                            type="text"
+                            id="searchInput"
+                            list="titleHints"
+                            autocomplete="off"
+                            placeholder="Поиск книги или статьи..."
+                    >
+
+                    <datalist id="titleHints"></datalist>
+                </div>
+
+                <button id="searchBtn" type="button">
+                    🔍 Найти
+                </button>
+
+                <button id="advancedSearchBtn" type="button">
+                    ⚙ Расширенный поиск
+                </button>
+
+                <select id="sortSelect">
+                    <option value="default">Сортировка</option>
+                    <option value="year_desc">Год: по убыванию</option>
+                    <option value="year_asc">Год: по возрастанию</option>
+                    <option value="title_asc">Название: А–Я</option>
+                    <option value="title_desc">Название: Я–А</option>
+                </select>
+
+            </div>
+
+            <div id="advancedSearch" class="advanced-search">
+
+                <div class="advanced-field">
+
+                    <label for="authorSearch">
+                        Автор
+                    </label>
+
+                    <input
+                            type="text"
+                            id="authorSearch"
+                            list="authorHints"
+                            autocomplete="off"
+                            placeholder="Имя автора..."
+                    >
+
+                    <datalist id="authorHints"></datalist>
+
+                </div>
+
+                <div class="advanced-field">
+
+                    <label for="genreSearch">
+                        Жанр
+                    </label>
+
+                    <input
+                            type="text"
+                            id="genreSearch"
+                            list="genreHints"
+                            autocomplete="off"
+                            placeholder="Жанр..."
+                    >
+
+                    <datalist id="genreHints"></datalist>
+
+                </div>
+
+                <div class="advanced-field">
+
+                    <label for="udcSearch">
+                        УДК
+                    </label>
+
+                    <input
+                            type="text"
+                            id="udcSearch"
+                            list="udcHints"
+                            autocomplete="off"
+                            placeholder="УДК..."
+                    >
+
+                    <datalist id="udcHints"></datalist>
+
+                </div>
+
+                <button
+                        id="advancedSearchApply"
+                        type="button"
+                        class="advanced-search-btn"
+                >
+                    🔎 Искать
+                </button>
+
+                <button
+                        id="advancedSearchClear"
+                        type="button"
+                        class="advanced-clear-btn"
+                >
+                    Очистить
+                </button>
+
+            </div>
+
+        </div>
+
+        <div id="content">
+            <p class="empty-message">
+                Каталог библиотеки будет здесь.
+            </p>
+        </div>
+
+    </section>
+
+</main>
+
+<div id="registerModal" class="modal">
+
+    <div class="modal-content">
+
+        <button class="close-btn" data-close="registerModal">
+            ×
+        </button>
+
+        <h2>Регистрация</h2>
+
+        <form id="registerForm" enctype="multipart/form-data">
+
+            <input
+                    type="email"
+                    name="eMail"
+                    placeholder="Email"
+                    required
+            >
+
+            <input
+                    type="text"
+                    name="login"
+                    placeholder="Логин"
+                    required
+            >
+
+            <input
+                    type="password"
+                    name="password"
+                    placeholder="Пароль"
+                    required
+            >
+
+            <input
+                    type="text"
+                    name="firstName"
+                    placeholder="Имя"
+            >
+
+            <input
+                    type="text"
+                    name="lastName"
+                    placeholder="Фамилия"
+            >
+
+            <input
+                    type="text"
+                    name="familyName"
+                    placeholder="Отчество"
+            >
+
+            <input
+                    type="date"
+                    name="birthDate"
+            >
+
+            <input
+                    type="tel"
+                    name="mobilePhone"
+                    placeholder="Телефон"
+            >
+
+            <select name="cityId" id="registerCity">
+                <option value="">
+                    Выберите город
+                </option>
+            </select>
+
+            <input
+                    type="text"
+                    name="address"
+                    placeholder="Адрес"
+            >
+
+            <input
+                    type="text"
+                    name="pseudonym"
+                    placeholder="Псевдоним"
+            >
+
+            <label class="photo-label">
+                Фотография профиля
+            </label>
+
+            <input
+                    type="file"
+                    name="profilePhoto"
+                    accept="image/*"
+            >
+
+            <button type="submit" class="submit-btn">
+                Зарегистрироваться
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+<div id="loginModal" class="modal">
+
+    <div class="modal-content">
+
+        <button class="close-btn" data-close="loginModal">
+            ×
+        </button>
+
+        <h2>Вход</h2>
+
+        <form id="loginForm">
+
+            <input
+                    type="text"
+                    name="login"
+                    placeholder="Логин"
+                    required
+            >
+
+            <input
+                    type="password"
+                    name="password"
+                    placeholder="Пароль"
+                    required
+            >
+
+            <button type="submit" class="submit-btn">
+                Войти
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script src="/js/user-auth.js"></script>
+<script src="/js/user-library.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>404 — Страница не найдена</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            background: #0e0e10;
+            font-family: "Inter", sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            color: white;
+        }
+
+        .container {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        h1 {
+            font-size: 140px;
+            margin: 0;
+            font-weight: 800;
+            letter-spacing: 10px;
+            color: #ffffff;
+            animation: float 3s ease-in-out infinite;
+            text-shadow: 0 0 20px rgba(255,255,255,0.3);
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+
+        p {
+            font-size: 20px;
+            opacity: 0.8;
+            margin-top: 10px;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #6c63ff, #8a82ff);
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            transition: 0.3s;
+            box-shadow: 0 0 15px rgba(108,99,255,0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px rgba(108,99,255,0.6);
+        }
+
+        /* Фоновая анимация */
+        .circle {
+            position: absolute;
+            background: rgba(108, 99, 255, 0.18);
+            border-radius: 50%;
+            animation: move 12s infinite ease-in-out;
+            filter: blur(10px);
+        }
+
+        .c1 { width: 220px; height: 220px; top: 10%; left: 15%; animation-duration: 14s; }
+        .c2 { width: 300px; height: 300px; bottom: 5%; right: 10%; animation-duration: 18s; }
+        .c3 { width: 160px; height: 160px; bottom: 25%; left: 5%; animation-duration: 16s; }
+
+        @keyframes move {
+            0%   { transform: translateY(0) translateX(0); }
+            50%  { transform: translateY(-40px) translateX(30px); }
+            100% { transform: translateY(0) translateX(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="circle c1"></div>
+<div class="circle c2"></div>
+<div class="circle c3"></div>
+
+<div class="container">
+    <h1>404</h1>
+    <p>Бубахшед, ин хусусият ҳанӯз дастрас нест 🙏</p>
+    <a href="/" class="btn">Саҳифаи асосӣ</a>
+</div>
+
+</body>
+</html>
