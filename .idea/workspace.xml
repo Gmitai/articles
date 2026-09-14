@@ -4,40 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fe834628-b3fc-4675-bd87-9a32f97eadd9" name="Changes" comment="v1.5">
-      <change afterPath="$PROJECT_DIR$/css/my-books.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/css/user-profile.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/css/user.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/db/user_auth_migration.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/icons/default-avatar.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/js/creatTreeView.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/js/my-books.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/js/refresh.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/js/user-auth.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/js/user-library.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/js/user-profile.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/my-books.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/profile.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/user-index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/routes/auth.routes.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/routes/profile.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/getAuthors.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/getAuthors.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/getCities.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/getCities.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/getDirections.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/getDirections.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/getPublishers.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/getPublishers.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/addArticle.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/addArticle.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/addAuthors.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/addAuthors.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/addPublisher.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/addPublisher.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/login.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/register.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ru1.png" beforeDir="false" />
-    </list>
+    <list default="true" id="fe834628-b3fc-4675-bd87-9a32f97eadd9" name="Changes" comment="v1.5" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -101,30 +68,30 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultHtmlFileTemplate": "HTML File",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "main",
-    "ignore.virus.scanning.warn.message": "true",
-    "junie.onboarding.icon.badge.shown": "true",
-    "last_opened_file_path": "E:/articles2",
-    "list.type.of.created.stylesheet": "CSS",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_interpreter_path": "C:/Users/user/AppData/Roaming/JetBrains/WebStorm2025.2/node/versions/24.21.0/node",
-    "nodejs_package_manager_path": "npm",
-    "to.speed.mode.migration.done": "true",
-    "ts.external.directory.path": "C:\\Program Files\\JetBrains\\WebStorm 2025.2.3\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;E:/articles2&quot;,
+    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_interpreter_path&quot;: &quot;C:/Users/user/AppData/Roaming/JetBrains/WebStorm2025.2/node/versions/24.21.0/node&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Program Files\\JetBrains\\WebStorm 2025.2.3\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="E:\articles1\icons" />
@@ -176,6 +143,7 @@
       <workItem from="1780459849022" duration="19000" />
       <workItem from="1789225172057" duration="10358000" />
       <workItem from="1789291591175" duration="20039000" />
+      <workItem from="1789313460570" duration="424000" />
     </task>
     <task id="LOCAL-00001" summary="v1.2">
       <option name="closed" value="true" />
