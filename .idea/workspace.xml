@@ -4,7 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fe834628-b3fc-4675-bd87-9a32f97eadd9" name="Changes" comment="v1.5" />
+    <list default="true" id="fe834628-b3fc-4675-bd87-9a32f97eadd9" name="Changes" comment="v1.5">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/user.css" beforeDir="false" afterPath="$PROJECT_DIR$/css/user.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/dataForArticleForm.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/dataForArticleForm.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/getAuthors.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/getAuthors.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/getCities.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/getCities.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/menues.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/menues.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/user-auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/user-auth.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/user-library.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/user-library.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/load_data_to_form.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/load_data_to_form.routes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/main.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/main.routes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/server.js" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -143,7 +155,8 @@
       <workItem from="1780459849022" duration="19000" />
       <workItem from="1789225172057" duration="10358000" />
       <workItem from="1789291591175" duration="20039000" />
-      <workItem from="1789313460570" duration="424000" />
+      <workItem from="1789313460570" duration="733000" />
+      <workItem from="1789355319182" duration="7664000" />
     </task>
     <task id="LOCAL-00001" summary="v1.2">
       <option name="closed" value="true" />

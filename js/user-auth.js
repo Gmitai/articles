@@ -387,8 +387,4 @@ function updateAuthInterface(user) {
 }
 
 checkUser();
-
-
-
-
 });

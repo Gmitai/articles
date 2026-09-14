@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Таҳрири Мақола/Китоб</title>
+    <title>Редактирование</title>
     <link rel="stylesheet" href="/css/Forms_Style.css">
     <link rel="stylesheet" href="/css/multiselect.css">
     <link rel="stylesheet" href="/css/View_Forms_Style.css">
@@ -12,19 +12,19 @@
 <body>
 
 <div class="form-container">
-    <h2>Таҳрири Мақола/Китоб</h2>
+    <h2>Редактирование</h2>
 
     <form id="editForm" action="/updateArticle" method="post" enctype="multipart/form-data">
 
         <input type="hidden" id="rowId" name="rowId">
 
         <div class="form-group">
-            <label for="title">Номи Мақола/Китоб:</label>
+            <label for="title">Название:</label>
             <input type="text" id="title" name="aricleName" required>
         </div>
 
         <div class="multiselect-container">
-            <div id="selected-values" class="selected-values">Муалифро интихоб кунед</div>
+            <div id="selected-values" class="selected-values">Выбирете автора (ов)</div>
             <div class="dropdown" id="dropdown" aria-required="true"></div>
         </div>
 
@@ -34,19 +34,19 @@
         </div>
 
         <div class="form-group">
-            <label for="pageCount">Миқдори саҳифа:</label>
+            <label for="pageCount">Количество страниц:</label>
             <input type="number" id="pageCount" name="pCount" required>
         </div>
 
         <div class="form-group">
-            <label for="yearOfPublish">Соли нашр:</label>
+            <label for="yearOfPublish">Год выпуска:</label>
             <input type="date" id="yearOfPublish" name="publishYear" required>
         </div>
 
         <div class="tree-select-container">
 
             <button type="button" id="treeToggleBtn" class="tree-button">
-                Самт
+                Направление
             </button>
 
             <div id="treeDropdown" class="tree-dropdown hidden">
@@ -56,19 +56,19 @@
         </div>
 
         <div class="form-group">
-            <label for="PublisherList">Нашриёт</label>
+            <label for="PublisherList">Издательсто</label>
             <select id="PublisherList" name="selPublisher" required>
-                <option value="">Нашриётро интихоб кунед</option>
+                <option value="">Выбирите издательство</option>
             </select>
         </div>
 
         <div class="form-group">
-            <button type="submit" onclick= window.parent.closeIframe(frmId)>Сабт</button>
+            <button type="submit" onclick= window.parent.closeIframe(frmId)>Подтвердить</button>
         </div>
 
         <div class="form-group">
             <button type="button" id="Back" onclick="window.parent.closeIframe(getFrmId())">
-                Саҳифаи асосӣ
+                Назад
             </button>
         </div>
     </form>

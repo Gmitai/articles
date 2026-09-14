@@ -72,6 +72,6 @@ app.use('/profile', profileRoutes);
 app.use('/', mainRoutes);
 app.use('/loadDt', loadDtToFormRoutes);
 
-app.listen(port, 'localhost', () => {
+app.listen(port, '192.168.31.134', () => {
     console.log(`Сервер запущен на порту ${port}`);
 });

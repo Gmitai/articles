@@ -17,7 +17,7 @@ createNav();
 function createNav() {
     TABLES.forEach(key => {
         const btn = document.createElement('button');
-        btn.textContent = key === 'articles' ? 'Мақолаҳо' : humanizeKey(key);
+        btn.textContent = humanizeKey(key);
         btn.dataset.key = key;
         btn.addEventListener('click', onNavClick);
         nav.appendChild(btn);
@@ -32,13 +32,13 @@ function createNav() {
 
 function humanizeKey(key) {
     const map = {
-        articles: 'Мақолаҳо',
-        authors: 'Муалифҳо',
-        publishers: 'Нашриёт',
-        directions: 'Классификаторҳо',
-        genres: 'Жанрҳо',
-        users: 'Истифодабарандагон',
-        books: 'Китобҳо'
+        articles: 'Стаьи',
+        authors: 'Авторы',
+        publishers: 'Изтательства',
+        directions: 'Классификаторы',
+        genres: 'Жанры',
+        users: 'Пользователи',
+        books: 'Книги'
     };
     return map[key] || key;
 }
@@ -156,10 +156,14 @@ function renderTable(key, rows) {
     contentEl.appendChild(table);
 }
 
-refreshBtn.addEventListener('click', () => {
-    const active = document.querySelector('.nav button.active');
-    if (active) loadForKey(active.dataset.key);
-});
+if (refreshBtn) {
+    refreshBtn.addEventListener('click', () => {
+        const active = document.querySelector('.nav button.active');
+        if (active) {
+            loadForKey(active.dataset.key);
+        }
+    });
+}
 
 function refresh() {
     const iframe = document.getElementById('meIframe2');

@@ -1,38 +1,62 @@
-/**
- *
- * @param {number|string} rowId
- */
 function loadArticleData(rowId) {
-    if (!rowId) return;
+    if (!rowId) {
+        return;
+    }
 
     const rowInput = document.getElementById("rowId");
-    if (rowInput) rowInput.value = rowId;
 
-    fetch(`/loadDt/getArticleById?id=${rowId}`)
-        .then(res => res.json())
+    if (rowInput) {
+        rowInput.value = rowId;
+    }
 
-        .then(data => {
-            if (!data) return;
+    fetch(`/loadDt/getArticleById?id=${encodeURIComponent(rowId)}`)
+        .then(async response => {
+            const data = await response.json();
 
-
-            document.getElementById("title").value = data.title_tj || '';
-            document.getElementById("pageCount").value = data.pagesCount || '';
-
-
-            if (data.publishYear) {
-                const d = new Date(data.publishYear);
-                const day = String(d.getDate()).padStart(2, '0');
-                const month = String(d.getMonth() + 1).padStart(2, '0');
-                const year = d.getFullYear();
-                document.getElementById("yearOfPublish").value = `${year}-${month}-${day}`;
+            if (!response.ok) {
+                throw new Error(
+                    data.error || `Ошибка сервера: ${response.status}`
+                );
             }
 
+            return data;
+        })
+        .then(data => {
+            if (!data) {
+                return;
+            }
 
-            document.getElementById("PublisherList").value = data.publisherId || '';
+            const title = document.getElementById("title");
+            const pageCount = document.getElementById("pageCount");
+            const yearOfPublish = document.getElementById("yearOfPublish");
+            const publisherList = document.getElementById("PublisherList");
 
+            if (title) {
+                title.value = data.title_tj || '';
+            }
+
+            if (pageCount) {
+                pageCount.value = data.pagesCount || '';
+            }
+
+            if (yearOfPublish && data.publishYear) {
+                const date = new Date(data.publishYear);
+
+                if (!isNaN(date.getTime())) {
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const year = date.getFullYear();
+
+                    yearOfPublish.value =
+                        `${year}-${month}-${day}`;
+                }
+            }
+
+            if (publisherList) {
+                publisherList.value = data.publisherId || '';
+            }
 
             if (data.directionId) {
-
 
                 setTimeout(() => {
 
@@ -40,17 +64,16 @@ function loadArticleData(rowId) {
                         `.tree-radio[value="${data.directionId}"]`
                     );
 
-                    if (radio) {
+                    if (!radio) {
+                        return;
+                    }
 
-                        radio.checked = true;
+                    radio.checked = true;
 
+                    const li = radio.closest("li");
 
-                        const li = radio.closest("li");
-
-                        if (li) {
-                            li.classList.add("selected");
-                        }
-
+                    if (li) {
+                        li.classList.add("selected");
 
                         let parent = li.parentElement;
 
@@ -60,11 +83,15 @@ function loadArticleData(rowId) {
                                 parent.classList.remove("hidden");
                             }
 
-                            const parentLi = parent.closest("li");
+                            const parentLi =
+                                parent.closest("li");
 
                             if (parentLi) {
 
-                                const toggle = parentLi.querySelector(":scope > .toggle");
+                                const toggle =
+                                    parentLi.querySelector(
+                                        ":scope > .toggle"
+                                    );
 
                                 if (toggle) {
                                     toggle.textContent = "−";
@@ -72,26 +99,51 @@ function loadArticleData(rowId) {
                                 }
                             }
 
-                            parent = parentLi?.parentElement;
+                            parent =
+                                parentLi
+                                    ? parentLi.parentElement
+                                    : null;
                         }
                     }
 
                 }, 300);
             }
 
-            if (data.authors && window.setSelectedAuthors) {
-                setSelectedAuthors(data.authors);
+            if (
+                data.authors &&
+                typeof window.setSelectedAuthors === "function"
+            ) {
+                window.setSelectedAuthors(data.authors);
             }
 
         })
-        .catch(err => console.error("Ошибка при загрузке статьи:", err));
-
+        .catch(error => {
+            console.error(
+                "Ошибка при загрузке статьи:",
+                error
+            );
+        });
 }
 
+/*document.addEventListener("DOMContentLoaded", () => {
 
-document.addEventListener("DOMContentLoaded", function () {
-    const rowId = JSON.parse(localStorage.getItem('rowId'));
+    const savedRowId =
+        localStorage.getItem("rowId");
+
+    if (!savedRowId) {
+        return;
+    }
+
+    let rowId;
+
+    try {
+        rowId = JSON.parse(savedRowId);
+    } catch {
+        rowId = savedRowId;
+    }
+
     if (rowId) {
         loadArticleData(rowId);
     }
-});
+
+});*/

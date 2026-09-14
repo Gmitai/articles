@@ -1,4 +1,3 @@
-//main.routes.js
 const express = require('express');
 const router = express.Router();
 const urlencodedParser = express.urlencoded({extended: false});
@@ -65,9 +64,10 @@ router.use(express.static(path.join(__dirname, '..', 'uploads')))
 router.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, '../Public/index.html'));
 });
-//маколахо
+
+//статьи
 router.get('/articles', async (req, res) => {
-    const [result] = await connection.execute("SELECT a.id, a.title_tj AS 'Мавзӯъ', CONCAT(d.udc,' ', d.title_ru) AS 'Самт (УДК)', p.title_tj AS 'Нашриёт', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Соли нашр', IF(a.typeOf=1, 'Мақола', 'Китоб') AS 'Тип' FROM articles a LEFT JOIN directions d ON a.directionId=d.id LEFT JOIN genres g ON a.genreId=g.id LEFT JOIN publishers p  ON a.publisherId=p.id WHERE a.typeOf=1");
+    const [result] = await connection.execute("SELECT a.id, a.title_tj AS 'Название', CONCAT(d.udc,' ', d.title_ru) AS 'Направление (УДК)', p.title_tj AS 'Издательство', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Год издания', IF(a.typeOf=1, 'Статья', 'Книга') AS 'Тип' FROM articles a LEFT JOIN directions d ON a.directionId=d.id LEFT JOIN genres g ON a.genreId=g.id LEFT JOIN publishers p  ON a.publisherId=p.id WHERE a.typeOf=1");
 
     try {
         selected_menuId = 0;
@@ -78,23 +78,24 @@ router.get('/articles', async (req, res) => {
         subresult.forEach(item => {
             const indx = result.findIndex(v => v.id === item.id)
             if (indx > -1) {
-                if (!('Муаллиф' in result[indx])) {
-                    result[indx] = Object.assign(result[indx], {"Муаллиф": item.author});
+                if (!('Автор' in result[indx])) {
+                    result[indx] = Object.assign(result[indx], {"Автор": item.author});
                 } else {
-                    result[indx]['Муаллиф'] += ', ' + item.author;
+                    result[indx]['Автор'] += ', ' + item.author;
                 }
             }
         });
+
         res.send([result, selected_menuId]);
     } catch (err) {
         console.log(err);
     }
-    console.log(path.join(__dirname, '..', 'Public'));
+
 });
 
-//китобхо
+//книги
 router.get('/books', async (req, res) => {
-    const [result] = await connection.execute("SELECT a.id, a.title_tj AS 'Мавзӯъ', CONCAT(d.udc, ' ', d.title_ru) AS 'Самт (УДК)', p.title_tj AS 'Нашриёт', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Соли нашр' FROM articles a LEFT JOIN directions d ON a.directionId=d.id LEFT JOIN genres g ON a.genreId=g.id LEFT JOIN publishers p  ON a.publisherId=p.id WHERE a.typeOf=0");
+    const [result] = await connection.execute("SELECT a.id, a.title_tj AS 'Название', CONCAT(d.udc, ' ', d.title_ru) AS 'Направление (УДК)', p.title_tj AS 'Издательство', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Год издания' FROM articles a LEFT JOIN directions d ON a.directionId=d.id LEFT JOIN genres g ON a.genreId=g.id LEFT JOIN publishers p  ON a.publisherId=p.id WHERE a.typeOf=0");
     try {
         selected_menuId = 0;
         flgBook = 0;
@@ -104,13 +105,14 @@ router.get('/books', async (req, res) => {
         subresult.forEach(item => {
             const indx = result.findIndex(v => v.id === item.id)
             if (indx > -1) {
-                if (!('Муаллиф' in result[indx])) {
-                    result[indx] = Object.assign(result[indx], {"Муаллиф": item.author});
+                if (!('Автор' in result[indx])) {
+                    result[indx] = Object.assign(result[indx], {"Автор": item.author});
                 } else {
-                    result[indx]['Муаллиф'] += ', ' + item.author;
+                    result[indx]['Автор'] += ', ' + item.author;
                 }
             }
         });
+
         res.send([result, selected_menuId]);
 
     } catch (err) {
@@ -118,9 +120,9 @@ router.get('/books', async (req, res) => {
     }
 });
 
-//муаллифхо
+//авторы
 router.get('/authors', async (req, res) => {
-    const [result] = await connection.execute("SELECT a.id, CONCAT(a.lastName,' ', a.firstName, ' ', IFNULL(a.familyName, '')) AS 'Ному насаб',   DATE_FORMAT(a.birthDate, '%d.%m.%Y') AS 'Санаи тавалуд', c.title AS 'Шаҳр', a.address AS 'Суроға' FROM authors a LEFT JOIN cities c ON a.cityId=c.id");
+    const [result] = await connection.execute("SELECT a.id, CONCAT(a.lastName,' ', a.firstName, ' ', IFNULL(a.familyName, '')) AS 'ФИО', DATE_FORMAT(a.birthDate, '%d.%m.%Y') AS 'Дата рождения', c.title AS 'Город', a.address AS 'Адрес' FROM authors a LEFT JOIN cities c ON a.cityId=c.id");
     try {
         selected_menuId = 1;
         res.send([result, selected_menuId]);
@@ -129,9 +131,9 @@ router.get('/authors', async (req, res) => {
     }
 });
 
-//нашриётхо
+//издательства
 router.get('/publishers', async (req, res) => {
-    const [result] = await connection.execute("SELECT p.id, p.title_tj as 'Номи нашриёт', c.title as 'Шаҳр', address as 'Суроға' from publishers p left join cities c on p.cityId=c.id");
+    const [result] = await connection.execute("SELECT p.id, p.title_tj as 'Название издательства', c.title as 'Город', address as 'Адрес' from publishers p left join cities c on p.cityId=c.id");
     try {
         selected_menuId=2;
         res.send([result, selected_menuId]);
@@ -141,9 +143,9 @@ router.get('/publishers', async (req, res) => {
     }
 });
 
-//Классификаторхо
+//Классификаторы
 router.get('/directions', async (req, res) => {
-    const [result] = await connection.execute("SELECT title_ru as 'Самт', udc as 'УДК' FROM directions order by udc");
+    const [result] = await connection.execute("SELECT title_ru as 'Направление', udc as 'УДК' FROM directions order by udc");
     try {
         selected_menuId=4;
         res.send([result, selected_menuId]);
@@ -155,18 +157,18 @@ router.get('/directions', async (req, res) => {
 
 //Жанр
 router.get('/genres', async (req, res) => {
-   const [result] = await connection.execute("SELECT `name` AS 'Жанр' FROM genres");
-   try {
+    const [result] = await connection.execute("SELECT `name` AS 'Жанр' FROM genres");
+    try {
         selected_menuId=5;
         res.send([result, selected_menuId]);
     }
     catch (err) {
-       console.log(err);
+        console.log(err);
     }
 });
 
 router.get('/users', async (req, res) => {
-    const [result] = await connection.execute("SELECT u.id, CONCAT(u.lastName,' ', u.firstName, ' ', IFNULL(u.familyName, '')) AS 'Ному насаб', u.login AS 'Логин', u.eMail AS 'Эл-почта', u.mobilePhone AS 'Номери телефон', DATE_FORMAT(u.birthDate, '%d.%m.%Y') AS 'Санаи тавалуд', c.title AS 'Шаҳр', u.address AS 'Суроға', u.pseudonym AS 'Номи кутоҳ', DATE_FORMAT(u.createdAt, '%d.%m.%Y') AS 'Санаи регистратсия' FROM users u left join cities c on u.cityId=c.id");
+    const [result] = await connection.execute("SELECT u.id, CONCAT(u.lastName,' ', u.firstName, ' ', IFNULL(u.familyName, '')) AS 'ФИО', u.login AS 'Логин', u.eMail AS 'Эл-почта', u.mobilePhone AS 'Номер телефона', DATE_FORMAT(u.birthDate, '%d.%m.%Y') AS 'Дата рождения', c.title AS 'Город', u.address AS 'Адрес', u.pseudonym AS 'Псевдоним', DATE_FORMAT(u.createdAt, '%d.%m.%Y') AS 'Дата регистрации' FROM users u left join cities c on u.cityId=c.id");
     try{
         selected_menuId=6;
         res.send([result, selected_menuId]);
@@ -175,6 +177,7 @@ router.get('/users', async (req, res) => {
         console.log(err);
     }
 })
+
 //------------download-----------
 
 router.get('/articleFileName/:id', async (req, res) => {
@@ -210,6 +213,7 @@ router.get('/download/:filename' , (req, res) => {
 });
 
 //-----------POST------------
+
 router.post('/addArticle', urlencodedParser, async (req, res) => {
     const title = req.body.aricleName;
     const pageCount = req.body.pCount;
@@ -225,7 +229,7 @@ router.post('/addArticle', urlencodedParser, async (req, res) => {
         );
 
         if (result.length > 0) {
-            return res.send("Чунин мақола аллакай дар БМ вуҷуд дорад!");
+            return res.send("Такая статья уже существует в БМ!");
         }
 
         const files = Array.isArray(req.files) ? req.files : [];
@@ -313,7 +317,7 @@ router.post('/updateArticle', urlencodedParser, async (req, res) => {
         );
 
         if (oldArticle.length === 0) {
-            return res.status(404).send("Мақола ёфт нашуд!");
+            return res.status(404).send("Статья не найдена!");
         }
 
         let sql = `
@@ -396,7 +400,7 @@ router.post('/updateArticle', urlencodedParser, async (req, res) => {
             );
         }
 
-        return res.send("Мақола бомуваффақият навсозӣ шуд!");
+        return res.send("Статья успешно обновлена!");
 
     } catch (err) {
         console.log(err);
@@ -482,7 +486,7 @@ router.post('/addPublisher', urlencodedParser, async (req, res) => {
     const [result] = await connection.query(`SELECT * FROM publishers WHERE title_tj = '${publisher}' AND cityId='${selCity}'`);
     try{
         if(result.length > 0){
-            res.send("Чунин нашриёт аллакай дар БМ вуҷуд  дорад!");
+            res.send("Такое издательство уже существует в БМ!");
             res.sendFile(path.join(__dirname, '..', 'Public', 'addPublisher.html'));
         }
         else {

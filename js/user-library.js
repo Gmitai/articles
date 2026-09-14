@@ -186,7 +186,7 @@ favoriteButton.type = 'button';
 favoriteButton.textContent = '★';
 favoriteButton.title = 'Добавить в избранное';
 
-        fetch(`/favorite/${item.id}`)
+         fetch(`/favorite/${item.id}`)
             .then(response => {
                 if (!response.ok) {
                     return null;
@@ -201,6 +201,7 @@ favoriteButton.title = 'Добавить в избранное';
                 }
             })
             .catch(() => {});
+
 
 if (item.favorite) {
     favoriteButton.classList.add('active');
