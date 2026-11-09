@@ -42,6 +42,40 @@
     <iframe src="/editPublisher.html" class="modal-iframe6" id="meIframe3"></iframe>
     <iframe src="/directionForm.html" class="modal-iframe" id="mIframe4"></iframe>
     <iframe src="/directionForm.html" class="modal-iframe4" id="meIframe4"></iframe>
+    <div id="addUserModal" class="admin-user-modal" hidden>
+        <section class="admin-user-dialog" role="dialog" aria-modal="true" aria-labelledby="addUserTitle">
+            <button id="closeAddUserModal" class="admin-user-close" type="button" aria-label="Закрыть">×</button>
+            <h2 id="addUserTitle">Добавить пользователя</h2>
+            <form id="addUserForm">
+                <label>Email<input type="email" name="eMail" maxlength="30" required></label>
+                <label>Логин<input type="text" name="login" maxlength="30" required></label>
+                <label>Пароль<input id="adminUserPassword" type="password" name="password" maxlength="72" required></label>
+                <label>Имя<input type="text" name="firstName" maxlength="25"></label>
+                <label>Фамилия<input type="text" name="lastName" maxlength="25"></label>
+                <label>Отчество<input type="text" name="familyName" maxlength="25"></label>
+                <label>Псевдоним<input type="text" name="pseudonym" maxlength="50"></label>
+                <label>Права
+                    <select name="role">
+                        <option value="user">Пользователь</option>
+                        <option value="admin">Администратор</option>
+                    </select>
+                </label>
+                <p id="addUserMessage" class="admin-user-message" aria-live="polite"></p>
+                <button type="submit">Создать пользователя</button>
+            </form>
+        </section>
+    </div>
+    <div id="genreModal" class="admin-user-modal" hidden>
+        <section class="admin-user-dialog" role="dialog" aria-modal="true" aria-labelledby="genreModalTitle">
+            <button id="closeGenreModal" class="admin-user-close" type="button" aria-label="Закрыть">×</button>
+            <h2 id="genreModalTitle">Добавить жанр</h2>
+            <form id="genreForm">
+                <label>Название жанра<input type="text" name="name" maxlength="50" required></label>
+                <p id="genreMessage" class="admin-user-message" aria-live="polite"></p>
+                <button id="saveGenreButton" type="submit">Добавить жанр</button>
+            </form>
+        </section>
+    </div>
 </div>
 
 <script src="/js/getDirections.js" type="text/javascript" defer></script>
@@ -52,6 +86,8 @@
 <script src="/js/menues.js" type="text/javascript"></script>
 <script src="/js/Hide_Show_Forms.js" type="text/javascript"></script>
 <script src="/js/downloadFile.js" type="text/javascript"></script>
+<script src="/js/admin-users.js"></script>
+<script src="/js/admin-genres.js"></script>
 
 <script>
     document.getElementById('homeBtn').addEventListener('click', () => {
@@ -66,13 +102,21 @@
 
         const key = active.dataset.key;
 
+        if (key === 'users') {
+            document.getElementById('addUserModal').hidden = false;
+            return;
+        }
+        if (key === 'genres') {
+            document.getElementById('genreModal').hidden = false;
+            return;
+        }
+
         const formIds = {
             articles: 0,
             books: 0,
             authors: 1,
             publishers: 2,
-            directions: 4,
-            genres: 4
+            directions: 4
         };
 
         if (formIds[key] === undefined) return;

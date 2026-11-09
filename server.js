@@ -66,12 +66,14 @@ const authRoutes = require('./routes/auth.routes');
 const profileRoutes = require('./routes/profile.routes');
 const mainRoutes = require('./routes/main.routes');
 const loadDtToFormRoutes = require('./routes/load_data_to_form.routes');
+const adminRoutes = require('./routes/admin.routes');
 
 app.use('/', authRoutes);
 app.use('/profile', profileRoutes);
+app.use('/admin-api', adminRoutes);
 app.use('/', mainRoutes);
 app.use('/loadDt', loadDtToFormRoutes);
 
-app.listen(port, 'localhost', () => {
+app.listen(port, '192.168.0.8', () => {
     console.log(`Сервер запущен на порту ${port}`);
 });

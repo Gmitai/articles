@@ -33,8 +33,6 @@ async function getUserByToken(authToken) {
             familyName,
             birthDate,
             mobilePhone,
-            cityId,
-            address,
             pseudonym,
             profilePhoto
          FROM users
@@ -48,21 +46,14 @@ async function getUserByToken(authToken) {
     }
 
     const user = users[0];
-    let cityTitle = null;
-
-    if (user.cityId) {
-        const [cities] = await db.query(
-            `SELECT title
-             FROM cities
-             WHERE id = ?
-             LIMIT 1`,
-            [user.cityId]
-        );
-
-        if (cities.length > 0) {
-            cityTitle = cities[0].title;
-        }
-    }
+    const [userGenres] = await db.query(
+        `SELECT g.id, g.name
+         FROM user_genres ug
+         JOIN genres g ON g.id = ug.genreId
+         WHERE ug.userId = ?
+         ORDER BY g.name`,
+        [user.id]
+    );
 
     return {
         id: user.id,
@@ -73,11 +64,10 @@ async function getUserByToken(authToken) {
         familyName: user.familyName,
         birthDate: user.birthDate,
         mobilePhone: user.mobilePhone,
-        cityId: user.cityId,
-        city: cityTitle,
-        address: user.address,
         pseudonym: user.pseudonym,
-        profilePhoto: user.profilePhoto
+        profilePhoto: user.profilePhoto,
+        genreIds: userGenres.map(genre => genre.id),
+        genres: userGenres.map(genre => genre.name)
     };
 }
 
@@ -115,26 +105,13 @@ router.get('/me', async (req, res) => {
     }
 });
 
-router.get('/cities', async (req, res) => {
+router.get('/genres', async (req, res) => {
     try {
-        const [cities] = await db.query(
-            `SELECT id, title
-             FROM cities
-             WHERE typeOf = 3
-             ORDER BY title`
-        );
-
-        res.json({
-            success: true,
-            cities
-        });
+        const [genres] = await db.query('SELECT id, name FROM genres ORDER BY name');
+        res.json({ success: true, genres });
     } catch (error) {
-        console.error('Ошибка получения городов:', error);
-
-        res.status(500).json({
-            success: false,
-            message: 'Не удалось загрузить города'
-        });
+        console.error('Ошибка получения жанров:', error);
+        res.status(500).json({ success: false, message: 'Не удалось загрузить жанры' });
     }
 });
 
@@ -164,11 +141,28 @@ router.put('/update', async (req, res) => {
             familyName,
             birthDate,
             mobilePhone,
-            cityId,
-            address,
             pseudonym,
-            eMail
+            eMail,
+            genreIds: submittedGenreIds
         } = req.body || {};
+        const rawGenreIds = Array.isArray(submittedGenreIds)
+            ? submittedGenreIds
+            : submittedGenreIds == null ? [] : [submittedGenreIds];
+        const genreIds = [...new Set(rawGenreIds.map(Number).filter(id => Number.isInteger(id) && id > 0))];
+
+        if (genreIds.length !== rawGenreIds.length) {
+            return res.status(400).json({ success: false, message: 'Некорректный список жанров' });
+        }
+        if (genreIds.length) {
+            const placeholders = genreIds.map(() => '?').join(', ');
+            const [genres] = await db.query(
+                `SELECT id FROM genres WHERE id IN (${placeholders})`,
+                genreIds
+            );
+            if (genres.length !== genreIds.length) {
+                return res.status(400).json({ success: false, message: 'Выбран неизвестный жанр' });
+            }
+        }
 
         if (eMail && eMail !== user.eMail) {
             const [emailUsers] = await db.query(
@@ -186,24 +180,6 @@ router.put('/update', async (req, res) => {
                 });
             }
         }
-
-        if (cityId) {
-            const [cities] = await db.query(
-                `SELECT id
-                 FROM cities
-                 WHERE id = ? AND typeOf = 3
-                 LIMIT 1`,
-                [cityId]
-            );
-
-            if (cities.length === 0) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Выбранный город не найден'
-                });
-            }
-        }
-
         await db.query(
             `UPDATE users
              SET
@@ -212,8 +188,6 @@ router.put('/update', async (req, res) => {
                 familyName = ?,
                 birthDate = ?,
                 mobilePhone = ?,
-                cityId = ?,
-                address = ?,
                 pseudonym = ?,
                 eMail = ?
              WHERE id = ?`,
@@ -223,13 +197,19 @@ router.put('/update', async (req, res) => {
                 familyName || null,
                 birthDate || null,
                 mobilePhone || null,
-                cityId || null,
-                address || null,
                 pseudonym || null,
                 eMail || null,
                 user.id
             ]
         );
+
+        await db.query('DELETE FROM user_genres WHERE userId = ?', [user.id]);
+        for (const genreId of genreIds) {
+            await db.query(
+                'INSERT INTO user_genres (userId, genreId) VALUES (?, ?)',
+                [user.id, genreId]
+            );
+        }
 
         const updatedUser = await getUserByToken(authToken);
 

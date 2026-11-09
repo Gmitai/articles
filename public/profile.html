@@ -55,14 +55,6 @@
                     <span id="profileMobilePhone" class="field-value">—</span>
                 </div>
                 <div class="profile-field">
-                    <span class="field-label">Город</span>
-                    <span id="profileCity" class="field-value">—</span>
-                </div>
-                <div class="profile-field">
-                    <span class="field-label">Адрес</span>
-                    <span id="profileAddress" class="field-value">—</span>
-                </div>
-                <div class="profile-field">
                     <span class="field-label">Псевдоним</span>
                     <span id="profilePseudonym" class="field-value">—</span>
                 </div>
@@ -70,6 +62,11 @@
                     <span class="field-label">Email</span>
                     <span id="profileEmailField" class="field-value">—</span>
                 </div>
+            </div>
+
+            <div class="profile-field">
+                <span class="field-label">Интересующие жанры</span>
+                <span id="profileGenres" class="field-value">—</span>
             </div>
 
             <form id="editProfileForm" class="edit-profile-form" hidden>
@@ -99,18 +96,6 @@
                         <input id="editMobilePhone" name="mobilePhone" type="text">
                     </div>
 
-                    <div class="form-group">
-                        <label for="editCity">Город</label>
-                        <select id="editCity" name="cityId">
-                            <option value="">Выберите город</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group form-group-full">
-                        <label for="editAddress">Адрес</label>
-                        <input id="editAddress" name="address" type="text">
-                    </div>
-
                     <div class="form-group form-group-full">
                         <label for="editPseudonym">Псевдоним</label>
                         <input id="editPseudonym" name="pseudonym" type="text">
@@ -120,6 +105,10 @@
                         <label for="editEmail">Email</label>
                         <input id="editEmail" name="eMail" type="email">
                     </div>
+                    <fieldset class="form-group form-group-full genre-interests">
+                        <legend>Интересующие жанры</legend>
+                        <div id="editGenres" class="genre-selector"></div>
+                    </fieldset>
                 </div>
 
                 <div class="edit-actions">

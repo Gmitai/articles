@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginModal = document.getElementById('loginModal');
     const registerForm = document.getElementById('registerForm');
     const loginForm = document.getElementById('loginForm');
-    const registerCity = document.getElementById('registerCity');
     const myProfileBtn = document.getElementById('myProfileBtn');
     const myBooksBtn = document.getElementById('myBooksBtn');
     const settingsBtn = document.getElementById('settingsBtn');
@@ -77,7 +76,7 @@ if (settingsBtn) {
 if (registerBtn) {
     registerBtn.addEventListener('click', () => {
         registerModal.style.display = 'flex';
-        loadCities();
+        loadRegisterGenres();
     });
 }
 
@@ -108,32 +107,48 @@ window.addEventListener('click', event => {
     }
 });
 
-async function loadCities() {
-    if (!registerCity) {
-        return;
-    }
-
+async function loadRegisterGenres() {
+    const container = document.getElementById('registerGenres');
+    if (!container) return;
     try {
-        const response = await fetch('/auth/cities');
-
-        if (!response.ok) {
-            throw new Error('Не удалось загрузить города');
-        }
-
-        const cities = await response.json();
-
-        registerCity.innerHTML = '<option value="">Выберите город</option>';
-
-        cities.forEach(city => {
-            const option = document.createElement('option');
-            option.value = city.id;
-            option.textContent = city.title;
-            registerCity.appendChild(option);
+        const response = await fetch('/auth/genres');
+        const genres = await response.json();
+        if (!response.ok) throw new Error('Не удалось загрузить жанры');
+        container.replaceChildren();
+        const dropdown = document.createElement('div');
+        dropdown.className = 'genre-dropdown';
+        const trigger = document.createElement('button');
+        trigger.type = 'button';
+        trigger.className = 'genre-dropdown-trigger';
+        trigger.textContent = 'Выберите жанры';
+        const options = document.createElement('div');
+        options.className = 'genre-options';
+        options.hidden = true;
+        options.style.display = 'none';
+        genres.forEach(genre => {
+            const label = document.createElement('label');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.name = 'genreIds';
+            checkbox.value = genre.id;
+            label.append(checkbox, document.createTextNode(` ${genre.name}`));
+            options.appendChild(label);
         });
-
+        dropdown.append(trigger, options);
+        container.appendChild(dropdown);
+        trigger.addEventListener('click', () => {
+            options.hidden = !options.hidden;
+            options.style.display = options.hidden ? 'none' : 'block';
+        });
+        options.addEventListener('change', () => {
+            const selectedCount = options.querySelectorAll('input:checked').length;
+            trigger.textContent = selectedCount
+                ? `Выбрано жанров: ${selectedCount}`
+                : 'Выберите жанры';
+        });
     } catch (error) {
-        console.error('Ошибка загрузки городов:', error);
-        registerCity.innerHTML = '<option value="">Ошибка загрузки городов</option>';
+        console.error('Ошибка загрузки жанров:', error);
+        container.textContent = 'Не удалось загрузить список жанров';
     }
 }
 
@@ -203,7 +218,7 @@ if (loginForm) {
                     loginModal.style.display = 'none';
                     registerModal.style.display = 'flex';
 
-                    loadCities();
+                    loadRegisterGenres();
 
                     const registerLogin =
                         registerForm.querySelector('[name="login"]');

@@ -16,18 +16,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     const profileFamilyName = document.getElementById('profileFamilyName');
     const profileBirthDate = document.getElementById('profileBirthDate');
     const profileMobilePhone = document.getElementById('profileMobilePhone');
-    const profileCity = document.getElementById('profileCity');
-    const profileAddress = document.getElementById('profileAddress');
     const profilePseudonym = document.getElementById('profilePseudonym');
     const profileEmailField = document.getElementById('profileEmailField');
+    const profileGenres = document.getElementById('profileGenres');
+    const editGenres = document.getElementById('editGenres');
 
     const editFirstName = document.getElementById('editFirstName');
     const editLastName = document.getElementById('editLastName');
     const editFamilyName = document.getElementById('editFamilyName');
     const editBirthDate = document.getElementById('editBirthDate');
     const editMobilePhone = document.getElementById('editMobilePhone');
-    const editCity = document.getElementById('editCity');
-    const editAddress = document.getElementById('editAddress');
     const editPseudonym = document.getElementById('editPseudonym');
     const editEmail = document.getElementById('editEmail');
 
@@ -79,10 +77,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         profileFamilyName.textContent = getValue(user.familyName);
         profileBirthDate.textContent = formatDate(user.birthDate);
         profileMobilePhone.textContent = getValue(user.mobilePhone);
-        profileCity.textContent = getValue(user.city);
-        profileAddress.textContent = getValue(user.address);
         profilePseudonym.textContent = getValue(user.pseudonym);
         profileEmailField.textContent = getValue(user.eMail);
+        profileGenres.textContent = (user.genres || []).join(', ') || '—';
 
         setPhoto(user.profilePhoto);
     }
@@ -95,48 +92,71 @@ document.addEventListener('DOMContentLoaded', async () => {
             ? String(user.birthDate).substring(0, 10)
             : '';
         editMobilePhone.value = user.mobilePhone || '';
-        editCity.value = user.cityId || '';
-        editAddress.value = user.address || '';
         editPseudonym.value = user.pseudonym || '';
         editEmail.value = user.eMail || '';
+        const selectedGenreIds = new Set((user.genreIds || []).map(String));
+        editGenres.querySelectorAll('input[name="genreIds"]').forEach(input => {
+            input.checked = selectedGenreIds.has(input.value);
+        });
+        const trigger = editGenres.querySelector('.genre-dropdown-trigger');
+        if (trigger) {
+            const selectedCount = editGenres.querySelectorAll('input[name="genreIds"]:checked').length;
+            trigger.textContent = selectedCount
+                ? `Выбрано жанров: ${selectedCount}`
+                : 'Выберите жанры';
+        }
     }
 
-    async function loadCities() {
-        try {
-            const response = await fetch('/profile/cities');
-            const data = await response.json();
-
-            if (!response.ok || !data.success) {
-                throw new Error(data.message || 'Не удалось загрузить города');
-            }
-
-            editCity.innerHTML = '<option value="">Выберите город</option>';
-
-            data.cities.forEach(city => {
-                const option = document.createElement('option');
-                option.value = city.id;
-                option.textContent = city.title;
-                editCity.appendChild(option);
-            });
-
-            if (currentUser && currentUser.cityId) {
-                editCity.value = currentUser.cityId;
-            }
-        } catch (error) {
-            console.error('Ошибка загрузки городов:', error);
-            editCity.innerHTML = '<option value="">Не удалось загрузить города</option>';
-        }
+    async function loadGenres() {
+        const response = await fetch('/profile/genres');
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.message || 'Не удалось загрузить жанры');
+        editGenres.replaceChildren();
+        const dropdown = document.createElement('div');
+        dropdown.className = 'genre-dropdown';
+        const trigger = document.createElement('button');
+        trigger.type = 'button';
+        trigger.className = 'genre-dropdown-trigger';
+        trigger.textContent = 'Выберите жанры';
+        const options = document.createElement('div');
+        options.className = 'genre-options';
+        options.hidden = true;
+        options.style.display = 'none';
+        data.genres.forEach(genre => {
+            const label = document.createElement('label');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.name = 'genreIds';
+            checkbox.value = genre.id;
+            label.append(checkbox, document.createTextNode(` ${genre.name}`));
+            options.appendChild(label);
+        });
+        dropdown.append(trigger, options);
+        editGenres.appendChild(dropdown);
+        trigger.addEventListener('click', () => {
+            options.hidden = !options.hidden;
+            options.style.display = options.hidden ? 'none' : 'block';
+        });
+        options.addEventListener('change', () => {
+            const selectedCount = options.querySelectorAll('input:checked').length;
+            trigger.textContent = selectedCount
+                ? `Выбрано жанров: ${selectedCount}`
+                : 'Выберите жанры';
+        });
+        if (currentUser) fillEditForm(currentUser);
     }
 
     function openEditMode() {
         fillEditForm(currentUser);
         profileView.hidden = true;
+        profileGenres.closest('.profile-field').hidden = true;
         editProfileForm.hidden = false;
         editProfileBtn.hidden = true;
     }
 
     function closeEditMode() {
         profileView.hidden = false;
+        profileGenres.closest('.profile-field').hidden = false;
         editProfileForm.hidden = true;
         editProfileBtn.hidden = false;
     }
@@ -161,7 +181,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         showProfile(data.user);
-        await loadCities();
+        await loadGenres();
     } catch (error) {
         console.error('Ошибка загрузки профиля:', error);
         alert('Не удалось загрузить данные профиля');
@@ -193,10 +213,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 familyName: editFamilyName.value.trim(),
                 birthDate: editBirthDate.value,
                 mobilePhone: editMobilePhone.value.trim(),
-                cityId: editCity.value || null,
-                address: editAddress.value.trim(),
                 pseudonym: editPseudonym.value.trim(),
-                eMail: editEmail.value.trim()
+                eMail: editEmail.value.trim(),
+                genreIds: [...editGenres.querySelectorAll('input[name="genreIds"]:checked')]
+                    .map(input => Number(input.value))
             };
 
             try {

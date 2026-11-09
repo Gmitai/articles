@@ -97,9 +97,15 @@ function renderTable(key, rows) {
     const cols = Object.keys(rows[0]);
     cols.forEach(c => {
         const th = document.createElement('th');
-        th.textContent = c;
+        th.textContent = key === 'genres' && c === 'genreName' ? 'Жанр' : c;
         headerRow.appendChild(th);
     });
+    if (key === 'users' || key === 'genres') {
+        const actionsHeader = document.createElement('th');
+        actionsHeader.className = 'admin-actions-column';
+        actionsHeader.textContent = 'Действия';
+        headerRow.appendChild(actionsHeader);
+    }
     thead.appendChild(headerRow);
     table.appendChild(thead);
 
@@ -125,6 +131,46 @@ function renderTable(key, rows) {
         img2.style.width = '32px';
         img2.style.height = '32px';
         let frmId = parseInt(localStorage.getItem('frmId'));
+        if (key === 'users' || key === 'genres') {
+            const editCell = document.createElement('td');
+            editCell.className = 'admin-actions-column';
+            const actions = document.createElement('div');
+            actions.className = 'admin-user-actions';
+            const editButton = document.createElement('button');
+            const userEditIcon = document.createElement('img');
+            userEditIcon.src = '/icons/edit-icon.png';
+            userEditIcon.alt = key === 'users' ? 'Редактировать пользователя' : 'Редактировать жанр';
+            userEditIcon.style.width = '32px';
+            userEditIcon.style.height = '32px';
+            editButton.type = 'button';
+            editButton.className = 'admin-user-edit-button';
+            editButton.title = key === 'users' ? 'Редактировать пользователя' : 'Редактировать жанр';
+            editButton.appendChild(userEditIcon);
+            editButton.addEventListener('click', () => {
+                if (key === 'users' && typeof window.editAdminUser === 'function') {
+                    window.editAdminUser(r.id);
+                } else if (key === 'genres' && typeof window.editAdminGenre === 'function') {
+                    window.editAdminGenre(r.id);
+                }
+            });
+            actions.appendChild(editButton);
+
+            const deleteButton = document.createElement('button');
+            deleteButton.type = 'button';
+            deleteButton.className = 'admin-user-delete-button';
+            deleteButton.textContent = 'Удалить';
+            deleteButton.addEventListener('click', () => {
+                if (key === 'users' && typeof window.deleteAdminUser === 'function') {
+                    window.deleteAdminUser(r.id, r['Логин'] || r.id);
+                } else if (key === 'genres' && typeof window.deleteAdminGenre === 'function') {
+                    window.deleteAdminGenre(r.id, r.genreName || r.id);
+                }
+            });
+            actions.appendChild(deleteButton);
+            editCell.appendChild(actions);
+            tr.appendChild(editCell);
+        }
+
         if (frmId === 0 || frmId === 1 || frmId === 2 || frmId === 4) {
             const tdNew = document.createElement('td');
             const button = document.createElement('button');

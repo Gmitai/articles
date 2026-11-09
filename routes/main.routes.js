@@ -61,7 +61,27 @@ router.use(express.static(path.join(__dirname, '..', 'css')))
 router.use(express.static(path.join(__dirname, '..', 'icons')))
 router.use(express.static(path.join(__dirname, '..', 'uploads')))
 
-router.get('/admin', (req, res) => {
+async function getAdminUserId(req) {
+    const cookie = req.headers.cookie
+        ?.split(';')
+        .map(value => value.trim())
+        .find(value => value.startsWith('authToken='));
+    if (!cookie) return null;
+    const token = decodeURIComponent(cookie.slice('authToken='.length));
+    const [users] = await connection.execute(
+        'SELECT id FROM users WHERE authToken = ? AND role = ? LIMIT 1',
+        [token, 'admin']
+    );
+    return users.length ? users[0].id : null;
+}
+
+router.get('/admin', async (req, res) => {
+    try {
+        if (!(await getAdminUserId(req))) return res.redirect('/');
+    } catch (error) {
+        console.error('Ошибка проверки администратора:', error);
+        return res.status(500).send('Ошибка сервера');
+    }
     res.sendFile(path.join(__dirname, '../Public/index.html'));
 });
 
@@ -168,7 +188,10 @@ router.get('/directions', async (req, res) => {
 
 //Жанр
 router.get('/genres', async (req, res) => {
-    const [result] = await connection.execute("SELECT `name` AS 'Жанр' FROM genres");
+    if (!(await getAdminUserId(req))) {
+        return res.status(403).json({ error: 'Недостаточно прав' });
+    }
+    const [result] = await connection.execute('SELECT id, name AS genreName FROM genres ORDER BY name');
     try {
         selected_menuId=5;
         res.send([result, selected_menuId]);
@@ -179,7 +202,11 @@ router.get('/genres', async (req, res) => {
 });
 
 router.get('/users', async (req, res) => {
-    const [result] = await connection.execute("SELECT u.id, CONCAT(u.lastName,' ', u.firstName, ' ', IFNULL(u.familyName, '')) AS 'ФИО', u.login AS 'Логин', u.eMail AS 'Эл-почта', u.mobilePhone AS 'Номер телефона', DATE_FORMAT(u.birthDate, '%d.%m.%Y') AS 'Дата рождения', c.title AS 'Город', u.address AS 'Адрес', u.pseudonym AS 'Псевдоним', DATE_FORMAT(u.createdAt, '%d.%m.%Y') AS 'Дата регистрации' FROM users u left join cities c on u.cityId=c.id");
+    const adminId = await getAdminUserId(req);
+    if (!adminId) {
+        return res.status(403).json({ error: 'Недостаточно прав' });
+    }
+    const [result] = await connection.execute("SELECT u.id, CONCAT(u.lastName,' ', u.firstName, ' ', IFNULL(u.familyName, '')) AS 'ФИО', u.login AS 'Логин', u.eMail AS 'Эл-почта', u.mobilePhone AS 'Номер телефона', DATE_FORMAT(u.birthDate, '%d.%m.%Y') AS 'Дата рождения', u.pseudonym AS 'Псевдоним', u.role AS 'Роль', DATE_FORMAT(u.createdAt, '%d.%m.%Y') AS 'Дата регистрации' FROM users u WHERE u.id <> ?", [adminId]);
     try{
         selected_menuId=6;
         res.send([result, selected_menuId]);

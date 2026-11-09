@@ -1,46 +1,85 @@
 const express = require('express');
 const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 const connection = require('../db/db');
 
 const router = express.Router();
 
 const TOKEN_COOKIE = 'authToken';
 
-function hashPassword(password) {
-    const salt = crypto.randomBytes(16).toString('hex');
-
-    const hash = crypto
-        .scryptSync(password, salt, 64)
-        .toString('hex');
-
-    return `${salt}:${hash}`;
+async function hashPassword(password) {
+    return bcrypt.hash(password, 12);
 }
 
-function verifyPassword(password, storedPassword) {
-    if (!storedPassword) return false;
+async function verifyPassword(password, storedPassword) {
+    if (typeof storedPassword !== 'string' || !storedPassword) {
+        return { valid: false, needsRehash: false };
+    }
 
-    if (storedPassword.includes(':')) {
-        const [salt, storedHash] = storedPassword.split(':');
-
+    // bcrypt hashes are used for new passwords. Keep recognition for existing
+    // bcrypt hashes too, so deployments that already used bcrypt remain valid.
+    if (/^\$2[aby]\$\d{2}\$/.test(storedPassword)) {
         try {
-            const hash = crypto
-                .scryptSync(password, salt, 64)
-                .toString('hex');
-
-            return crypto.timingSafeEqual(
-                Buffer.from(hash, 'hex'),
-                Buffer.from(storedHash, 'hex')
-            );
+            return {
+                valid: await bcrypt.compare(password, storedPassword),
+                needsRehash: false
+            };
         } catch (error) {
-            return false;
+            return { valid: false, needsRehash: false };
         }
     }
 
-    return password === storedPassword;
+    if (storedPassword.includes(':')) {
+        const separator = storedPassword.indexOf(':');
+        const salt = storedPassword.slice(0, separator);
+        const storedHash = storedPassword.slice(separator + 1);
+
+        try {
+            const expected = Buffer.from(storedHash, 'hex');
+            const actual = crypto.scryptSync(password, salt, expected.length);
+
+            return {
+                valid: expected.length > 0 && crypto.timingSafeEqual(actual, expected),
+                needsRehash: true
+            };
+        } catch (error) {
+            return { valid: false, needsRehash: false };
+        }
+    }
+
+    // Legacy plaintext passwords are accepted once, then upgraded after login.
+    return {
+        valid: password === storedPassword,
+        needsRehash: true
+    };
 }
 
 function createAuthToken() {
     return crypto.randomBytes(32).toString('hex');
+}
+
+function normalizeGenreIds(value) {
+    const values = Array.isArray(value) ? value : value == null ? [] : [value];
+    return [...new Set(values.map(Number).filter(id => Number.isInteger(id) && id > 0))];
+}
+
+async function saveUserGenres(userId, genreIds) {
+    if (genreIds.length) {
+        const placeholders = genreIds.map(() => '?').join(', ');
+        const [genres] = await connection.execute(
+            `SELECT id FROM genres WHERE id IN (${placeholders})`,
+            genreIds
+        );
+        if (genres.length !== genreIds.length) return false;
+    }
+
+    for (const genreId of genreIds) {
+        await connection.execute(
+            'INSERT INTO user_genres (userId, genreId) VALUES (?, ?)',
+            [userId, genreId]
+        );
+    }
+    return true;
 }
 
 router.get('/', (req, res) => {
@@ -73,8 +112,6 @@ router.get('/auth/me', async (req, res) => {
                  familyName,
                  birthDate,
                  mobilePhone,
-                 cityId,
-                 address,
                  pseudonym,
                  profilePhoto,
                  createdAt,
@@ -115,9 +152,8 @@ router.post('/auth/register', async (req, res) => {
             familyName,
             birthDate,
             mobilePhone,
-            cityId,
-            address,
-            pseudonym
+            pseudonym,
+            genreIds: submittedGenreIds
         } = req.body;
 
         if (!eMail || !login || !password) {
@@ -165,8 +201,9 @@ router.post('/auth/register', async (req, res) => {
             }
         }
 
-        const hashedPassword = hashPassword(password);
+        const hashedPassword = await hashPassword(password);
         const authToken = createAuthToken();
+        const genreIds = normalizeGenreIds(submittedGenreIds);
 
         const profilePhoto = req.file
             ? req.file.filename
@@ -183,13 +220,11 @@ router.post('/auth/register', async (req, res) => {
                  familyName,
                  birthDate,
                  mobilePhone,
-                 cityId,
-                 address,
                  pseudonym,
                  profilePhoto,
                  authToken
              )
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 eMail,
                 login,
@@ -199,13 +234,19 @@ router.post('/auth/register', async (req, res) => {
                 familyName || null,
                 birthDate || null,
                 mobilePhone || null,
-                cityId || null,
-                address || null,
                 pseudonym || null,
                 profilePhoto,
                 authToken
             ]
         );
+
+        if (!(await saveUserGenres(result.insertId, genreIds))) {
+            await connection.execute('DELETE FROM users WHERE id = ?', [result.insertId]);
+            return res.status(400).json({
+                success: false,
+                message: 'Выбран один или несколько неизвестных жанров'
+            });
+        }
 
         res.cookie(TOKEN_COOKIE, authToken, {
             httpOnly: true,
@@ -261,12 +302,12 @@ router.post('/auth/login', async (req, res) => {
 
         const user = rows[0];
 
-        const passwordCorrect = verifyPassword(
+        const passwordCheck = await verifyPassword(
             password,
             user.password
         );
 
-        if (!passwordCorrect) {
+        if (!passwordCheck.valid) {
             return res.status(401).json({
                 success: false,
                 needRegister: false,
@@ -275,6 +316,16 @@ router.post('/auth/login', async (req, res) => {
         }
 
         const authToken = createAuthToken();
+
+        if (passwordCheck.needsRehash) {
+            const upgradedPassword = await hashPassword(password);
+            await connection.execute(
+                `UPDATE users
+                 SET password = ?
+                 WHERE id = ?`,
+                [upgradedPassword, user.id]
+            );
+        }
 
         await connection.execute(
             `UPDATE users
@@ -364,6 +415,18 @@ router.get('/auth/cities', async (req, res) => {
         res.status(500).json({
             error: 'Ошибка загрузки городов'
         });
+    }
+});
+
+router.get('/auth/genres', async (req, res) => {
+    try {
+        const [genres] = await connection.execute(
+            'SELECT id, name FROM genres ORDER BY name'
+        );
+        res.json(genres);
+    } catch (error) {
+        console.error('Ошибка загрузки жанров:', error);
+        res.status(500).json({ message: 'Не удалось загрузить жанры' });
     }
 });
 
