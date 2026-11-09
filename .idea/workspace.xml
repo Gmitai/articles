@@ -5,15 +5,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fe834628-b3fc-4675-bd87-9a32f97eadd9" name="Changes" comment="v1.5">
+      <change afterPath="$PROJECT_DIR$/js/dataForDirectionForm.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/directionForm.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/css/user.css" beforeDir="false" afterPath="$PROJECT_DIR$/css/user.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/Hide_Show_Forms.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/Hide_Show_Forms.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/js/dataForArticleForm.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/dataForArticleForm.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/getAuthors.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/getAuthors.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/getCities.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/getCities.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/dataForAuthorForm.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/dataForAuthorForm.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/dataForPublisherForm.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/dataForPublisherForm.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/js/menues.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/menues.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/user-auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/user-auth.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/js/user-library.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/user-library.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/load_data_to_form.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/load_data_to_form.routes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/addArticle.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/addArticle.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/addAuthors.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/addAuthors.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/editArticle.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/editArticle.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/user-index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/user-index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routes/main.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/main.routes.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/server.js" afterDir="false" />
     </list>
@@ -157,6 +163,14 @@
       <workItem from="1789291591175" duration="20039000" />
       <workItem from="1789313460570" duration="733000" />
       <workItem from="1789355319182" duration="7664000" />
+      <workItem from="1789441713608" duration="5041000" />
+      <workItem from="1789449448397" duration="11345000" />
+      <workItem from="1789490092392" duration="837000" />
+      <workItem from="1789493044078" duration="187000" />
+      <workItem from="1789522906853" duration="613000" />
+      <workItem from="1789529439995" duration="3124000" />
+      <workItem from="1791644489302" duration="127000" />
+      <workItem from="1793773773413" duration="267000" />
     </task>
     <task id="LOCAL-00001" summary="v1.2">
       <option name="closed" value="true" />
@@ -203,6 +217,17 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="v1.2" />

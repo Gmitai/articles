@@ -79,5 +79,100 @@
 <script src="/js/getLSItem.js" type="text/javascript"></script>
 <script src="/js/multiselect.js" type="text/javascript"></script>
 <script src="/js/creatTreeView.js" type="text/javascript"></script>
+
+
+<script>
+    const addArticleForm = document.querySelector('form[action="/addArticle"]');
+
+    if (addArticleForm) {
+        addArticleForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            try {
+                const formData = new FormData(this);
+
+                const response = await fetch('/addArticle', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const text = await response.text();
+
+                if (!response.ok) {
+                    throw new Error(text || 'Ошибка добавления');
+                }
+
+                alert(text || 'Статья успешно добавлена');
+
+                this.reset();
+
+                if (typeof selectedAuthors !== 'undefined') {
+                    selectedAuthors = [];
+                }
+
+                const selectedValues = document.getElementById('selected-values');
+
+                if (selectedValues) {
+                    selectedValues.textContent = 'Выбирите автора (ов)';
+                }
+
+                if (typeof updateDropdownFromSelected === 'function') {
+                    updateDropdownFromSelected();
+                }
+
+                document.querySelectorAll('.tree-radio').forEach(radio => {
+                    radio.checked = false;
+                });
+
+                document.querySelectorAll('#treeUDC li').forEach(li => {
+                    li.classList.remove('selected');
+                });
+
+                const treeDropdown = document.getElementById('treeDropdown');
+
+                if (treeDropdown) {
+                    treeDropdown.classList.add('hidden');
+                }
+
+                document.querySelectorAll('#treeUDC .toggle').forEach(toggle => {
+                    const childUl = toggle.closest('li')?.querySelector(':scope > ul');
+
+                    if (childUl) {
+                        childUl.classList.add('hidden');
+                    }
+
+                    toggle.textContent = '+';
+                    toggle.dataset.state = 'closed';
+                });
+
+                const publisherList = document.getElementById('PublisherList');
+
+                if (publisherList) {
+                    publisherList.value = '';
+                }
+
+                if (window.parent && window.parent.loadForKey) {
+                    const active = window.parent.document.querySelector('.nav button.active');
+
+                    if (active) {
+                        await window.parent.loadForKey(active.dataset.key);
+                    }
+                }
+
+                const frame = window.parent.document.getElementById('mIframe1');
+
+                if (frame) {
+                    frame.style.display = 'block';
+                }
+
+            } catch (error) {
+                console.error('Ошибка добавления:', error);
+                alert(error.message);
+            }
+        });
+    }
+</script>
+
+
 </body>
 </html>

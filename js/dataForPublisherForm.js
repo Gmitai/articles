@@ -51,7 +51,12 @@ function submitPublisherForm() {
         .then(res => res.json())
         .then(resp => {
             alert(resp.message || "Редакция обновлена!");
-            window.parent.closeIframe(1);
+
+            if (window.parent && window.parent.loadForKey) {
+                window.parent.loadForKey('publishers');
+            }
+
+            window.parent.closeIframe(2);
         })
         .catch(err => console.error(err));
 }

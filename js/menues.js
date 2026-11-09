@@ -125,14 +125,14 @@ function renderTable(key, rows) {
         img2.style.width = '32px';
         img2.style.height = '32px';
         let frmId = parseInt(localStorage.getItem('frmId'));
-        if (frmId < 2) {
+        if (frmId === 0 || frmId === 1 || frmId === 2 || frmId === 4) {
             const tdNew = document.createElement('td');
             const button = document.createElement('button');
             button.appendChild(img);
             button.setAttribute('id', 'edit');
             button.addEventListener('click', () => {
                 showForm(getFrmId(), r['id'])
-                refresh()
+
             });
             tdNew.appendChild(button);
             tr.appendChild(tdNew);
@@ -166,7 +166,25 @@ if (refreshBtn) {
 }
 
 function refresh() {
-    const iframe = document.getElementById('meIframe2');
-    iframe.contentWindow.location.reload();
+    const frmId = parseInt(localStorage.getItem('frmId'));
+
+    const iframeIds = {
+        0: 'meIframe1',
+        1: 'meIframe2',
+        2: 'meIframe3',
+        4: 'meIframe4'
+    };
+
+    const iframeId = iframeIds[frmId];
+
+    if (!iframeId) {
+        return;
+    }
+
+    const iframe = document.getElementById(iframeId);
+
+    if (iframe) {
+        iframe.contentWindow.location.reload();
+    }
 }
 

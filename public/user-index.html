@@ -188,6 +188,34 @@
 
                 </div>
 
+
+                <div class="advanced-field">
+                    <label for="YearSearch">Год</label>
+                    <select id="YearSearch">
+                        <option value="">Все годы</option>
+                    </select>
+                </div>
+
+
+
+                <div class="advanced-field">
+
+                    <label for="PublisherSearch">
+                        Редакция
+                    </label>
+
+                    <input
+                            type="text"
+                            id="PublisherSearch"
+                            list="PublisherHints"
+                            autocomplete="off"
+                            placeholder="Редакция..."
+                    >
+
+                    <datalist id="PublisherHints"></datalist>
+
+                </div>
+
                 <button
                         id="advancedSearchApply"
                         type="button"

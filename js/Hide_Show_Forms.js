@@ -1,55 +1,54 @@
-const forms = [
-    "#mIframe1",
-    "#mIframe2",
-    "#mIframe3",
 
-];
-const eforms = [
-    "#meIframe1",
-    "#meIframe2",
-    "#meIframe3",
-    "#meIframe4",
-    "#meIframe5"
-];
+const forms = {
+    0: "#mIframe1",
+    1: "#mIframe2",
+    2: "#mIframe3",
+    4: "#mIframe4"
+};
+const eforms = {
+    0: "#meIframe1",
+    1: "#meIframe2",
+    2: "#meIframe3",
+    4: "#meIframe4"
+};
 let frmId = 0;
-
 let editMode = false;
-
 function showForm(fId, rowId = 0) {
-    let articleFormLayer;
+    fId = Number(fId);
+    rowId = Number(rowId);
+    let frame;
     if (rowId > 0) {
-        articleFormLayer = document.querySelector(eforms[fId]);
-        localStorage.setItem('rowId', JSON.stringify(rowId));
+        frame = document.querySelector(eforms[fId]);
         editMode = true;
+        localStorage.setItem("rowId", String(rowId));
     } else {
-        articleFormLayer = document.querySelector(forms[fId]);
+        frame = document.querySelector(forms[fId]);
         editMode = false;
+        localStorage.removeItem("rowId");
     }
-
-    if (articleFormLayer) {
-        articleFormLayer.style.display = "block";
-        frmId = fId;
-
-        if (editMode) {
-
-            const tryLoad = () => {
-                const iframeDoc = articleFormLayer.contentDocument || articleFormLayer.contentWindow.document;
-                if (iframeDoc.readyState === "complete") {
-
-                    if (articleFormLayer.contentWindow.loadArticleData) {
-                        articleFormLayer.contentWindow.loadArticleData(rowId);
-                    }
-                } else {
-                    setTimeout(tryLoad, 50);
-                }
-            };
-            tryLoad();
-        }
+    if (!frame) {
+        console.error("Форма не найдена:", fId, rowId);
+        return;
+    }
+    frmId = fId;
+    localStorage.setItem("frmId", String(fId));
+    frame.style.display = "block";
+    if (fId === 4 && rowId === 0) {
+        frame.contentWindow.postMessage({
+            type: "resetDirectionForm"
+        }, "*");
     }
 }
-
-function closeIframe(fId)
-{
-    const frame = editMode? document.querySelector(eforms[fId]): document.querySelector(forms[fId]);
-    if (frame) frame.style.display='none';
+function closeIframe(fId) {
+    fId = Number(fId);
+    const editFrame = document.querySelector(eforms[fId]);
+    const addFrame = document.querySelector(forms[fId]);
+    if (editFrame) {
+        editFrame.style.display = "none";
+    }
+    if (addFrame) {
+        addFrame.style.display = "none";
+    }
+    localStorage.removeItem("rowId");
 }
+

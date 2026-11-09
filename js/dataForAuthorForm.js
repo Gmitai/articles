@@ -1,14 +1,13 @@
 
 function getFrmId() {
-    let frmId = localStorage.getItem('frmId');
-    return frmId != null ? frmId : -1;
+    const frmId = localStorage.getItem('frmId');
+    return frmId != null ? Number(frmId) : -1;
 }
 
 function getRowId() {
-    let rowId = localStorage.getItem('rowId');
-    return rowId != null ? rowId : -1;
+    const rowId = localStorage.getItem('rowId');
+    return rowId != null ? Number(rowId) : 0;
 }
-
 
 function loadCities() {
     return fetch("/loadDt/getCities")
@@ -25,14 +24,15 @@ function loadCities() {
         });
 }
 
-
 function loadAuthorData(rowId) {
-    if (!rowId) return;
+    rowId = Number(rowId);
 
-    fetch(`/loadDt/getAuthorById?id=${rowId}`)
+    if (rowId <= 0) return;
+
+    fetch(`/loadDt/getAuthorById?id=${encodeURIComponent(rowId)}`)
         .then(res => res.json())
         .then(data => {
-            document.getElementById("rowId").value = data.id;
+            document.getElementById("rowId").value = data.id || '';
             document.getElementById("name").value = data.fullName || '';
             document.getElementById("birthDate").value = data.birthDate || '';
             document.getElementById("phoneNumber").value = data.mobilePhone || '';
@@ -41,7 +41,6 @@ function loadAuthorData(rowId) {
         })
         .catch(err => console.error("Ошибка при загрузке автора:", err));
 }
-
 
 function submitAuthorForm() {
     const rowId = document.getElementById("rowId").value;
@@ -56,25 +55,52 @@ function submitAuthorForm() {
     fetch('/updateAuthor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rowId, lastName, firstName, familyName, birthDate, phone, cityId, address })
+        body: JSON.stringify({
+            rowId,
+            lastName,
+            firstName,
+            familyName,
+            birthDate,
+            phone,
+            cityId,
+            address
+        })
     })
         .then(res => res.json())
         .then(resp => {
             alert(resp.message || "Автор обновлен!");
+
+            if (window.parent && window.parent.loadForKey) {
+                window.parent.loadForKey('authors');
+            }
+
             window.parent.closeIframe(1);
         })
         .catch(err => console.error(err));
 }
 
-
 function refreshAuthorForm() {
     const rowId = getRowId();
-    if (!rowId) return;
+
+    if (rowId <= 0) return;
+
     loadCities().then(() => {
         loadAuthorData(rowId);
     });
 }
 
-refreshAuthorForm();
+let lastRowId = 0;
 
+function checkRowIdChange() {
+    const currentRowId = getRowId();
+
+    if (currentRowId > 0 && currentRowId !== lastRowId) {
+        lastRowId = currentRowId;
+        refreshAuthorForm();
+    }
+}
+
+setInterval(checkRowIdChange, 100);
+
+refreshAuthorForm();
 

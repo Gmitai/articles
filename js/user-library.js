@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('searchInput');
     const searchBtn = document.getElementById('searchBtn');
@@ -8,14 +9,46 @@ document.addEventListener('DOMContentLoaded', () => {
     const authorSearch = document.getElementById('authorSearch');
     const genreSearch = document.getElementById('genreSearch');
     const udcSearch = document.getElementById('udcSearch');
+    const yearSearch = document.getElementById('YearSearch');
+    const publisherSearch = document.getElementById('PublisherSearch');
     const content = document.getElementById('content');
 
     const titleHints = document.getElementById('titleHints');
     const authorHints = document.getElementById('authorHints');
     const genreHints = document.getElementById('genreHints');
     const udcHints = document.getElementById('udcHints');
-
+    const publisherHints = document.getElementById('PublisherHints');
     const sortSelect = document.getElementById('sortSelect');
+
+
+async function loadYears() {
+    if (!yearSearch) {
+        return;
+    }
+
+    try {
+        const response = await fetch('/userSearchYears');
+
+        if (!response.ok) {
+            throw new Error('Не удалось загрузить годы');
+        }
+
+        const years = await response.json();
+
+        yearSearch.innerHTML = '<option value="">Все годы</option>';
+
+        years.forEach(year => {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            yearSearch.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Ошибка загрузки годов:', error);
+    }
+}
+
+
 
     function sortItems(items) {
         const sortType = sortSelect.value;
@@ -74,6 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadCatalog();
     loadHints();
+    loadYears();
 
     async function loadCatalog() {
         try {
@@ -92,32 +126,53 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error(error);
             content.innerHTML = `
-                <p class="error-message">
-                    Не удалось загрузить каталог.
-                </p>
-            `;
+<p class="error-message">
+    Не удалось загрузить каталог.
+</p>
+`;
         }
     }
 
-    async function loadHints() {
-        try {
-            const response = await fetch('/userSearchHints');
 
-            if (!response.ok) {
-                throw new Error('Не удалось загрузить подсказки');
-            }
 
-            const data = await response.json();
+async function loadHints() {
+    try {
+        const [hintsResponse, publishersResponse] = await Promise.all([
+            fetch('/userSearchHints'),
+            fetch('/loadDt/getPublishers')
+        ]);
 
-            fillHints(titleHints, data.titles);
-            fillHints(authorHints, data.authors);
-            fillHints(genreHints, data.genres);
-            fillHints(udcHints, data.udc);
-
-        } catch (error) {
-            console.error('Ошибка подсказок:', error);
+        if (!hintsResponse.ok) {
+            throw new Error('Не удалось загрузить подсказки');
         }
+
+        const data = await hintsResponse.json();
+
+        fillHints(titleHints, data.titles);
+        fillHints(authorHints, data.authors);
+        fillHints(genreHints, data.genres);
+        fillHints(udcHints, data.udc);
+
+        if (publishersResponse.ok) {
+            const publishers = await publishersResponse.json();
+
+            publisherHints.innerHTML = '';
+
+            publishers.forEach(publisher => {
+                if (!publisher.title_tj) {
+                    return;
+                }
+
+                const option = document.createElement('option');
+                option.value = publisher.title_tj;
+                publisherHints.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error('Ошибка подсказок:', error);
     }
+}
+
 
     function fillHints(list, values) {
         if (!list || !Array.isArray(values)) {
@@ -129,6 +184,28 @@ document.addEventListener('DOMContentLoaded', () => {
         values.forEach(item => {
             const option = document.createElement('option');
             option.value = item.value;
+            list.appendChild(option);
+        });
+    }
+
+    function fillCustomHints(list, values) {
+        if (!list || !Array.isArray(values)) {
+            return;
+        }
+
+        list.innerHTML = '';
+
+        const uniqueValues = [
+            ...new Set(
+                values
+                    .map(item => item.value)
+                    .filter(value => value && value.trim())
+            )
+        ];
+
+        uniqueValues.forEach(value => {
+            const option = document.createElement('option');
+            option.value = value;
             list.appendChild(option);
         });
     }
@@ -180,13 +257,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const card = document.createElement('article');
         card.className = 'book-card';
 
-const favoriteButton = document.createElement('button');
-favoriteButton.className = 'favorite-btn';
-favoriteButton.type = 'button';
-favoriteButton.textContent = '★';
-favoriteButton.title = 'Добавить в избранное';
+        const favoriteButton = document.createElement('button');
+        favoriteButton.className = 'favorite-btn';
+        favoriteButton.type = 'button';
+        favoriteButton.textContent = '★';
+        favoriteButton.title = 'Добавить в избранное';
 
-         fetch(`/favorite/${item.id}`)
+        fetch(`/favorite/${item.id}`)
             .then(response => {
                 if (!response.ok) {
                     return null;
@@ -202,143 +279,139 @@ favoriteButton.title = 'Добавить в избранное';
             })
             .catch(() => {});
 
+        if (item.favorite) {
+            favoriteButton.classList.add('active');
+        }
 
-if (item.favorite) {
-    favoriteButton.classList.add('active');
-}
+        favoriteButton.addEventListener('click', async event => {
+            event.stopPropagation();
 
-favoriteButton.addEventListener('click', async event => {
-    event.stopPropagation();
+            try {
+                const response = await fetch(`/favorite/${item.id}`, {
+                    method: 'POST'
+                });
 
-    try {
-        const response = await fetch(`/favorite/${item.id}`, {
-            method: 'POST'
+                const data = await response.json();
+
+                if (response.status === 401) {
+                    alert('Чтобы добавить книгу в избранное, войдите в аккаунт');
+                    return;
+                }
+
+                if (!response.ok || !data.success) {
+                    alert(data.message || 'Не удалось изменить избранное');
+                    return;
+                }
+
+                item.favorite = data.favorite;
+
+                favoriteButton.classList.toggle(
+                    'active',
+                    data.favorite
+                );
+
+                favoriteButton.title = data.favorite
+                    ? 'Убрать из избранного'
+                    : 'Добавить в избранное';
+
+            } catch (error) {
+                console.error('Ошибка избранного:', error);
+                alert('Не удалось подключиться к серверу');
+            }
         });
 
-        const data = await response.json();
+        const icon = document.createElement('div');
+        icon.className = 'book-card-icon';
+        icon.textContent =
+            Number(item.typeOf) === 0 ? '📚' : '📄';
 
-        if (response.status === 401) {
-            alert('Чтобы добавить книгу в избранное, войдите в аккаунт');
-            return;
+        const title = document.createElement('h3');
+        title.className = 'book-card-title';
+        title.textContent = item.title || 'Без названия';
+
+        const authors = document.createElement('p');
+        authors.className = 'book-card-info';
+        authors.innerHTML =
+            `<strong>Автор:</strong> ${escapeHtml(item.authors || 'Не указан')}`;
+
+        const genre = document.createElement('p');
+        genre.className = 'book-card-info';
+        genre.innerHTML =
+            `<strong>Жанр:</strong> ${escapeHtml(item.genre || 'Не указан')}`;
+
+        const udc = document.createElement('p');
+        udc.className = 'book-card-info';
+        udc.innerHTML =
+            `<strong>УДК:</strong> ${escapeHtml(item.udc || 'Не указан')}`;
+
+        const publisher = document.createElement('p');
+        publisher.className = 'book-card-info';
+        publisher.innerHTML =
+            `<strong>Издательство:</strong> ${escapeHtml(item.publisher || 'Не указано')}`;
+
+        const year = document.createElement('p');
+        year.className = 'book-card-info';
+        year.innerHTML =
+            `<strong>Год:</strong> ${formatYear(item.publishYear)}`;
+
+        const pages = document.createElement('p');
+        pages.className = 'book-card-info';
+        pages.innerHTML =
+            `<strong>Страниц:</strong> ${item.pagesCount || '—'}`;
+
+        const buttons = document.createElement('div');
+        buttons.className = 'card-buttons';
+
+        const readButton = document.createElement('button');
+        readButton.className = 'read-book-btn';
+        readButton.type = 'button';
+        readButton.textContent = '📖 Читать';
+
+        const downloadButton = document.createElement('button');
+        downloadButton.className = 'download-book-btn';
+        downloadButton.type = 'button';
+        downloadButton.textContent = '⬇ Скачать';
+
+        if (item.filePath) {
+            readButton.addEventListener('click', () => {
+                window.open(
+                    `/uploads/${encodeURIComponent(item.filePath)}`,
+                    '_blank'
+                );
+            });
+
+            downloadButton.addEventListener('click', () => {
+                const link = document.createElement('a');
+                link.href = `/download/${encodeURIComponent(item.filePath)}`;
+                link.download = item.filePath;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+            });
+        } else {
+            readButton.disabled = true;
+            readButton.textContent = 'Файл отсутствует';
+
+            downloadButton.disabled = true;
+            downloadButton.textContent = 'Файл отсутствует';
         }
 
-        if (!response.ok || !data.success) {
-            alert(data.message || 'Не удалось изменить избранное');
-            return;
-        }
+        buttons.appendChild(readButton);
+        buttons.appendChild(downloadButton);
 
-        item.favorite = data.favorite;
+        card.appendChild(favoriteButton);
+        card.appendChild(icon);
+        card.appendChild(title);
+        card.appendChild(authors);
+        card.appendChild(genre);
+        card.appendChild(udc);
+        card.appendChild(publisher);
+        card.appendChild(year);
+        card.appendChild(pages);
+        card.appendChild(buttons);
 
-        favoriteButton.classList.toggle(
-            'active',
-            data.favorite
-        );
-
-        favoriteButton.title = data.favorite
-            ? 'Убрать из избранного'
-            : 'Добавить в избранное';
-
-    } catch (error) {
-        console.error('Ошибка избранного:', error);
-        alert('Не удалось подключиться к серверу');
+        return card;
     }
-});
-
-const icon = document.createElement('div');
-icon.className = 'book-card-icon';
-icon.textContent =
-    Number(item.typeOf) === 0 ? '📚' : '📄';
-
-const title = document.createElement('h3');
-title.className = 'book-card-title';
-title.textContent = item.title || 'Без названия';
-
-const authors = document.createElement('p');
-authors.className = 'book-card-info';
-authors.innerHTML =
-    `<strong>Автор:</strong> ${escapeHtml(item.authors || 'Не указан')}`;
-
-const genre = document.createElement('p');
-genre.className = 'book-card-info';
-genre.innerHTML =
-    `<strong>Жанр:</strong> ${escapeHtml(item.genre || 'Не указан')}`;
-
-const udc = document.createElement('p');
-udc.className = 'book-card-info';
-udc.innerHTML =
-    `<strong>УДК:</strong> ${escapeHtml(item.udc || 'Не указан')}`;
-
-const publisher = document.createElement('p');
-publisher.className = 'book-card-info';
-publisher.innerHTML =
-    `<strong>Издательство:</strong> ${escapeHtml(item.publisher || 'Не указано')}`;
-
-const year = document.createElement('p');
-year.className = 'book-card-info';
-year.innerHTML =
-    `<strong>Год:</strong> ${formatYear(item.publishYear)}`;
-
-const pages = document.createElement('p');
-pages.className = 'book-card-info';
-pages.innerHTML =
-    `<strong>Страниц:</strong> ${item.pagesCount || '—'}`;
-
-const buttons = document.createElement('div');
-buttons.className = 'card-buttons';
-
-const readButton = document.createElement('button');
-readButton.className = 'read-book-btn';
-readButton.type = 'button';
-readButton.textContent = '📖 Читать';
-
-const downloadButton = document.createElement('button');
-downloadButton.className = 'download-book-btn';
-downloadButton.type = 'button';
-downloadButton.textContent = '⬇ Скачать';
-
-if (item.filePath) {
-    readButton.addEventListener('click', () => {
-        window.open(
-            `/uploads/${encodeURIComponent(item.filePath)}`,
-            '_blank'
-        );
-    });
-
-    downloadButton.addEventListener('click', () => {
-        const link = document.createElement('a');
-        link.href = `/download/${encodeURIComponent(item.filePath)}`;
-        link.download = item.filePath;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-    });
-} else {
-    readButton.disabled = true;
-    readButton.textContent = 'Файл отсутствует';
-
-    downloadButton.disabled = true;
-    downloadButton.textContent = 'Файл отсутствует';
-}
-
-buttons.appendChild(readButton);
-buttons.appendChild(downloadButton);
-
-card.appendChild(favoriteButton);
-card.appendChild(icon);
-card.appendChild(title);
-card.appendChild(authors);
-card.appendChild(genre);
-card.appendChild(udc);
-card.appendChild(publisher);
-card.appendChild(year);
-card.appendChild(pages);
-card.appendChild(buttons);
-
-return card;
-
-
-    }
-
 
     function formatYear(value) {
         if (!value) {
@@ -365,8 +438,10 @@ return card;
         const author = authorSearch.value.trim();
         const genre = genreSearch.value.trim();
         const udc = udcSearch.value.trim();
+        const year = yearSearch ? yearSearch.value.trim() : '';
+        const publisher = publisherSearch ? publisherSearch.value.trim() : '';
 
-        if (!title && !author && !genre && !udc) {
+        if (!title && !author && !genre && !udc && !year && !publisher) {
             renderItems(allItems);
             return;
         }
@@ -392,6 +467,14 @@ return card;
                 params.set('udc', udc);
             }
 
+            if (year) {
+                params.set('year', year);
+            }
+
+            if (publisher) {
+                params.set('publisher', publisher);
+            }
+
             const response = await fetch(
                 `/userSearch?${params.toString()}`
             );
@@ -408,10 +491,10 @@ return card;
             console.error(error);
 
             content.innerHTML = `
-                <p class="error-message">
-                    Ошибка при выполнении поиска.
-                </p>
-            `;
+    <p class="error-message">
+    Ошибка при выполнении поиска.
+</p>
+`;
         }
     }
 
@@ -436,6 +519,14 @@ return card;
         genreSearch.value = '';
         udcSearch.value = '';
 
+        if (yearSearch) {
+            yearSearch.value = '';
+        }
+
+        if (publisherSearch) {
+            publisherSearch.value = '';
+        }
+
         renderItems(allItems);
     });
 
@@ -444,8 +535,10 @@ return card;
         const author = authorSearch.value.trim();
         const genre = genreSearch.value.trim();
         const udc = udcSearch.value.trim();
+        const year = yearSearch ? yearSearch.value.trim() : '';
+        const publisher = publisherSearch ? publisherSearch.value.trim() : '';
 
-        if (!title && !author && !genre && !udc) {
+        if (!title && !author && !genre && !udc && !year && !publisher) {
             renderItems(allItems);
         } else {
             performSearch();

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="tj">
 <head>
@@ -6,53 +7,89 @@
     <title>Добавить автора</title>
     <link rel="stylesheet" href="/css/Forms_Style.css">
 </head>
-
 <body>
 <script src="/js/getCities.js" type="text/javascript"></script>
 <script src="/js/getLSItem.js" type="text/javascript"></script>
 <div class="form-container">
     <h2>Добавить</h2>
-    <form action="/addAuthor" method="post">
+    <form id="addAuthorForm" action="/addAuthor" method="post">
         <div class="form-group">
             <label for="keyInput">ФИО:</label>
             <input type="text" id="keyInput" name="authorsName" required>
             <p id="keyOutput" style="margin-top: 15px;"></p>
         </div>
-
         <div class="form-group">
             <label for="birthDate">Дата рождения:</label>
             <input type="date" id="birthDate" name="birthDate" required>
         </div>
-
         <div class="form-group">
             <label for="phoneNumber">Номер телефона:</label>
             <input type="text" id="phoneNumber" name="phoneNum" required>
         </div>
-
         <div>
-            <label for="city_List"> Город/Страна </label>
+            <label for="city_List">Город/Страна</label>
             <select id="city_List" name="selCity" required>
                 <option value="">Выбирите город/страну</option>
             </select>
         </div>
-
         <div class="form-group">
             <label for="address">Аддресс</label>
             <input type="text" id="address" name="address" required>
         </div>
         <div class="form-group">
-            <button type="submit" >Подтвердить</button>
+            <button type="submit">Подтвердить</button>
         </div>
-
         <div class="form-group">
             <button type="button" onclick="window.parent.closeIframe(getFrmId())">
                 Назад
             </button>
         </div>
-
-</form>
-
+    </form>
 </div>
+<script>
+    const addAuthorForm = document.getElementById("addAuthorForm");
 
+    addAuthorForm.addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        try {
+            const response = await fetch("/addAuthor", {
+                method: "POST",
+                body: new FormData(this)
+            });
+
+            const text = await response.text();
+
+            if (!response.ok) {
+                throw new Error(text || "Ошибка добавления автора");
+            }
+
+            this.reset();
+
+            const cityList = document.getElementById("city_List");
+            if (cityList) {
+                cityList.value = "";
+            }
+
+            const keyOutput = document.getElementById("keyOutput");
+            if (keyOutput) {
+                keyOutput.textContent = "";
+            }
+
+            if (window.parent && typeof window.parent.loadForKey === "function") {
+                await window.parent.loadForKey("authors");
+            }
+
+            const frame = window.parent.document.getElementById("mIframe2");
+            if (frame) {
+                frame.style.display = "block";
+            }
+        } catch (error) {
+            console.error("Ошибка добавления автора:", error);
+            alert(error.message);
+        }
+    });
+</script>
 </body>
 </html>
+

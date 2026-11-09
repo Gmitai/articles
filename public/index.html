@@ -22,7 +22,7 @@
 
             <div class="actions" id="add_content">
                 <button id="homeBtn" type="button">Главная</button>
-                <button id="add" onclick="showForm(getFrmId())">Добавить</button>
+                <button id="add" type="button">Добавить</button>
             </div>
         </div>
 
@@ -40,6 +40,8 @@
     <iframe src="/editArticle.html" class="modal-iframe4" id="meIframe1"></iframe>
     <iframe src="/editAuthors.html" class="modal-iframe5" id="meIframe2"></iframe>
     <iframe src="/editPublisher.html" class="modal-iframe6" id="meIframe3"></iframe>
+    <iframe src="/directionForm.html" class="modal-iframe" id="mIframe4"></iframe>
+    <iframe src="/directionForm.html" class="modal-iframe4" id="meIframe4"></iframe>
 </div>
 
 <script src="/js/getDirections.js" type="text/javascript" defer></script>
@@ -54,6 +56,28 @@
 <script>
     document.getElementById('homeBtn').addEventListener('click', () => {
         window.location.href = '/';
+    });
+</script>
+
+<script>
+    document.getElementById('add').addEventListener('click', () => {
+        const active = document.querySelector('.nav button.active');
+        if (!active) return;
+
+        const key = active.dataset.key;
+
+        const formIds = {
+            articles: 0,
+            books: 0,
+            authors: 1,
+            publishers: 2,
+            directions: 4,
+            genres: 4
+        };
+
+        if (formIds[key] === undefined) return;
+
+        showForm(formIds[key]);
     });
 </script>
 </body>

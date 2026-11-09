@@ -145,13 +145,24 @@ router.get('/publishers', async (req, res) => {
 
 //Классификаторы
 router.get('/directions', async (req, res) => {
-    const [result] = await connection.execute("SELECT title_ru as 'Направление', udc as 'УДК' FROM directions order by udc");
     try {
-        selected_menuId=4;
+        const [result] = await connection.execute(`
+            SELECT
+                id,
+                title_ru AS 'Направление',
+                udc AS 'УДК'
+            FROM directions
+            ORDER BY udc
+        `);
+
+        selected_menuId = 4;
+
         res.send([result, selected_menuId]);
-    }
-    catch (err) {
+    } catch (err) {
         console.log(err);
+        res.status(500).json({
+            error: 'Ошибка загрузки классификаторов'
+        });
     }
 });
 
@@ -214,6 +225,7 @@ router.get('/download/:filename' , (req, res) => {
 
 //-----------POST------------
 
+
 router.post('/addArticle', urlencodedParser, async (req, res) => {
     const title = req.body.aricleName;
     const pageCount = req.body.pCount;
@@ -229,7 +241,7 @@ router.post('/addArticle', urlencodedParser, async (req, res) => {
         );
 
         if (result.length > 0) {
-            return res.send("Такая статья уже существует в БМ!");
+            return res.status(400).send("Такая статья уже существует в БМ!");
         }
 
         const files = Array.isArray(req.files) ? req.files : [];
@@ -238,7 +250,7 @@ router.post('/addArticle', urlencodedParser, async (req, res) => {
         const coverdata = files.find(file => file.fieldname === 'coverImage');
 
         if (!filedata) {
-            return res.send("Ошибка при загрузке файла");
+            return res.status(400).send("Ошибка при загрузке файла");
         }
 
         if (coverdata) {
@@ -249,15 +261,15 @@ router.post('/addArticle', urlencodedParser, async (req, res) => {
             ];
 
             if (!allowedTypes.includes(coverdata.mimetype)) {
-                return res.send("Неверный формат обложки");
+                return res.status(400).send("Неверный формат обложки");
             }
         }
 
         const sql = `
-            INSERT INTO articles
-            (title_tj, pagesCount, publishYear, directionId, publisherId, typeOf, filePath, coverPath)
-            VALUES (?,?,?,?,?,?,?,?)
-        `;
+INSERT INTO articles
+(title_tj, pagesCount, publishYear, directionId, publisherId, typeOf, filePath, coverPath)
+VALUES (?,?,?,?,?,?,?,?)
+    `;
 
         const [insertResult] = await connection.query(sql, [
             title,
@@ -286,15 +298,14 @@ router.post('/addArticle', urlencodedParser, async (req, res) => {
             );
         }
 
-        return res.sendFile(
-            path.join(__dirname, '..', 'Public', 'addArticle.html')
-        );
-
+        return res.status(200).send("Статья успешно добавлена!");
     } catch (err) {
         console.log(err);
         return res.status(500).send("Server error");
     }
 });
+
+
 
 router.post('/updateArticle', urlencodedParser, async (req, res) => {
     const id = req.body.rowId;
@@ -449,35 +460,47 @@ router.post('/updateAuthor', express.json(), async (req, res) => {
 });
 
 router.post('/addAuthor', urlencodedParser, async (req, res) => {
-    const fullName = req.body.authorsName.split(' ');
-    const birthDate=req.body.birthDate;
-    const phoneNumber=req.body.phoneNum;
-    const selCity=req.body.selCity;
-    const address=req.body.address;
-    const lastName=fullName[0].charAt(0).toUpperCase() + fullName[0].substring(1).toLowerCase();
-    const firstName=fullName[1].charAt(0).toUpperCase() + fullName[1].substring(1).toLowerCase();
-    let familyName=null;
-    if (fullName.length>2) {
-        familyName=fullName[2].charAt(0).toUpperCase() + fullName[2].substring(1).toLowerCase();
-    }
+    try {
+        const fullName = req.body.authorsName.trim().split(/\s+/);
 
-    const [result] = await connection.query(`SELECT * FROM authors WHERE firstName = '${firstName}' AND lastName='${lastName}'`);
-    try{
-        if(result.length > 0){
-            res.sendFile(path.join(__dirname, '..', 'Public', 'addAuthors.html'));
+        if (fullName.length < 2) {
+            return res.status(400).send("Введите имя и фамилию автора");
         }
-        else {
-            const sql="Insert into authors (firstName, lastName, familyName, birthDate, mobilePhone, cityId, address) VALUES (?,?,?,?,?,?,?)";
-            connection.query(sql, [firstName, lastName, familyName, birthDate, phoneNumber, selCity, address], (err, result) => {
-                if (err) {console.log(err)}
-            });
-            res.sendFile(path.join(__dirname, '..', 'Public', 'addAuthors.html'));
+
+        const birthDate = req.body.birthDate;
+        const phoneNumber = req.body.phoneNum;
+        const selCity = req.body.selCity;
+        const address = req.body.address;
+
+        const lastName = fullName[0].charAt(0).toUpperCase() + fullName[0].substring(1).toLowerCase();
+        const firstName = fullName[1].charAt(0).toUpperCase() + fullName[1].substring(1).toLowerCase();
+
+        let familyName = null;
+
+        if (fullName.length > 2) {
+            familyName = fullName[2].charAt(0).toUpperCase() + fullName[2].substring(1).toLowerCase();
         }
-    }catch (err) {
-        console.log(err);
-        return res.status(500).send("Server error");
+
+        const [existing] = await connection.query(
+            "SELECT id FROM authors WHERE firstName = ? AND lastName = ?",
+            [firstName, lastName]
+        );
+
+        if (existing.length > 0) {
+            return res.status(400).send("Такой автор уже существует");
+        }
+
+        await connection.query(
+            "INSERT INTO authors (firstName, lastName, familyName, birthDate, mobilePhone, cityId, address) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            [firstName, lastName, familyName, birthDate, phoneNumber, selCity, address]
+        );
+
+        return res.status(200).send("Автор успешно добавлен");
+    } catch (err) {
+        console.error(err);
+        return res.status(500).send("Ошибка сервера");
     }
-})
+});
 
 router.post('/addPublisher', urlencodedParser, async (req, res) => {
     const publisher = req.body.publisherName;
@@ -607,6 +630,8 @@ router.get('/userSearch', async (req, res) => {
     const author = (req.query.author || '').trim();
     const genre = (req.query.genre || '').trim();
     const udc = (req.query.udc || '').trim();
+    const year = (req.query.year || '').trim();
+    const publisher = (req.query.publisher || '').trim();
 
     try {
         const conditions = [];
@@ -656,6 +681,20 @@ router.get('/userSearch', async (req, res) => {
             params.push(udc);
         }
 
+
+         if (year) {
+             if (/^\d{4}$/.test(year)) {
+                 conditions.push('YEAR(a.publishYear) = ?');
+                 params.push(Number(year));
+             }
+         }
+
+
+
+        if (publisher) {
+            conditions.push('LOWER(p.title_tj) LIKE LOWER(?)');
+            params.push(`%${publisher}%`);
+        }
         let sql = `
             SELECT
                 a.id,
@@ -743,6 +782,41 @@ async function getCurrentUserId(req) {
     return rows[0].id;
 }
 
+
+router.get('/userSearchYears', async (req, res) => {
+    try {
+        const [rows] = await connection.execute(`
+SELECT
+MIN(YEAR(publishYear)) AS minYear,
+    MAX(YEAR(publishYear)) AS maxYear
+FROM articles
+WHERE publishYear IS NOT NULL
+    `);
+
+        const minYear = rows[0]?.minYear;
+        const maxYear = rows[0]?.maxYear;
+
+        if (!minYear || !maxYear) {
+            return res.json([]);
+        }
+
+        const years = [];
+
+        for (let year = Number(maxYear); year >= Number(minYear); year--) {
+            years.push(year);
+        }
+
+        res.json(years);
+    } catch (err) {
+        console.error('userSearchYears error:', err);
+        res.status(500).json({
+            error: 'Ошибка загрузки годов'
+        });
+    }
+});
+
+
+
 router.get('/favorites', async (req, res) => {
     try {
         const userId = await getCurrentUserId(req);
@@ -769,7 +843,7 @@ router.get('/favorites', async (req, res) => {
                     IFNULL(d.title_ru, '')
                 ) AS udc,
                 IFNULL(g.name, '') AS genre,
-                IFNULL(p.title_tj, '') AS publisher,
+                IFNULL(p.ti+++tle_tj, '') AS publisher,
                 GROUP_CONCAT(
                     DISTINCT CONCAT(
                         ath.lastName,
@@ -921,6 +995,231 @@ router.post('/favorite/:articleId', async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Ошибка изменения избранного'
+        });
+    }
+});
+
+router.get('/loadDt/getPublisherById', async (req, res) => {
+    const id = Number(req.query.id);
+
+    if (!id) {
+        return res.status(400).json({
+            error: 'Некорректный ID издательства'
+        });
+    }
+
+    try {
+        const [rows] = await connection.execute(
+            `SELECT id, title_tj, cityId, address
+             FROM publishers
+             WHERE id = ?
+             LIMIT 1`,
+            [id]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({
+                error: 'Издательство не найдено'
+            });
+        }
+
+        res.json(rows[0]);
+    } catch (err) {
+        console.error('getPublisherById error:', err);
+        res.status(500).json({
+            error: 'Ошибка загрузки издательства'
+        });
+    }
+});
+
+router.post('/updatePublisher', express.json(), async (req, res) => {
+    const {
+        rowId,
+        publisherName,
+        selCity,
+        address
+    } = req.body;
+
+    try {
+        const [result] = await connection.execute(
+            `UPDATE publishers
+             SET title_tj = ?, cityId = ?, address = ?
+             WHERE id = ?`,
+            [
+                publisherName,
+                selCity || null,
+                address || null,
+                rowId
+            ]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                message: 'Издательство не найдено'
+            });
+        }
+
+        res.json({
+            message: 'Издательство успешно обновлено!'
+        });
+    } catch (err) {
+        console.error('UPDATE PUBLISHER ERROR:', err);
+        res.status(500).json({
+            message: 'Ошибка обновления издательства',
+            error: err.message
+        });
+    }
+});
+
+router.get('/loadDt/getDirectionById', async (req, res) => {
+    const id = Number(req.query.id);
+
+    if (!id) {
+        return res.status(400).json({
+            error: 'Некорректный ID классификатора'
+        });
+    }
+
+    try {
+        const [rows] = await connection.execute(
+            `SELECT id, title_ru, udc, parentId
+             FROM directions
+             WHERE id = ?
+             LIMIT 1`,
+            [id]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({
+                error: 'Классификатор не найден'
+            });
+        }
+
+        res.json(rows[0]);
+    } catch (err) {
+        console.error('getDirectionById error:', err);
+
+        res.status(500).json({
+            error: 'Ошибка загрузки классификатора'
+        });
+    }
+});
+
+router.post('/addDirection', express.json(), async (req, res) => {
+    const {
+        title,
+        udc,
+        parentId
+    } = req.body;
+
+    if (!title || !udc) {
+        return res.status(400).json({
+            message: 'Заполните название и УДК'
+        });
+    }
+
+    try {
+        const [existing] = await connection.execute(
+            `SELECT id
+             FROM directions
+             WHERE udc = ?
+             LIMIT 1`,
+            [udc]
+        );
+
+        if (existing.length > 0) {
+            return res.status(409).json({
+                message: 'Классификатор с таким УДК уже существует'
+            });
+        }
+
+        await connection.execute(
+            `INSERT INTO directions
+             (title_ru, udc, parentId)
+             VALUES (?, ?, ?)`,
+            [
+                title,
+                udc,
+                parentId || null
+            ]
+        );
+
+        res.json({
+            message: 'Классификатор успешно добавлен!'
+        });
+    } catch (err) {
+        console.error('ADD DIRECTION ERROR:', err);
+
+        res.status(500).json({
+            message: 'Ошибка добавления классификатора',
+            error: err.message
+        });
+    }
+});
+
+router.post('/updateDirection', express.json(), async (req, res) => {
+    const {
+        rowId,
+        title,
+        udc,
+        parentId
+    } = req.body;
+
+    if (!rowId || !title || !udc) {
+        return res.status(400).json({
+            message: 'Необходимо заполнить все обязательные поля'
+        });
+    }
+
+    try {
+        const [existing] = await connection.execute(
+            `SELECT id
+             FROM directions
+             WHERE udc = ?
+             AND id <> ?
+             LIMIT 1`,
+            [udc, rowId]
+        );
+
+        if (existing.length > 0) {
+            return res.status(409).json({
+                message: 'Другой классификатор уже использует этот УДК'
+            });
+        }
+
+        if (Number(parentId) === Number(rowId)) {
+            return res.status(400).json({
+                message: 'Классификатор не может быть родителем самого себя'
+            });
+        }
+
+        const [result] = await connection.execute(
+            `UPDATE directions
+             SET title_ru = ?, udc = ?, parentId = ?
+             WHERE id = ?`,
+            [
+                title,
+                udc,
+                parentId || null,
+                rowId
+            ]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                message: 'Классификатор не найден'
+            });
+        }
+
+        res.json({
+            message: 'Классификатор успешно обновлён!'
+        });
+    } catch (err) {
+        console.error('UPDATE DIRECTION ERROR:', err);
+
+        res.status(500).json({
+            message: 'Ошибка обновления классификатора',
+            error: err.message
         });
     }
 });
