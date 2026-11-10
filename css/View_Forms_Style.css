@@ -214,6 +214,46 @@ button:hover {
     display: none;
 }
 
+.udc-select-row {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+}
+
+.udc-code-input {
+    box-sizing: border-box;
+    flex: 1 1 auto;
+    width: 0;
+    min-width: 0;
+    height: 42px;
+    padding: 9px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+    font-size: 14px;
+}
+
+.udc-code-input:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+.tree-button.udc-tree-toggle {
+    box-sizing: border-box;
+    flex: 0 0 46px;
+    width: 46px;
+    height: 42px;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    font-weight: 600;
+}
+
+.tree-select-container > label[for="udcSearchInput"] {
+    display: block;
+    margin-bottom: 6px;
+}
+
 .tree-wrapper {
     max-height: 300px;
     overflow-y: auto;

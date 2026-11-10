@@ -66,17 +66,24 @@ function submitAuthorForm() {
             address
         })
     })
-        .then(res => res.json())
+        .then(async res => {
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.message || 'Не удалось обновить автора.');
+            return result;
+        })
         .then(resp => {
             alert(resp.message || "Автор обновлен!");
 
-            if (window.parent && window.parent.loadForKey) {
-                window.parent.loadForKey('authors');
+            if (typeof window.notifyAdminFormSaved === 'function') {
+                window.notifyAdminFormSaved();
+            } else {
+                window.parent.closeIframe(1);
             }
-
-            window.parent.closeIframe(1);
         })
-        .catch(err => console.error(err));
+        .catch(err => {
+            console.error(err);
+            alert(err.message || 'Не удалось обновить автора.');
+        });
 }
 
 function refreshAuthorForm() {

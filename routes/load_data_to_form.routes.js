@@ -56,7 +56,7 @@ router.get('/getArticleById', async (req, res) => {
 });
 
 router.get('/getAuthors', async (req, res) => {
-    const [result] = await connection.execute("SELECT id, CONCAT(lastName, ' ', firstName) AS lastName FROM authors");
+    const [result] = await connection.execute("SELECT id, firstName, lastName, familyName, CONCAT_WS(' ', lastName, firstName, NULLIF(familyName, '')) AS fullName FROM authors ORDER BY lastName, firstName");
     try {
         res.send(result);
     } catch (err) {
@@ -81,7 +81,7 @@ router.get('/getAuthorById', async (req, res) => {
 });
 
 router.get('/getDirections', async (req, res) => {
-    const [result] = await connection.execute("SELECT id, parentId, CONCAT(udc,' ', title_ru) AS name FROM directions");
+    const [result] = await connection.execute("SELECT id, parentId, udc, title_ru, CONCAT_WS(' ', udc, NULLIF(title_ru, '')) AS name FROM directions");
     try {
         res.send(result);
     } catch (err) {

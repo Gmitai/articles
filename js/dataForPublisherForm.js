@@ -48,17 +48,24 @@ function submitPublisherForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ rowId, publisherName, selCity, address })
     })
-        .then(res => res.json())
+        .then(async res => {
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.message || 'Не удалось обновить издательство.');
+            return result;
+        })
         .then(resp => {
             alert(resp.message || "Редакция обновлена!");
 
-            if (window.parent && window.parent.loadForKey) {
-                window.parent.loadForKey('publishers');
+            if (typeof window.notifyAdminFormSaved === 'function') {
+                window.notifyAdminFormSaved();
+            } else {
+                window.parent.closeIframe(2);
             }
-
-            window.parent.closeIframe(2);
         })
-        .catch(err => console.error(err));
+        .catch(err => {
+            console.error(err);
+            alert(err.message || 'Не удалось обновить издательство.');
+        });
 }
 
 

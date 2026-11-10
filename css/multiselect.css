@@ -27,3 +27,118 @@
     display: block;
     cursor: pointer;
 }
+
+.author-select-container {
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.author-select-container > label {
+    display: block;
+    margin-bottom: 6px;
+}
+
+.author-select-row {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+}
+
+.author-search-input {
+    box-sizing: border-box;
+    flex: 1 1 auto;
+    width: 0;
+    min-width: 0;
+    height: 42px;
+    padding: 9px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+    font-size: 14px;
+}
+
+.author-list-toggle.tree-button {
+    box-sizing: border-box;
+    flex: 0 0 46px;
+    width: 46px;
+    height: 42px;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+.author-select-container .selected-values {
+    box-sizing: border-box;
+    width: 100%;
+    margin-top: 6px;
+    border-radius: 6px;
+    cursor: default;
+}
+
+.author-select-container .dropdown {
+    box-sizing: border-box;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    max-height: 260px;
+    overflow-y: auto;
+}
+
+.publisher-select-container {
+    position: relative;
+    width: 100%;
+}
+
+.publisher-select-container > label {
+    display: block;
+    margin-bottom: 6px;
+}
+
+.publisher-select-row {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+}
+
+.publisher-list-toggle.tree-button {
+    box-sizing: border-box;
+    flex: 0 0 46px;
+    width: 46px;
+    height: 42px;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+.publisher-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    max-height: 260px;
+    overflow-y: auto;
+    margin-top: 4px;
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, .12);
+}
+
+.publisher-option {
+    display: block;
+    width: 100%;
+    padding: 8px 10px;
+    border: 0;
+    background: #fff;
+    color: #333;
+    text-align: left;
+    cursor: pointer;
+}
+
+.publisher-option:hover,
+.publisher-option.selected {
+    background: #eef3fb;
+    color: #222;
+}

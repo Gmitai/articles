@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const title = document.getElementById('addUserTitle');
     const passwordInput = document.getElementById('adminUserPassword');
     let editingUserId = null;
+    const pendingUserDeletes = new Set();
 
     function closeModal() {
         modal.hidden = true;
@@ -51,13 +52,21 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.deleteAdminUser = async (userId, userName) => {
+        const requestKey = String(userId);
+        if (pendingUserDeletes.has(requestKey)) return;
+        pendingUserDeletes.add(requestKey);
         if (!confirm(`Удалить пользователя «${userName}»? Это действие нельзя отменить.`)) {
+            pendingUserDeletes.delete(requestKey);
             return;
         }
         try {
             const response = await fetch(`/admin-api/users/${encodeURIComponent(userId)}`, {
                 method: 'DELETE'
             });
+            if (response.status === 404) {
+                if (typeof loadForKey === 'function') await loadForKey('users');
+                return;
+            }
             const result = await response.json();
             if (!response.ok || !result.success) {
                 throw new Error(result.message || 'Не удалось удалить пользователя');
@@ -65,6 +74,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (typeof loadForKey === 'function') loadForKey('users');
         } catch (error) {
             alert(error.message);
+        } finally {
+            pendingUserDeletes.delete(requestKey);
         }
     };
 

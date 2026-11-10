@@ -23,14 +23,20 @@
             <input type="text" id="title" name="aricleName" required>
         </div>
 
-        <div class="multiselect-container">
-            <div id="selected-values" class="selected-values">Выбирете автора (ов)</div>
-            <div class="dropdown" id="dropdown" aria-required="true"></div>
+        <div class="multiselect-container author-select-container">
+            <label for="authorSearchInput">Авторы</label>
+            <div class="author-select-row">
+                <input type="text" id="authorSearchInput" name="authorNames" class="author-search-input" list="authorSuggestions" placeholder="Введите ФИО через запятую" autocomplete="off">
+                <datalist id="authorSuggestions"></datalist>
+                <button type="button" id="authorToggleBtn" class="tree-button author-list-toggle" title="Открыть список авторов" aria-label="Открыть список авторов">☷</button>
+            </div>
+            <div id="selected-values" class="selected-values">Выберите из списка или введите ФИО</div>
+            <div class="dropdown" id="dropdown"></div>
         </div>
 
         <div class="form-group">
-            <label for="fileUpload">Файл (PDF):</label>
-            <input type="file" id="fileUpload" accept="application/pdf" name="fileData">
+            <label for="fileUpload">Файл (PDF, Word или DjVu):</label>
+            <input type="file" id="fileUpload" accept="application/pdf,.pdf,.doc,.docx,.djvu,.djv,image/jpeg,.jpg,.jpeg,image/png,.png" name="fileData">
         </div>
 
         <div class="form-group">
@@ -44,10 +50,12 @@
         </div>
 
         <div class="tree-select-container">
-
-            <button type="button" id="treeToggleBtn" class="tree-button">
-                Направление
-            </button>
+            <label for="udcSearchInput">Направление (УДК)</label>
+            <div class="udc-select-row">
+                <input type="text" id="udcSearchInput" name="udcCode" class="udc-code-input" list="udcSuggestions" placeholder="Введите код УДК" autocomplete="off">
+                <datalist id="udcSuggestions"></datalist>
+                <button type="button" id="treeToggleBtn" class="tree-button udc-tree-toggle" title="Открыть список УДК" aria-label="Открыть список УДК">УДК</button>
+            </div>
 
             <div id="treeDropdown" class="tree-dropdown hidden">
                 <ul id="treeUDC" class="tree"></ul>
@@ -55,12 +63,18 @@
 
         </div>
 
-        <div class="form-group">
-            <label for="PublisherList">Издательсто</label>
-            <select id="PublisherList" name="selPublisher" required>
-                <option value="">Выбирите издательство</option>
-            </select>
+        <div class="publisher-select-container">
+            <label for="publisherSearchInput">Издательство</label>
+            <div class="publisher-select-row">
+                <input type="text" id="publisherSearchInput" name="publisherName" class="author-search-input" list="publisherSuggestions" placeholder="Введите название издательства" autocomplete="off" required>
+                <datalist id="publisherSuggestions"></datalist>
+                <input type="hidden" id="PublisherList" name="selPublisher" value="">
+                <button type="button" id="publisherToggleBtn" class="tree-button publisher-list-toggle" title="Открыть список издательств" aria-label="Открыть список издательств">☷</button>
+            </div>
+            <div id="publisherDropdown" class="publisher-dropdown hidden" role="listbox"></div>
         </div>
+
+
 
         <div class="form-group">
             <button type="submit">Подтвердить</button>
@@ -79,5 +93,6 @@
 <script src="/js/multiselect.js" defer></script>
 <script src="/js/dataForArticleForm.js" defer></script>
 <script src="/js/getLSItem.js" type="text/javascript" defer></script>
+<script src="/js/admin-form-bridge.js" defer></script>
 </body>
 </html>

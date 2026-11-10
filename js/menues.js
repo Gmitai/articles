@@ -34,8 +34,8 @@ function humanizeKey(key) {
     const map = {
         articles: 'Стаьи',
         authors: 'Авторы',
-        publishers: 'Изтательства',
-        directions: 'Классификаторы',
+        publishers: 'Издательства',
+        directions: 'УДК',
         genres: 'Жанры',
         users: 'Пользователи',
         books: 'Книги'
@@ -100,7 +100,7 @@ function renderTable(key, rows) {
         th.textContent = key === 'genres' && c === 'genreName' ? 'Жанр' : c;
         headerRow.appendChild(th);
     });
-    if (key === 'users' || key === 'genres') {
+    if (['articles', 'books', 'authors', 'publishers', 'directions', 'users', 'genres'].includes(key)) {
         const actionsHeader = document.createElement('th');
         actionsHeader.className = 'admin-actions-column';
         actionsHeader.textContent = 'Действия';
@@ -158,7 +158,14 @@ function renderTable(key, rows) {
             const deleteButton = document.createElement('button');
             deleteButton.type = 'button';
             deleteButton.className = 'admin-user-delete-button';
-            deleteButton.textContent = 'Удалить';
+            deleteButton.title = 'Удалить';
+            deleteButton.setAttribute('aria-label', 'Удалить');
+            const deleteIcon = document.createElement('img');
+            deleteIcon.src = '/icons/Delete.png';
+            deleteIcon.alt = '';
+            deleteIcon.width = 24;
+            deleteIcon.height = 24;
+            deleteButton.appendChild(deleteIcon);
             deleteButton.addEventListener('click', () => {
                 if (key === 'users' && typeof window.deleteAdminUser === 'function') {
                     window.deleteAdminUser(r.id, r['Логин'] || r.id);
@@ -169,31 +176,52 @@ function renderTable(key, rows) {
             actions.appendChild(deleteButton);
             editCell.appendChild(actions);
             tr.appendChild(editCell);
-        }
+        } else if (['articles', 'books', 'authors', 'publishers', 'directions'].includes(key)) {
+            const actionCell = document.createElement('td');
+            actionCell.className = 'admin-actions-column';
+            const actions = document.createElement('div');
+            actions.className = 'admin-user-actions';
 
-        if (frmId === 0 || frmId === 1 || frmId === 2 || frmId === 4) {
-            const tdNew = document.createElement('td');
-            const button = document.createElement('button');
-            button.appendChild(img);
-            button.setAttribute('id', 'edit');
-            button.addEventListener('click', () => {
-                showForm(getFrmId(), r['id'])
+            const editButton = document.createElement('button');
+            editButton.type = 'button';
+            editButton.className = 'admin-user-edit-button';
+            editButton.title = 'Редактировать';
+            editButton.appendChild(img);
+            editButton.addEventListener('click', () => showForm(getFrmId(), r.id));
+            actions.appendChild(editButton);
 
+            if ((key === 'articles' || key === 'books') && frmId === 0) {
+                const downloadButton = document.createElement('button');
+                downloadButton.type = 'button';
+                downloadButton.className = 'admin-user-edit-button';
+                downloadButton.title = 'Скачать файл';
+                downloadButton.appendChild(img2);
+                downloadButton.addEventListener('click', () => getFileName(r.id));
+                actions.appendChild(downloadButton);
+            }
+
+            const deleteButton = document.createElement('button');
+            deleteButton.type = 'button';
+            deleteButton.className = 'admin-user-delete-button';
+            deleteButton.title = 'Удалить';
+            deleteButton.setAttribute('aria-label', 'Удалить');
+            const deleteIcon = document.createElement('img');
+            deleteIcon.src = '/icons/Delete.png';
+            deleteIcon.alt = '';
+            deleteIcon.width = 24;
+            deleteIcon.height = 24;
+            deleteButton.appendChild(deleteIcon);
+            deleteButton.addEventListener('click', () => {
+                const labelColumn = cols.find(column => column !== 'id');
+                const displayName = labelColumn ? r[labelColumn] : r.id;
+                if (typeof window.deleteCatalogRecord === 'function') {
+                    window.deleteCatalogRecord(key, r.id, displayName);
+                }
             });
-            tdNew.appendChild(button);
-            tr.appendChild(tdNew);
-        }
+            actions.appendChild(deleteButton);
 
-        if (frmId === 0) {
-            const td2 = document.createElement('td');
-            const button1 = document.createElement('button');
-            button1.appendChild(img2);
-            button1.setAttribute('id', 'loading');
-            button1.addEventListener('click', () => {
-                getFileName(r['id'])
-            });
-            td2.appendChild(button1);
-            tr.appendChild(td2);
+            actionCell.appendChild(actions);
+            tr.appendChild(actionCell);
         }
 
         tbody.appendChild(tr);

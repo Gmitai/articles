@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const title = document.getElementById('genreModalTitle');
     const saveButton = document.getElementById('saveGenreButton');
     let editingGenreId = null;
+    const pendingGenreDeletes = new Set();
 
     function closeModal() {
         modal.hidden = true;
@@ -42,11 +43,21 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.deleteAdminGenre = async (genreId, genreName) => {
-        if (!confirm(`Удалить жанр «${genreName}»?`)) return;
+        const requestKey = String(genreId);
+        if (pendingGenreDeletes.has(requestKey)) return;
+        pendingGenreDeletes.add(requestKey);
+        if (!confirm(`Удалить жанр «${genreName}»?`)) {
+            pendingGenreDeletes.delete(requestKey);
+            return;
+        }
         try {
             const response = await fetch(`/admin-api/genres/${encodeURIComponent(genreId)}`, {
                 method: 'DELETE'
             });
+            if (response.status === 404) {
+                if (typeof loadForKey === 'function') await loadForKey('genres');
+                return;
+            }
             const result = await response.json();
             if (!response.ok || !result.success) {
                 throw new Error(result.message || 'Не удалось удалить жанр');
@@ -54,6 +65,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (typeof loadForKey === 'function') loadForKey('genres');
         } catch (error) {
             alert(error.message);
+        } finally {
+            pendingGenreDeletes.delete(requestKey);
         }
     };
 

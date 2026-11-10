@@ -21,17 +21,21 @@
             <input type="text" id="title" name="aricleName" required>
         </div>
 
-        <div class="multiselect-container">
-            <div id="selected-values" class="selected-values">Выбирите автора (ов)</div>
-
-                <div class="dropdown" id="dropdown">
-
+        <div class="multiselect-container author-select-container">
+            <label for="authorSearchInput">Авторы</label>
+            <div class="author-select-row">
+                <input type="text" id="authorSearchInput" name="authorNames" class="author-search-input" list="authorSuggestions" placeholder="Введите ФИО через запятую" autocomplete="off">
+                <datalist id="authorSuggestions"></datalist>
+                <button type="button" id="authorToggleBtn" class="tree-button author-list-toggle" title="Открыть список авторов" aria-label="Открыть список авторов">☷</button>
             </div>
+            <div id="selected-values" class="selected-values">Выберите из списка или введите ФИО</div>
+            <div class="dropdown" id="dropdown"></div>
         </div>
 
         <div class="form-group">
             <label for="fileUpload">Выбирите файл:</label>
-            <input type="file" id="fileUpload" accept="application/pdf" name="fileData">
+            <input type="file" id="fileUpload" accept="application/pdf,.pdf,.doc,.docx,.djvu,.djv,image/jpeg,.jpg,.jpeg,image/png,.png" name="fileData" multiple>
+            <small>Один PDF, Word или DjVu либо несколько сканов JPG/PNG — они будут собраны в PDF.</small>
         </div>
         <div class="form-group">
             <label for="pageCount">Количество страниц:</label>
@@ -44,10 +48,12 @@
         </div>
 
         <div class="tree-select-container">
-
-            <button type="button" id="treeToggleBtn" class="tree-button">
-                Направление
-            </button>
+            <label for="udcSearchInput">Направление (УДК)</label>
+            <div class="udc-select-row">
+                <input type="text" id="udcSearchInput" name="udcCode" class="udc-code-input" list="udcSuggestions" placeholder="Введите код УДК" autocomplete="off">
+                <datalist id="udcSuggestions"></datalist>
+                <button type="button" id="treeToggleBtn" class="tree-button udc-tree-toggle" title="Открыть список УДК" aria-label="Открыть список УДК">УДК</button>
+            </div>
 
             <div id="treeDropdown" class="tree-dropdown hidden">
                 <ul id="treeUDC" class="tree"></ul>
@@ -55,12 +61,18 @@
 
         </div>
 
-        <div class="form-group">
-            <label for="PublisherList"> Издательство </label>
-            <select id="PublisherList" name="selPublisher" required>
-                <option value="">Выбирите издательство</option>
-            </select>
+        <div class="publisher-select-container">
+            <label for="publisherSearchInput">Издательство</label>
+            <div class="publisher-select-row">
+                <input type="text" id="publisherSearchInput" name="publisherName" class="author-search-input" list="publisherSuggestions" placeholder="Введите название издательства" autocomplete="off" required>
+                <datalist id="publisherSuggestions"></datalist>
+                <input type="hidden" id="PublisherList" name="selPublisher" value="">
+                <button type="button" id="publisherToggleBtn" class="tree-button publisher-list-toggle" title="Открыть список издательств" aria-label="Открыть список издательств">☷</button>
+            </div>
+            <div id="publisherDropdown" class="publisher-dropdown hidden" role="listbox"></div>
         </div>
+
+
 
         <div class="form-group">
             <button type="submit" >Подтвердить</button>
@@ -75,7 +87,6 @@
 </div>
 <script src="/js/getDirections.js" type="text/javascript"></script>
 <script src="/js/getPublishers.js" type="text/javascript"></script>
-<script src="/js/getAuthors.js" type="text/javascript"></script>
 <script src="/js/getLSItem.js" type="text/javascript"></script>
 <script src="/js/multiselect.js" type="text/javascript"></script>
 <script src="/js/creatTreeView.js" type="text/javascript"></script>
@@ -83,6 +94,25 @@
 
 <script>
     const addArticleForm = document.querySelector('form[action="/addArticle"]');
+    const bookFileInput = document.getElementById('fileUpload');
+
+    if (bookFileInput) {
+        bookFileInput.addEventListener('change', function() {
+            const files = Array.from(this.files || []);
+            if (!files.length) return;
+
+            const isSingleDocument = files.length === 1 && /\.(pdf|docx?|djvu?)$/i.test(files[0].name);
+            const areImages = files.every(file => /\.(jpe?g|png)$/i.test(file.name));
+            const validSelection = files.length <= 500 &&
+                files.reduce((total, file) => total + file.size, 0) <= 500 * 1024 * 1024 &&
+                (isSingleDocument || areImages);
+
+            if (!validSelection) {
+                alert('Выберите один PDF, Word или DjVu либо до 500 изображений JPG/PNG общим размером не более 500 МБ. Форматы нельзя смешивать.');
+                this.value = '';
+            }
+        });
+    }
 
     if (addArticleForm) {
         addArticleForm.addEventListener('submit', async function(e) {
@@ -90,6 +120,12 @@
 
             try {
                 const formData = new FormData(this);
+                formData.set('udcCode', (document.getElementById('udcSearchInput')?.value || '').trim());
+                const selectedBookFiles = Array.from(bookFileInput?.files || []);
+                const keepOriginal = selectedBookFiles.length === 1 &&
+                    !/\.pdf$/i.test(selectedBookFiles[0].name) &&
+                    !window.confirm('Файл не в PDF. Конвертировать его в PDF? Нажмите «Отмена», чтобы сохранить исходный файл без конвертации.');
+                if (keepOriginal) formData.set('keepOriginal', 'true');
 
                 const response = await fetch('/addArticle', {
                     method: 'POST',
@@ -106,9 +142,7 @@
 
                 this.reset();
 
-                if (typeof selectedAuthors !== 'undefined') {
-                    selectedAuthors = [];
-                }
+                if (typeof clearSelectedAuthors === 'function') clearSelectedAuthors();
 
                 const selectedValues = document.getElementById('selected-values');
 
@@ -151,18 +185,8 @@
                     publisherList.value = '';
                 }
 
-                if (window.parent && window.parent.loadForKey) {
-                    const active = window.parent.document.querySelector('.nav button.active');
-
-                    if (active) {
-                        await window.parent.loadForKey(active.dataset.key);
-                    }
-                }
-
-                const frame = window.parent.document.getElementById('mIframe1');
-
-                if (frame) {
-                    frame.style.display = 'block';
+                if (typeof window.notifyAdminFormSaved === 'function') {
+                    window.notifyAdminFormSaved();
                 }
 
             } catch (error) {
@@ -172,7 +196,6 @@
         });
     }
 </script>
-
-
+<script src="/js/admin-form-bridge.js"></script>
 </body>
 </html>

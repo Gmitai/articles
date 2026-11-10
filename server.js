@@ -44,7 +44,8 @@ const storageConfig = multer.diskStorage({
 const upload = multer({
     storage: storageConfig,
     limits: {
-        fileSize: 10 * 1024 * 1024
+        fileSize: 500 * 1024 * 1024,
+        files: 500
     }
 }).any();
 
@@ -74,6 +75,8 @@ app.use('/admin-api', adminRoutes);
 app.use('/', mainRoutes);
 app.use('/loadDt', loadDtToFormRoutes);
 
-app.listen(port, '192.168.0.8', () => {
+app.listen(port, 'localhost', () => {
     console.log(`Сервер запущен на порту ${port}`);
 });
+
+//192.168.0.8

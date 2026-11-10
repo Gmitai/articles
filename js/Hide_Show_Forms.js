@@ -33,11 +33,7 @@ function showForm(fId, rowId = 0) {
     frmId = fId;
     localStorage.setItem("frmId", String(fId));
     frame.style.display = "block";
-    if (fId === 4 && rowId === 0) {
-        frame.contentWindow.postMessage({
-            type: "resetDirectionForm"
-        }, "*");
-    }
+    frame.contentWindow.location.reload();
 }
 function closeIframe(fId) {
     fId = Number(fId);
@@ -51,4 +47,31 @@ function closeIframe(fId) {
     }
     localStorage.removeItem("rowId");
 }
+
+window.addEventListener('message', async event => {
+    if (event.origin !== window.location.origin || !event.data?.type) return;
+
+    const iframeEntries = [
+        ['mIframe1', 0], ['mIframe2', 1], ['mIframe3', 2], ['mIframe4', 4],
+        ['meIframe1', 0], ['meIframe2', 1], ['meIframe3', 2], ['meIframe4', 4]
+    ];
+    const sourceEntry = iframeEntries.find(([id]) =>
+        document.getElementById(id)?.contentWindow === event.source
+    );
+    if (!sourceEntry) return;
+
+    const [iframeId, formId] = sourceEntry;
+    if (event.data.type === 'admin-form-outside-click') {
+        closeIframe(formId);
+        return;
+    }
+    if (event.data.type !== 'admin-form-saved') return;
+
+    const active = document.querySelector('.nav button.active');
+    if (active && typeof window.loadForKey === 'function') {
+        await window.loadForKey(active.dataset.key);
+    }
+    document.getElementById(iframeId).style.display = 'none';
+    localStorage.removeItem('rowId');
+});
 

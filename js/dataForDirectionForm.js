@@ -109,10 +109,11 @@ async function submitDirectionForm() {
             throw new Error(data.message || data.error || 'Ошибка сохранения');
         }
         alert(data.message);
-        if (window.parent && window.parent.loadForKey) {
-            window.parent.loadForKey('directions');
+        if (typeof window.notifyAdminFormSaved === 'function') {
+            window.notifyAdminFormSaved();
+        } else {
+            window.parent.closeIframe(4);
         }
-        window.parent.closeIframe(4);
     } catch (error) {
         console.error('Ошибка сохранения:', error);
         alert(error.message);

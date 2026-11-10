@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require("path");
 const connection = require('../db/db');
 const multer = require("multer");
+const { prepareBookUpload } = require('./image-scans-to-pdf');
 
 const articleStorage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -75,6 +76,93 @@ async function getAdminUserId(req) {
     return users.length ? users[0].id : null;
 }
 
+async function removeUploadedFiles(files) {
+    await Promise.all((files || []).map(file =>
+        fs.promises.unlink(file.path).catch(() => {})
+    ));
+}
+
+async function getOrCreateDirectionId(udcCode, selectedId) {
+    const code = String(udcCode || '').trim();
+    if (!code) return selectedId || null;
+    if (code.length > 25) throw new Error('Код УДК не должен превышать 25 символов.');
+    const [existing] = await connection.query(
+        'SELECT id FROM directions WHERE TRIM(udc) = ? LIMIT 1', [code]
+    );
+    if (existing.length) return existing[0].id;
+    const [inserted] = await connection.query(
+        'INSERT INTO directions (udc, parentId) VALUES (?, NULL)', [code]
+    );
+    return inserted.insertId;
+}
+
+async function resolveArticleAuthorIds(authorIds, authorNames) {
+    const ids = new Set((Array.isArray(authorIds) ? authorIds : (authorIds ? [authorIds] : []))
+        .map(Number)
+        .filter(id => Number.isInteger(id) && id > 0));
+    const names = [...new Set(String(authorNames || '').split(',').map(name => name.trim()).filter(Boolean))];
+
+    for (const fullName of names) {
+        const parts = fullName.split(/\s+/).filter(Boolean);
+        if (parts.length < 2) {
+            throw new Error(`Укажите фамилию и имя автора: «${fullName}».`);
+        }
+        if (parts.some(part => part.length > 25) || parts.slice(2).join(' ').length > 25) {
+            throw new Error(`Слишком длинная часть ФИО автора: «${fullName}».`);
+        }
+
+        const [existing] = await connection.query(
+            `SELECT id FROM authors
+             WHERE LOWER(CONCAT_WS(' ', lastName, firstName, NULLIF(familyName, ''))) = LOWER(?)
+             LIMIT 1`,
+            [fullName]
+        );
+        let matchedAuthor = existing[0];
+        if (!matchedAuthor && parts.length === 2) {
+            const [shortMatches] = await connection.query(
+                `SELECT id FROM authors
+                 WHERE LOWER(CONCAT_WS(' ', lastName, firstName)) = LOWER(?)
+                 LIMIT 1`,
+                [fullName]
+            );
+            matchedAuthor = shortMatches[0];
+        }
+        if (matchedAuthor) {
+            ids.add(matchedAuthor.id);
+            continue;
+        }
+
+        const [created] = await connection.query(
+            'INSERT INTO authors (lastName, firstName, familyName) VALUES (?, ?, ?)',
+            [parts[0], parts[1], parts.slice(2).join(' ') || null]
+        );
+        ids.add(created.insertId);
+    }
+
+    return [...ids];
+}
+
+async function getOrCreatePublisherId(publisherName, selectedId) {
+    const title = String(publisherName || '').trim().replace(/\s+/g, ' ');
+    if (!title) {
+        if (selectedId) return selectedId;
+        throw new Error('Введите название издательства.');
+    }
+    if (title.length > 50) throw new Error('Название издательства не должно превышать 50 символов.');
+
+    const [existing] = await connection.query(
+        'SELECT id FROM publishers WHERE LOWER(TRIM(title_tj)) = LOWER(?) LIMIT 1',
+        [title]
+    );
+    if (existing.length) return existing[0].id;
+
+    const [created] = await connection.query(
+        'INSERT INTO publishers (title_tj) VALUES (?)',
+        [title]
+    );
+    return created.insertId;
+}
+
 router.get('/admin', async (req, res) => {
     try {
         if (!(await getAdminUserId(req))) return res.redirect('/');
@@ -87,7 +175,7 @@ router.get('/admin', async (req, res) => {
 
 //статьи
 router.get('/articles', async (req, res) => {
-    const [result] = await connection.execute("SELECT a.id, a.title_tj AS 'Название', CONCAT(d.udc,' ', d.title_ru) AS 'Направление (УДК)', p.title_tj AS 'Издательство', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Год издания', IF(a.typeOf=1, 'Статья', 'Книга') AS 'Тип' FROM articles a LEFT JOIN directions d ON a.directionId=d.id LEFT JOIN genres g ON a.genreId=g.id LEFT JOIN publishers p  ON a.publisherId=p.id WHERE a.typeOf=1");
+    const [result] = await connection.execute("SELECT a.id, a.title_tj AS 'Название', CONCAT_WS(' ', d.udc, NULLIF(d.title_ru, '')) AS 'Направление (УДК)', p.title_tj AS 'Издательство', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Год издания', IF(a.typeOf=1, 'Статья', 'Книга') AS 'Тип' FROM articles a LEFT JOIN directions d ON a.directionId=d.id LEFT JOIN genres g ON a.genreId=g.id LEFT JOIN publishers p  ON a.publisherId=p.id WHERE a.typeOf=1");
 
     try {
         selected_menuId = 0;
@@ -115,7 +203,7 @@ router.get('/articles', async (req, res) => {
 
 //книги
 router.get('/books', async (req, res) => {
-    const [result] = await connection.execute("SELECT a.id, a.title_tj AS 'Название', CONCAT(d.udc, ' ', d.title_ru) AS 'Направление (УДК)', p.title_tj AS 'Издательство', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Год издания' FROM articles a LEFT JOIN directions d ON a.directionId=d.id LEFT JOIN genres g ON a.genreId=g.id LEFT JOIN publishers p  ON a.publisherId=p.id WHERE a.typeOf=0");
+    const [result] = await connection.execute("SELECT a.id, a.title_tj AS 'Название', CONCAT_WS(' ', d.udc, NULLIF(d.title_ru, '')) AS 'Направление (УДК)', p.title_tj AS 'Издательство', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Год издания' FROM articles a LEFT JOIN directions d ON a.directionId=d.id LEFT JOIN genres g ON a.genreId=g.id LEFT JOIN publishers p  ON a.publisherId=p.id WHERE a.typeOf=0");
     try {
         selected_menuId = 0;
         flgBook = 0;
@@ -258,80 +346,81 @@ router.post('/addArticle', urlencodedParser, async (req, res) => {
     const pageCount = req.body.pCount;
     const publishDate = req.body.publishYear;
     const direction = req.body.selDirect;
+    const udcCode = req.body.udcCode;
     const publisher = req.body.selPublisher;
+    const publisherName = req.body.publisherName;
     const authors = req.body.authors;
+    const authorNames = req.body.authorNames;
+    const uploadedFiles = Array.isArray(req.files) ? req.files : [];
+    let articleCreated = false;
+    let preparedBookFile = null;
 
     try {
-        const [result] = await connection.query(
-            "SELECT * FROM articles WHERE title_tj = ? AND pagesCount = ?",
+        const [duplicates] = await connection.query(
+            'SELECT id FROM articles WHERE title_tj = ? AND pagesCount = ? LIMIT 1',
             [title, pageCount]
         );
-
-        if (result.length > 0) {
-            return res.status(400).send("Такая статья уже существует в БМ!");
+        if (duplicates.length) {
+            await removeUploadedFiles(uploadedFiles);
+            return res.status(400).send('Такая запись уже существует в базе данных.');
         }
 
-        const files = Array.isArray(req.files) ? req.files : [];
+        const articleFiles = uploadedFiles.filter(file => file.fieldname === 'fileData');
+        const coverdata = uploadedFiles.find(file => file.fieldname === 'coverImage');
+        preparedBookFile = await prepareBookUpload(articleFiles, {
+            keepOriginal: req.body.keepOriginal === 'true'
+        });
+        const directionId = await getOrCreateDirectionId(udcCode, direction);
+        const authorIds = await resolveArticleAuthorIds(authors, authorNames);
+        const publisherId = await getOrCreatePublisherId(publisherName, publisher);
 
-        const filedata = files.find(file => file.fieldname === 'fileData');
-        const coverdata = files.find(file => file.fieldname === 'coverImage');
-
-        if (!filedata) {
-            return res.status(400).send("Ошибка при загрузке файла");
+        if (coverdata && !['image/jpeg', 'image/png', 'image/webp'].includes(coverdata.mimetype)) {
+            throw new Error('Обложка должна быть в формате JPG, PNG или WebP.');
         }
 
-        if (coverdata) {
-            const allowedTypes = [
-                'image/jpeg',
-                'image/png',
-                'image/webp'
-            ];
-
-            if (!allowedTypes.includes(coverdata.mimetype)) {
-                return res.status(400).send("Неверный формат обложки");
-            }
-        }
-
-        const sql = `
-INSERT INTO articles
-(title_tj, pagesCount, publishYear, directionId, publisherId, typeOf, filePath, coverPath)
-VALUES (?,?,?,?,?,?,?,?)
-    `;
-
-        const [insertResult] = await connection.query(sql, [
-            title,
-            pageCount,
-            publishDate,
-            direction || null,
-            publisher || null,
-            flgBook,
-            filedata.filename,
-            coverdata ? coverdata.filename : null
-        ]);
+        const [insertResult] = await connection.query(
+            'INSERT INTO articles (title_tj, pagesCount, publishYear, directionId, publisherId, typeOf, filePath, coverPath) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [
+                title,
+                pageCount,
+                publishDate,
+                directionId,
+                publisherId,
+                flgBook,
+                preparedBookFile.filename,
+                coverdata ? coverdata.filename : null
+            ]
+        );
 
         const articleId = insertResult.insertId;
+        articleCreated = true;
 
-        if (Array.isArray(authors)) {
-            for (const author of authors) {
-                await connection.query(
-                    "INSERT INTO article_authors (id_article, id_author) VALUES (?,?)",
-                    [articleId, author]
-                );
-            }
-        } else if (authors) {
+        if (preparedBookFile.generated) {
+            await removeUploadedFiles(articleFiles);
+        }
+
+        for (const authorId of authorIds) {
             await connection.query(
-                "INSERT INTO article_authors (id_article, id_author) VALUES (?,?)",
-                [articleId, authors]
+                'INSERT INTO article_authors (id_article, id_author) VALUES (?, ?)',
+                [articleId, authorId]
             );
         }
 
-        return res.status(200).send("Статья успешно добавлена!");
-    } catch (err) {
-        console.log(err);
-        return res.status(500).send("Server error");
+        return res.status(200).send('Запись успешно добавлена.');
+    } catch (error) {
+        console.error('addArticle error:', error);
+        if (!articleCreated) {
+            await removeUploadedFiles(uploadedFiles);
+            if (preparedBookFile?.generated) {
+                await fs.promises.unlink(preparedBookFile.outputPath).catch(() => {});
+            }
+        }
+        if (error.message && !error.code) {
+            return res.status(400).send(error.message);
+        }
+        return res.status(500).send('Ошибка при добавлении записи.');
     }
 });
-
 
 
 router.post('/updateArticle', urlencodedParser, async (req, res) => {
@@ -340,8 +429,12 @@ router.post('/updateArticle', urlencodedParser, async (req, res) => {
     const pageCount = req.body.pCount;
     const publishDate = req.body.publishYear;
     const direction = req.body.selDirect;
+    const udcCode = req.body.udcCode;
     const publisher = req.body.selPublisher;
+    const publisherName = req.body.publisherName;
     const authors = req.body.authors;
+    const authorNames = req.body.authorNames;
+    let preparedEditedFile = null;
 
     try {
         const files = Array.isArray(req.files) ? req.files : [];
@@ -358,6 +451,16 @@ router.post('/updateArticle', urlencodedParser, async (req, res) => {
             return res.status(404).send("Статья не найдена!");
         }
 
+        if (filedata) {
+            preparedEditedFile = await prepareBookUpload([filedata], {
+                keepOriginal: req.body.keepOriginal === 'true'
+            });
+        }
+
+        const directionId = await getOrCreateDirectionId(udcCode, direction);
+        const authorIds = await resolveArticleAuthorIds(authors, authorNames);
+        const publisherId = await getOrCreatePublisherId(publisherName, publisher);
+
         let sql = `
             UPDATE articles
             SET title_tj=?,
@@ -372,14 +475,14 @@ router.post('/updateArticle', urlencodedParser, async (req, res) => {
             title,
             pageCount,
             publishDate,
-            direction || null,
-            publisher || null,
+            directionId,
+            publisherId,
             flgBook
         ];
 
         if (filedata) {
             sql += `, filePath=?`;
-            sqlparams.push(filedata.filename);
+            sqlparams.push(preparedEditedFile.filename);
         }
 
         if (coverdata) {
@@ -401,6 +504,10 @@ router.post('/updateArticle', urlencodedParser, async (req, res) => {
         sqlparams.push(id);
 
         await connection.query(sql, sqlparams);
+
+        if (preparedEditedFile?.generated) {
+            await fs.promises.unlink(filedata.path).catch(() => {});
+        }
 
         if (coverdata && oldArticle[0].coverPath) {
             const oldCoverPath = path.join(
@@ -424,25 +531,23 @@ router.post('/updateArticle', urlencodedParser, async (req, res) => {
             [id]
         );
 
-        if (Array.isArray(authors)) {
-            for (const author of authors) {
+        if (authorIds.length) {
+            for (const author of authorIds) {
                 await connection.query(
                     "INSERT INTO article_authors (id_article, id_author) VALUES (?,?)",
                     [id, author]
                 );
             }
-        } else if (authors) {
-            await connection.query(
-                "INSERT INTO article_authors (id_article, id_author) VALUES (?,?)",
-                [id, authors]
-            );
         }
 
         return res.send("Статья успешно обновлена!");
 
     } catch (err) {
+        if (preparedEditedFile?.generated) {
+            await fs.promises.unlink(preparedEditedFile.outputPath).catch(() => {});
+        }
         console.log(err);
-        return res.status(500).send("Server error");
+        return res.status(err.message && !err.code ? 400 : 500).send(err.message || "Server error");
     }
 });
 
@@ -488,16 +593,17 @@ router.post('/updateAuthor', express.json(), async (req, res) => {
 
 router.post('/addAuthor', urlencodedParser, async (req, res) => {
     try {
-        const fullName = req.body.authorsName.trim().split(/\s+/);
+        const fullNameInput = (req.body.authorsName || '').trim();
+        const fullName = fullNameInput.split(/\s+/).filter(Boolean);
 
-        if (fullName.length < 2) {
+        if (!fullNameInput || fullName.length < 2) {
             return res.status(400).send("Введите имя и фамилию автора");
         }
 
-        const birthDate = req.body.birthDate;
-        const phoneNumber = req.body.phoneNum;
-        const selCity = req.body.selCity;
-        const address = req.body.address;
+        const birthDate = req.body.birthDate || null;
+        const phoneNumber = req.body.phoneNum?.trim() || null;
+        const selCity = req.body.selCity || null;
+        const address = req.body.address?.trim() || null;
 
         const lastName = fullName[0].charAt(0).toUpperCase() + fullName[0].substring(1).toLowerCase();
         const firstName = fullName[1].charAt(0).toUpperCase() + fullName[1].substring(1).toLowerCase();
@@ -530,27 +636,35 @@ router.post('/addAuthor', urlencodedParser, async (req, res) => {
 });
 
 router.post('/addPublisher', urlencodedParser, async (req, res) => {
-    const publisher = req.body.publisherName;
-    const selCity=req.body.selCity;
-    const address=req.body.address;
-    const [result] = await connection.query(`SELECT * FROM publishers WHERE title_tj = '${publisher}' AND cityId='${selCity}'`);
-    try{
-        if(result.length > 0){
-            res.send("Такое издательство уже существует в БМ!");
-            res.sendFile(path.join(__dirname, '..', 'Public', 'addPublisher.html'));
-        }
-        else {
-            const sql="Insert into publishers (title_tj, cityId, address) VALUES (?,?,?)";
-            connection.query(sql, [publisher, selCity, address], (err, result) => {
-                if (err) {console.log(err)}
-            });
-            res.sendFile(path.join(__dirname, '..', 'Public', 'addPublisher.html'));
-        }
-    }catch (err) {
-        console.log(err);
-        return res.status(500).send("Server error");
+    const publisher = (req.body.publisherName || '').trim();
+    const selCity = req.body.selCity || null;
+    const address = req.body.address?.trim() || null;
+
+    if (!publisher) {
+        return res.status(400).json({ message: 'Введите название издательства.' });
     }
-})
+
+    try {
+        const [existing] = await connection.execute(
+            'SELECT id FROM publishers WHERE title_tj = ? AND cityId <=> ? LIMIT 1',
+            [publisher, selCity]
+        );
+
+        if (existing.length) {
+            return res.status(409).json({ message: 'Такое издательство уже существует.' });
+        }
+
+        await connection.execute(
+            'INSERT INTO publishers (title_tj, cityId, address) VALUES (?, ?, ?)',
+            [publisher, selCity, address]
+        );
+
+        return res.status(200).json({ message: 'Издательство успешно добавлено.' });
+    } catch (error) {
+        console.error('addPublisher error:', error);
+        return res.status(500).json({ message: 'Ошибка при добавлении издательства.' });
+    }
+});
 
 router.get('/userCatalog', async (req, res) => {
     try {
