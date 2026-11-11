@@ -5,8 +5,9 @@ const {extname} = require("node:path");
 const fs = require('fs');
 const path = require("path");
 const connection = require('../db/db');
+const ensureInteractionTables = require('../db/interaction-tables');
 const multer = require("multer");
-const { prepareBookUpload } = require('./image-scans-to-pdf');
+const { prepareBookUpload, countPdfPages } = require('./image-scans-to-pdf');
 
 const articleStorage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -96,6 +97,15 @@ async function getOrCreateDirectionId(udcCode, selectedId) {
     return inserted.insertId;
 }
 
+async function resolveArticleGenreId(value) {
+    if (value == null || String(value).trim() === '') return null;
+    const id = Number(value);
+    if (!Number.isInteger(id) || id < 1) throw new Error('Select a valid genre.');
+    const [genres] = await connection.query('SELECT id FROM genres WHERE id = ? LIMIT 1', [id]);
+    if (!genres.length) throw new Error('Selected genre was not found.');
+    return id;
+}
+
 async function resolveArticleAuthorIds(authorIds, authorNames) {
     const ids = new Set((Array.isArray(authorIds) ? authorIds : (authorIds ? [authorIds] : []))
         .map(Number)
@@ -179,7 +189,6 @@ router.get('/articles', async (req, res) => {
 
     try {
         selected_menuId = 0;
-        flgBook = 1;
         let subresult;
         [subresult] = await connection.execute("SELECT a.id AS id, CONCAT(ath.lastName,' ', ath.firstName, ' ', IFNULL(ath.familyName, '')) AS author FROM articles a JOIN article_authors au JOIN authors ath ON au.id_article=a.id AND au.id_author=ath.id");
 
@@ -206,7 +215,6 @@ router.get('/books', async (req, res) => {
     const [result] = await connection.execute("SELECT a.id, a.title_tj AS 'Название', CONCAT_WS(' ', d.udc, NULLIF(d.title_ru, '')) AS 'Направление (УДК)', p.title_tj AS 'Издательство', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Год издания' FROM articles a LEFT JOIN directions d ON a.directionId=d.id LEFT JOIN genres g ON a.genreId=g.id LEFT JOIN publishers p  ON a.publisherId=p.id WHERE a.typeOf=0");
     try {
         selected_menuId = 0;
-        flgBook = 0;
         let subresult;
         [subresult] = await connection.execute("SELECT a.id AS id, CONCAT(ath.lastName,' ', ath.firstName, ' ', IFNULL(ath.familyName, '')) AS author FROM articles a JOIN article_authors au JOIN authors ath ON au.id_article=a.id AND au.id_author=ath.id");
 
@@ -338,24 +346,48 @@ router.get('/download/:filename' , (req, res) => {
     });
 });
 
+router.post('/bookMetadata', async (req, res) => {
+    const uploadedFiles = Array.isArray(req.files) ? req.files : [];
+    const file = uploadedFiles.find(item => item.fieldname === 'fileData');
+    let preparedFile = null;
+    try {
+        if (!file) return res.status(400).json({ success: false, message: 'Файл не получен.' });
+        preparedFile = await prepareBookUpload([file]);
+        const pdfPath = preparedFile.outputPath || file.path;
+        const pageCount = await countPdfPages(pdfPath);
+        if (!pageCount) throw new Error('Не удалось определить число страниц в файле.');
+        return res.json({ success: true, pageCount });
+    } catch (error) {
+        return res.status(400).json({ success: false, message: error.message });
+    } finally {
+        await removeUploadedFiles(uploadedFiles);
+        if (preparedFile?.generated) await fs.promises.unlink(preparedFile.outputPath).catch(() => {});
+    }
+});
+
 //-----------POST------------
 
 
 router.post('/addArticle', urlencodedParser, async (req, res) => {
     const title = req.body.aricleName;
+    const typeOf = ['1', 'article'].includes(String(req.body.typeOf || req.query.type || '').toLowerCase()) ? 1 : 0;
     const pageCount = req.body.pCount;
     const publishDate = req.body.publishYear;
     const direction = req.body.selDirect;
     const udcCode = req.body.udcCode;
     const publisher = req.body.selPublisher;
     const publisherName = req.body.publisherName;
+    const bbk = String(req.body.bbk || '').trim() || null;
+    const isbn = String(req.body.isbn || '').trim() || null;
     const authors = req.body.authors;
     const authorNames = req.body.authorNames;
+    const requestedGenreId = req.body.genreId;
     const uploadedFiles = Array.isArray(req.files) ? req.files : [];
     let articleCreated = false;
     let preparedBookFile = null;
 
     try {
+        await ensureInteractionTables();
         const [duplicates] = await connection.query(
             'SELECT id FROM articles WHERE title_tj = ? AND pagesCount = ? LIMIT 1',
             [title, pageCount]
@@ -373,22 +405,26 @@ router.post('/addArticle', urlencodedParser, async (req, res) => {
         const directionId = await getOrCreateDirectionId(udcCode, direction);
         const authorIds = await resolveArticleAuthorIds(authors, authorNames);
         const publisherId = await getOrCreatePublisherId(publisherName, publisher);
+        const genreId = await resolveArticleGenreId(requestedGenreId);
 
         if (coverdata && !['image/jpeg', 'image/png', 'image/webp'].includes(coverdata.mimetype)) {
             throw new Error('Обложка должна быть в формате JPG, PNG или WebP.');
         }
 
         const [insertResult] = await connection.query(
-            'INSERT INTO articles (title_tj, pagesCount, publishYear, directionId, publisherId, typeOf, filePath, coverPath) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            'INSERT INTO articles (title_tj, genreId, pagesCount, publishYear, directionId, publisherId, typeOf, filePath, coverPath, bbk, isbn) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             [
                 title,
+                genreId,
                 pageCount,
                 publishDate,
                 directionId,
                 publisherId,
-                flgBook,
+                typeOf,
                 preparedBookFile.filename,
-                coverdata ? coverdata.filename : null
+                coverdata ? coverdata.filename : null,
+                bbk,
+                isbn
             ]
         );
 
@@ -432,18 +468,22 @@ router.post('/updateArticle', urlencodedParser, async (req, res) => {
     const udcCode = req.body.udcCode;
     const publisher = req.body.selPublisher;
     const publisherName = req.body.publisherName;
+    const bbk = String(req.body.bbk || '').trim() || null;
+    const isbn = String(req.body.isbn || '').trim() || null;
     const authors = req.body.authors;
     const authorNames = req.body.authorNames;
+    const requestedGenreId = req.body.genreId;
     let preparedEditedFile = null;
 
     try {
+        await ensureInteractionTables();
         const files = Array.isArray(req.files) ? req.files : [];
 
         const filedata = files.find(file => file.fieldname === 'fileData');
         const coverdata = files.find(file => file.fieldname === 'coverImage');
 
         const [oldArticle] = await connection.query(
-            "SELECT filePath, coverPath FROM articles WHERE id = ?",
+            "SELECT filePath, coverPath, typeOf FROM articles WHERE id = ?",
             [id]
         );
 
@@ -460,24 +500,31 @@ router.post('/updateArticle', urlencodedParser, async (req, res) => {
         const directionId = await getOrCreateDirectionId(udcCode, direction);
         const authorIds = await resolveArticleAuthorIds(authors, authorNames);
         const publisherId = await getOrCreatePublisherId(publisherName, publisher);
+        const genreId = await resolveArticleGenreId(requestedGenreId);
 
         let sql = `
             UPDATE articles
             SET title_tj=?,
+                genreId=?,
                 pagesCount=?,
                 publishYear=?,
                 directionId=?,
                 publisherId=?,
-                typeOf=?
+                typeOf=?,
+                bbk=?,
+                isbn=?
         `;
 
         const sqlparams = [
             title,
+            genreId,
             pageCount,
             publishDate,
             directionId,
             publisherId,
-            flgBook
+            Number(oldArticle[0].typeOf) === 1 ? 1 : 0,
+            bbk,
+            isbn
         ];
 
         if (filedata) {
@@ -668,14 +715,21 @@ router.post('/addPublisher', urlencodedParser, async (req, res) => {
 
 router.get('/userCatalog', async (req, res) => {
     try {
+        await ensureInteractionTables();
         const [rows] = await connection.execute(`
             SELECT
                 a.id,
                 a.title_tj AS title,
+                a.title_ru AS titleRu,
+                a.title_en AS titleEn,
                 a.pagesCount,
                 a.publishYear,
                 a.typeOf,
+                a.uid,
+                a.statusType,
+                a.createAt,
                 a.filePath,
+                a.coverPath,
                 CONCAT(IFNULL(d.udc, ''), ' ', IFNULL(d.title_ru, '')) AS udc,
                 IFNULL(g.name, '') AS genre,
                 IFNULL(p.title_tj, '') AS publisher,
@@ -696,10 +750,16 @@ router.get('/userCatalog', async (req, res) => {
             GROUP BY
                 a.id,
                 a.title_tj,
+                a.title_ru,
+                a.title_en,
                 a.pagesCount,
                 a.publishYear,
                 a.typeOf,
+                a.uid,
+                a.statusType,
+                a.createAt,
                 a.filePath,
+                a.coverPath,
                 d.udc,
                 d.title_ru,
                 g.name,
@@ -707,7 +767,7 @@ router.get('/userCatalog', async (req, res) => {
             ORDER BY a.typeOf, a.title_tj
         `);
 
-        res.json(rows);
+        res.json(await attachCatalogInteractions(rows, await getCurrentUserId(req)));
     } catch (err) {
         console.error('userCatalog error:', err);
         res.status(500).json({
@@ -775,6 +835,7 @@ router.get('/userSearch', async (req, res) => {
     const publisher = (req.query.publisher || '').trim();
 
     try {
+        await ensureInteractionTables();
         const conditions = [];
         const params = [];
 
@@ -840,10 +901,16 @@ router.get('/userSearch', async (req, res) => {
             SELECT
                 a.id,
                 a.title_tj AS title,
+                a.title_ru AS titleRu,
+                a.title_en AS titleEn,
                 a.pagesCount,
                 a.publishYear,
                 a.typeOf,
+                a.uid,
+                a.statusType,
+                a.createAt,
                 a.filePath,
+                a.coverPath,
                 CONCAT(IFNULL(d.udc, ''), ' ', IFNULL(d.title_ru, '')) AS udc,
                 IFNULL(g.name, '') AS genre,
                 IFNULL(p.title_tj, '') AS publisher,
@@ -871,10 +938,16 @@ router.get('/userSearch', async (req, res) => {
             GROUP BY
                 a.id,
                 a.title_tj,
+                a.title_ru,
+                a.title_en,
                 a.pagesCount,
                 a.publishYear,
                 a.typeOf,
+                a.uid,
+                a.statusType,
+                a.createAt,
                 a.filePath,
+                a.coverPath,
                 d.udc,
                 d.title_ru,
                 g.name,
@@ -884,7 +957,7 @@ router.get('/userSearch', async (req, res) => {
 
         const [rows] = await connection.execute(sql, params);
 
-        res.json(rows);
+        res.json(await attachCatalogInteractions(rows, await getCurrentUserId(req)));
     } catch (err) {
         console.error('userSearch error:', err);
         res.status(500).json({
@@ -923,6 +996,40 @@ async function getCurrentUserId(req) {
     return rows[0].id;
 }
 
+async function attachCatalogInteractions(items, userId) {
+    if (!items.length) return items;
+    const ids = items.map(item => item.id);
+    const placeholders = ids.map(() => '?').join(', ');
+    const [ratingRows] = await connection.execute(`
+        SELECT targetId,
+               AVG(score) AS ratingAverage,
+               COUNT(*) AS ratingCount,
+               MAX(CASE WHEN userId = ? THEN score END) AS myRating
+        FROM ratings
+        WHERE targetType = 'article' AND targetId IN (${placeholders})
+        GROUP BY targetId
+    `, [userId, ...ids]);
+    let favoriteIds = new Set();
+    if (userId) {
+        const [favoriteRows] = await connection.execute(
+            `SELECT articleId FROM favorites WHERE userId = ? AND articleId IN (${placeholders})`,
+            [userId, ...ids]
+        );
+        favoriteIds = new Set(favoriteRows.map(row => Number(row.articleId)));
+    }
+    const ratingsById = new Map(ratingRows.map(row => [Number(row.targetId), row]));
+    return items.map(item => {
+        const rating = ratingsById.get(Number(item.id));
+        return {
+            ...item,
+            ratingAverage: rating ? Number(rating.ratingAverage) : 0,
+            ratingCount: rating ? Number(rating.ratingCount) : 0,
+            myRating: rating?.myRating == null ? null : Number(rating.myRating),
+            favorite: favoriteIds.has(Number(item.id))
+        };
+    });
+}
+
 
 router.get('/userSearchYears', async (req, res) => {
     try {
@@ -958,6 +1065,216 @@ WHERE publishYear IS NOT NULL
 
 
 
+router.get('/item/:id', async (req, res) => {
+    try {
+        const articleId = Number(req.params.id);
+        if (!Number.isInteger(articleId) || articleId < 1) {
+            return res.status(400).json({ success: false, message: 'Некорректный ID книги или статьи.' });
+        }
+        await ensureInteractionTables();
+        const [rows] = await connection.execute(`
+            SELECT a.id, a.title_tj AS title, a.title_ru AS titleRu, a.title_en AS titleEn,
+                   a.pagesCount, a.publishYear, a.typeOf, a.uid, a.statusType, a.createAt,
+                   a.filePath, a.coverPath, a.bbk, a.isbn, d.udc, d.title_ru AS direction,
+                   g.name AS genre, p.title_tj AS publisher
+            FROM articles a
+            LEFT JOIN directions d ON d.id = a.directionId
+            LEFT JOIN genres g ON g.id = a.genreId
+            LEFT JOIN publishers p ON p.id = a.publisherId
+            WHERE a.id = ?
+            LIMIT 1
+        `, [articleId]);
+        if (!rows.length) return res.status(404).json({ success: false, message: 'Книга или статья не найдена.' });
+
+        const [authors] = await connection.execute(`
+            SELECT ath.id, TRIM(CONCAT_WS(' ', ath.lastName, ath.firstName, NULLIF(ath.familyName, ''))) AS fullName
+            FROM article_authors aa
+            JOIN authors ath ON ath.id = aa.id_author
+            WHERE aa.id_article = ?
+            ORDER BY ath.lastName, ath.firstName
+        `, [articleId]);
+        const [item] = await attachCatalogInteractions(rows, await getCurrentUserId(req));
+        item.authors = authors;
+        res.json({ success: true, item });
+    } catch (error) {
+        console.error('Item details error:', error);
+        res.status(500).json({ success: false, message: 'Не удалось загрузить информацию о записи.' });
+    }
+});
+
+router.get('/author/:id', async (req, res) => {
+    try {
+        const authorId = Number(req.params.id);
+        if (!Number.isInteger(authorId) || authorId < 1) {
+            return res.status(400).json({ success: false, message: 'Некорректный ID автора.' });
+        }
+        await ensureInteractionTables();
+        const [rows] = await connection.execute(`
+            SELECT ath.id, ath.firstName, ath.lastName, ath.familyName, ath.birthDate,
+                   c.title AS city
+            FROM authors ath
+            LEFT JOIN cities c ON c.id = ath.cityId
+            WHERE ath.id = ?
+            LIMIT 1
+        `, [authorId]);
+        if (!rows.length) return res.status(404).json({ success: false, message: 'Автор не найден.' });
+        const userId = await getCurrentUserId(req);
+        const [[rating]] = await connection.execute(`
+            SELECT AVG(score) AS ratingAverage, COUNT(*) AS ratingCount,
+                   MAX(CASE WHEN userId = ? THEN score END) AS myRating
+            FROM ratings WHERE targetType = 'author' AND targetId = ?
+        `, [userId, authorId]);
+        let favorite = false;
+        if (userId) {
+            const [favorites] = await connection.execute(
+                'SELECT authorId FROM favorite_authors WHERE userId = ? AND authorId = ? LIMIT 1',
+                [userId, authorId]
+            );
+            favorite = favorites.length > 0;
+        }
+        const author = rows[0];
+        author.fullName = [author.lastName, author.firstName, author.familyName].filter(Boolean).join(' ');
+        author.ratingAverage = Number(rating.ratingAverage) || 0;
+        author.ratingCount = Number(rating.ratingCount) || 0;
+        author.myRating = rating.myRating == null ? null : Number(rating.myRating);
+        author.favorite = favorite;
+        res.json({ success: true, author });
+    } catch (error) {
+        console.error('Author details error:', error);
+        res.status(500).json({ success: false, message: 'Не удалось загрузить информацию об авторе.' });
+    }
+});
+
+router.get('/rating/:targetType/:targetId', async (req, res) => {
+    try {
+        const { targetType } = req.params;
+        const targetId = Number(req.params.targetId);
+        if (!['article', 'author'].includes(targetType) || !Number.isInteger(targetId) || targetId < 1) {
+            return res.status(400).json({ success: false, message: 'Некорректная запись для рейтинга.' });
+        }
+        await ensureInteractionTables();
+        const userId = await getCurrentUserId(req);
+        const [[rating]] = await connection.execute(`
+            SELECT AVG(score) AS ratingAverage, COUNT(*) AS ratingCount,
+                   MAX(CASE WHEN userId = ? THEN score END) AS myRating
+            FROM ratings WHERE targetType = ? AND targetId = ?
+        `, [userId, targetType, targetId]);
+        res.json({
+            success: true,
+            ratingAverage: Number(rating.ratingAverage) || 0,
+            ratingCount: Number(rating.ratingCount) || 0,
+            myRating: rating.myRating == null ? null : Number(rating.myRating)
+        });
+    } catch (error) {
+        console.error('Rating lookup error:', error);
+        res.status(500).json({ success: false, message: 'Не удалось загрузить рейтинг.' });
+    }
+});
+
+router.post('/rating/:targetType/:targetId', async (req, res) => {
+    try {
+        const { targetType } = req.params;
+        const targetId = Number(req.params.targetId);
+        const score = Number(req.body?.score);
+        if (!['article', 'author'].includes(targetType) || !Number.isInteger(targetId) || targetId < 1 ||
+            !Number.isInteger(score) || score < 1 || score > 5) {
+            return res.status(400).json({ success: false, message: 'Оценка должна быть целым числом от 1 до 5.' });
+        }
+        await ensureInteractionTables();
+        const userId = await getCurrentUserId(req);
+        if (!userId) return res.status(401).json({ success: false, message: 'Войдите в аккаунт, чтобы поставить оценку.' });
+        const table = targetType === 'article' ? 'articles' : 'authors';
+        const [targets] = await connection.execute(`SELECT id FROM ${table} WHERE id = ? LIMIT 1`, [targetId]);
+        if (!targets.length) return res.status(404).json({ success: false, message: 'Запись для оценки не найдена.' });
+        await connection.execute(`
+            INSERT INTO ratings (userId, targetType, targetId, score)
+            VALUES (?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE score = VALUES(score), updatedAt = CURRENT_TIMESTAMP
+        `, [userId, targetType, targetId, score]);
+        const [[rating]] = await connection.execute(`
+            SELECT AVG(score) AS ratingAverage, COUNT(*) AS ratingCount,
+                   MAX(CASE WHEN userId = ? THEN score END) AS myRating
+            FROM ratings WHERE targetType = ? AND targetId = ?
+        `, [userId, targetType, targetId]);
+        res.json({
+            success: true,
+            ratingAverage: Number(rating.ratingAverage) || 0,
+            ratingCount: Number(rating.ratingCount) || 0,
+            myRating: rating.myRating == null ? null : Number(rating.myRating)
+        });
+    } catch (error) {
+        console.error('Rating save error:', error);
+        res.status(500).json({ success: false, message: 'Не удалось сохранить оценку.' });
+    }
+});
+
+router.get('/favorite-authors', async (req, res) => {
+    try {
+        await ensureInteractionTables();
+        const userId = await getCurrentUserId(req);
+        if (!userId) return res.status(401).json({ success: false, message: 'Войдите в аккаунт.' });
+        const [authors] = await connection.execute(`
+            SELECT ath.id, ath.firstName, ath.lastName, ath.familyName, ath.birthDate,
+                   TRIM(CONCAT_WS(' ', ath.lastName, ath.firstName, NULLIF(ath.familyName, ''))) AS fullName,
+                   AVG(r.score) AS ratingAverage, COUNT(r.id) AS ratingCount
+            FROM favorite_authors fa
+            JOIN authors ath ON ath.id = fa.authorId
+            LEFT JOIN ratings r ON r.targetType = 'author' AND r.targetId = ath.id
+            WHERE fa.userId = ?
+            GROUP BY ath.id, ath.firstName, ath.lastName, ath.familyName, ath.birthDate, fa.createdAt
+            ORDER BY fa.createdAt DESC
+        `, [userId]);
+        res.json({ success: true, authors });
+    } catch (error) {
+        console.error('Favorite authors load error:', error);
+        res.status(500).json({ success: false, message: 'Не удалось загрузить избранных авторов.' });
+    }
+});
+
+router.get('/favorite-author/:authorId', async (req, res) => {
+    try {
+        await ensureInteractionTables();
+        const userId = await getCurrentUserId(req);
+        if (!userId) return res.status(401).json({ success: false, message: 'Войдите в аккаунт.' });
+        const authorId = Number(req.params.authorId);
+        if (!Number.isInteger(authorId) || authorId < 1) return res.status(400).json({ success: false, message: 'Некорректный ID автора.' });
+        const [rows] = await connection.execute(
+            'SELECT authorId FROM favorite_authors WHERE userId = ? AND authorId = ? LIMIT 1',
+            [userId, authorId]
+        );
+        res.json({ success: true, favorite: rows.length > 0 });
+    } catch (error) {
+        console.error('Favorite author check error:', error);
+        res.status(500).json({ success: false, message: 'Не удалось проверить избранное.' });
+    }
+});
+
+router.post('/favorite-author/:authorId', async (req, res) => {
+    try {
+        await ensureInteractionTables();
+        const userId = await getCurrentUserId(req);
+        if (!userId) return res.status(401).json({ success: false, message: 'Войдите в аккаунт.' });
+        const authorId = Number(req.params.authorId);
+        if (!Number.isInteger(authorId) || authorId < 1) return res.status(400).json({ success: false, message: 'Некорректный ID автора.' });
+        const [authors] = await connection.execute('SELECT id FROM authors WHERE id = ? LIMIT 1', [authorId]);
+        if (!authors.length) return res.status(404).json({ success: false, message: 'Автор не найден.' });
+        const [existing] = await connection.execute(
+            'SELECT authorId FROM favorite_authors WHERE userId = ? AND authorId = ? LIMIT 1',
+            [userId, authorId]
+        );
+        const favorite = !existing.length;
+        if (favorite) {
+            await connection.execute('INSERT INTO favorite_authors (userId, authorId) VALUES (?, ?)', [userId, authorId]);
+        } else {
+            await connection.execute('DELETE FROM favorite_authors WHERE userId = ? AND authorId = ?', [userId, authorId]);
+        }
+        res.json({ success: true, favorite });
+    } catch (error) {
+        console.error('Favorite author update error:', error);
+        res.status(500).json({ success: false, message: 'Не удалось изменить избранных авторов.' });
+    }
+});
+
 router.get('/favorites', async (req, res) => {
     try {
         const userId = await getCurrentUserId(req);
@@ -984,7 +1301,7 @@ router.get('/favorites', async (req, res) => {
                     IFNULL(d.title_ru, '')
                 ) AS udc,
                 IFNULL(g.name, '') AS genre,
-                IFNULL(p.ti+++tle_tj, '') AS publisher,
+                IFNULL(p.title_tj, '') AS publisher,
                 GROUP_CONCAT(
                     DISTINCT CONCAT(
                         ath.lastName,

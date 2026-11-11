@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const requestKey = String(genreId);
         if (pendingGenreDeletes.has(requestKey)) return;
         pendingGenreDeletes.add(requestKey);
-        if (!confirm(`Удалить жанр «${genreName}»?`)) {
+        if (!confirm(`Переместить жанр «${genreName}» в корзину? Его можно будет восстановить.`)) {
             pendingGenreDeletes.delete(requestKey);
             return;
         }

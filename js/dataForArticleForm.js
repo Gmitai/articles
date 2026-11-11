@@ -24,6 +24,9 @@ function loadArticleData(rowId) {
             const pageCount = document.getElementById("pageCount");
             const yearOfPublish = document.getElementById("yearOfPublish");
             const publisherList = document.getElementById("PublisherList");
+            const bbkInput = document.getElementById("bbk");
+            const isbnInput = document.getElementById("isbn");
+            const genreInput = document.getElementById("genreId");
             if (title) title.value = data.title_tj || '';
             if (pageCount) pageCount.value = data.pagesCount || '';
             if (yearOfPublish && data.publishYear) {
@@ -34,6 +37,12 @@ function loadArticleData(rowId) {
                     const year = date.getFullYear();
                     yearOfPublish.value = `${year}-${month}-${day}`;
                 }
+            }
+            if (bbkInput) bbkInput.value = data.bbk || '';
+            if (isbnInput) isbnInput.value = data.isbn || '';
+            if (genreInput) {
+                genreInput.dataset.selectedGenreId = data.genreId || '';
+                genreInput.value = data.genreId || '';
             }
             if (typeof window.setPublisherSelection === "function") {
                 window.setPublisherSelection(data.publisherId);
@@ -105,7 +114,6 @@ document.getElementById("editForm").addEventListener("submit", async function(e)
         if (!response.ok) {
             throw new Error(text || "Ошибка обновления статьи");
         }
-        alert(text || "Статья успешно обновлена!");
         if (typeof window.notifyAdminFormSaved === "function") {
             window.notifyAdminFormSaved();
         }

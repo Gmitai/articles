@@ -16,6 +16,23 @@ CREATE DATABASE /*!32312 IF NOT EXISTS*/`articles` /*!40100 DEFAULT CHARACTER SE
 
 USE `articles`;
 
+/*Table structure for table `admin_trash` */
+
+DROP TABLE IF EXISTS `admin_trash`;
+
+CREATE TABLE `admin_trash` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `recordType` varchar(32) NOT NULL,
+  `recordId` int NOT NULL,
+  `label` varchar(500) NOT NULL,
+  `payload` json NOT NULL,
+  `deletedAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_admin_trash_deletedAt` (`deletedAt`)
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+/*Data for the table `admin_trash` */
+
 /*Table structure for table `article_authors` */
 
 DROP TABLE IF EXISTS `article_authors`;
@@ -25,7 +42,7 @@ CREATE TABLE `article_authors` (
   `id_article` int NOT NULL,
   `id_author` int NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=235 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=282 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `article_authors` */
 
@@ -86,44 +103,14 @@ CREATE TABLE `articles` (
   `typeOf` int DEFAULT NULL COMMENT '0-book, 1-article',
   `filePath` varchar(150) DEFAULT NULL,
   `statusType` int DEFAULT NULL COMMENT '0-nomuayan, 1-VAK, 2-international, 3-Jumhuriyavi, 4-dokhili',
-  `createAt` datetime DEFAULT NULL,
+  `createAt` datetime DEFAULT CURRENT_TIMESTAMP,
   `coverPath` varchar(255) DEFAULT NULL,
+  `bbk` varchar(50) DEFAULT NULL,
+  `isbn` varchar(32) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=81 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=91 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `articles` */
-
-insert  into `articles`(`id`,`title_tj`,`title_ru`,`title_en`,`directionId`,`genreId`,`publisherId`,`publishYear`,`uid`,`pagesCount`,`typeOf`,`filePath`,`statusType`,`createAt`,`coverPath`) values 
-(51,'Ҳасани арӯс',NULL,NULL,8,1,14,'2026-03-14',NULL,123777,0,'Article-1779417341914-784094549.pdf',NULL,NULL,'cover-1789299484865-221498370.png'),
-(52,'Илҳом аз Ватан',NULL,NULL,7,1,1,'2026-05-14',NULL,234,0,'Article-1779417369508-168761129.pdf',NULL,NULL,NULL),
-(53,'Зодрӯзи Ватан',NULL,NULL,7,1,1,'2026-05-11',NULL,2348,0,'Article-1779417409484-485849455.pdf',NULL,NULL,'21. ÐÐ¾ÑÑ-1789296920322-624728022.jpg'),
-(54,'Структуры данных и алгоритмы в Java (второе издание )',NULL,NULL,1,1,14,'2026-05-21',NULL,8014,0,'data_structures_and_algorithms_in_java-1779419835036-644503849.pdf',NULL,NULL,'3. ÐÐµÐ¾Ð¿Ð°ÑÐ´-1789296888525-461833118.jpg'),
-(55,'Thinking in Java',NULL,NULL,1,1,1,'2026-05-21',NULL,1079,0,'ThinkingInJava-1779419844715-393871219.pdf',NULL,NULL,NULL),
-(56,'Introducing Python: Modern Computing in Simple Packages',NULL,NULL,5,1,1,'2024-01-10',NULL,1234,1,'introducing-python-modern-computing-in-simple-packages-1779419822092-507451259.pdf',NULL,NULL,NULL),
-(57,'Java Concurrency in Practice',NULL,NULL,1,1,2,'2024-04-30',NULL,345,1,'java_concurrency_in_practice-1779420037451-887825029.pdf',NULL,NULL,NULL),
-(58,'Решеник рутинных задач с помощью Python: практическое руководство для начинающих (ENG)',NULL,NULL,42,1,1,'2026-05-08',NULL,1090,1,'sweigart_a_automate_the_boring_s-1779420234269-666770956.pdf',NULL,NULL,NULL),
-(59,'Польза ии в современном мире',NULL,NULL,42,1,1,'2026-05-14',NULL,123,0,'Article-1779442551139-787717084.pdf',NULL,NULL,NULL),
-(60,'Бӯи нон',NULL,NULL,6,1,1,'2026-09-02',NULL,678,0,'10.-1789227252807-440714006.docx',NULL,NULL,NULL),
-(61,'Падида',NULL,NULL,7,1,2,'2026-09-18',NULL,2323,0,'Ð¢ÐµÐºÑÑÐ¾Ð²ÑÐ¹ Ð´Ð¾ÐºÑÐ¼ÐµÐ½Ñ-1789292344154-327662706.txt',NULL,NULL,NULL),
-(62,'Садои дил',NULL,NULL,12,1,3,'2026-09-02',NULL,123,0,'1-1789302855240-589210729.docx',NULL,NULL,NULL),
-(63,'Қиссаҳои кӯдакӣ',NULL,NULL,7,1,1,'2026-09-02',3,344,0,'1-1789312230642-182785744.docx',NULL,NULL,'cover-1789312230643-659168804.jpg'),
-(64,'Санг дар бағал',NULL,NULL,7,1,1,'2026-09-09',3,22323,0,'1-1789312410486-784335446.docx',NULL,NULL,NULL),
-(65,'Шукуфаи умед',NULL,NULL,7,1,1,'2026-09-03',NULL,344,0,'ÐÐ°Ð²Ð·ÑÑ Ð­Ð»ÐµÐ¼ÐµÐ½ÑÒ³Ð¾Ð¸ Ð¸Ð´Ð¾ÑÐ°ÐºÑÐ½Ð¸Ð¸ RadioButton Ð²Ð°                     CheckBox-1789313004912-564837873.docx',NULL,NULL,NULL),
-(66,'Роҳи зиндагӣ',NULL,NULL,7,1,1,'2026-09-03',NULL,5656,0,'ð¼-1789313036835-280078983.docx',NULL,NULL,NULL),
-(67,'Мақолаи тести',NULL,NULL,8,1,17,'2021-02-03',NULL,123,1,'1-1789360574426-439618082.docx',NULL,NULL,NULL),
-(68,'Мақолаи тестии-2',NULL,NULL,7,1,18,'2026-09-02',NULL,123,1,'3-1789363050987-331218547.pdf',NULL,NULL,NULL),
-(69,'китоб',NULL,NULL,7,1,1,'2026-09-02',NULL,123,0,'3-1789363131118-140926760.pdf',NULL,NULL,NULL),
-(70,'китоб1',NULL,NULL,9,1,1,'2026-09-10',NULL,123,0,'1-1789475964357-90284464.docx',NULL,NULL,NULL),
-(71,'Мақолаи тестии-3',NULL,NULL,10,1,1,'2026-09-03',NULL,123,1,'1-1789476002866-136375572.docx',NULL,NULL,NULL),
-(72,'Мақолаи тестии-4',NULL,NULL,8,1,1,'2026-09-03',NULL,123,1,'1-1789478330919-291447589.docx',NULL,NULL,NULL),
-(73,'китоб2',NULL,NULL,6,1,1,'2026-09-10',NULL,123,0,'1-1789478370885-156164767.docx',NULL,NULL,NULL),
-(74,'Мақолаи тестии-5',NULL,NULL,8,1,1,'2026-09-02',NULL,123,1,'ÐÐ½ÑÐµÑÐ¿ÑÐµÑÐ°ÑÐ¸Ñ ÑÐµÐ·ÑÐ»ÑÑÐ°ÑÐ¾Ð²-1789478662421-16042334.docx',NULL,NULL,NULL),
-(75,'Мақолаи тестии-6',NULL,NULL,10,1,1,'2026-09-08',NULL,123,1,'1-1789479117277-500446868.docx',NULL,NULL,NULL),
-(76,'Мақолаи тестии-7',NULL,NULL,7,1,1,'2026-09-08',NULL,123,1,'1-1789479475931-826035319.docx',NULL,NULL,NULL),
-(77,'Мақолаи тестии-8',NULL,NULL,10,1,2,'2026-09-08',NULL,123,1,'1-1789479508656-602267743.docx',NULL,NULL,NULL),
-(78,'китоб3',NULL,NULL,7,1,14,'2026-09-02',NULL,1234,0,'1-1789479545793-888910135.docx',NULL,NULL,NULL),
-(79,'Мақолаи тестии 9',NULL,NULL,7,1,1,'2026-09-02',NULL,123,1,'1-1789481731381-157934835.docx',NULL,NULL,NULL),
-(80,'китоб 4',NULL,NULL,8,1,3,'2026-09-10',NULL,1234,0,'1-1789481794235-415267075.docx',NULL,NULL,NULL);
 
 /*Table structure for table `authors` */
 
@@ -142,34 +129,23 @@ CREATE TABLE `authors` (
   `address` varchar(150) DEFAULT NULL,
   `createdAt` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `authors` */
 
-insert  into `authors`(`id`,`firstName`,`lastName`,`familyName`,`birthDate`,`mobilePhone`,`homePhone`,`workPhone`,`cityId`,`address`,`createdAt`) values 
-(8,'Мирзо','Турсунзаде',NULL,'2004-05-08','929926754',NULL,NULL,1,NULL,'2026-05-22 07:33:53'),
-(9,'Лоик','Шерали',NULL,'2026-05-08','926471247',NULL,NULL,1,NULL,'2026-05-22 07:34:13'),
-(10,'Гулрухсор','Сафиева',NULL,'2026-05-16','926471247',NULL,NULL,1,NULL,'2026-05-22 07:34:30'),
-(11,'Абдулхамид','Самадов',NULL,'2026-05-01','926471247',NULL,NULL,1,NULL,'2026-05-22 07:34:39'),
-(12,'Давлат','Сафар',NULL,'2026-05-07','926471247',NULL,NULL,1,NULL,'2026-05-22 07:34:57'),
-(13,'Лафоре','Роберт','','1984-11-24','+000000000',NULL,NULL,13,'Indianapolis, Indiana','2026-05-22 08:10:33'),
-(14,'Эккель','Брюс','','1980-06-04','+000000000',NULL,NULL,13,'Crested Butte, Colorado','2026-05-22 08:13:13'),
-(15,'Билл','','Любанович','1983-06-16','+000000000',NULL,NULL,13,'Minneapolis, Minnesota','2026-05-22 08:15:10'),
-(16,'Goetz','Brian','','2026-05-03','+000000000',NULL,NULL,13,'Williston, Vermont','2026-05-22 08:18:31'),
-(17,'Sweigart','Al','','2026-05-08','+000000000',NULL,NULL,13,'San Francisco, California','2026-05-22 08:21:17'),
-(18,'Ашур','Сафар','','2026-09-23','+000000000',NULL,NULL,1,NULL,'2026-09-18 08:46:21'),
-(19,'Али','Бободжон','','2026-09-17','+000000000',NULL,NULL,1,NULL,'2026-09-09 08:52:09'),
-(20,'Саттор','Турсун',NULL,'2026-09-10','+000000000',NULL,NULL,1,NULL,'2026-09-12 08:53:55'),
-(21,'Назарзода','М','А','2026-09-08','926471247',NULL,NULL,1,'Buston','2026-09-14 10:21:18'),
-(22,'Шахром','Нуров',NULL,'2005-01-04','+000000000',NULL,NULL,1,'Buston','2026-09-15 17:40:42'),
-(23,'Искандар','Назаров',NULL,'2026-09-09','+000000000',NULL,NULL,1,'Buston','2026-09-15 19:01:31'),
-(24,'Машраф','Точиддинов',NULL,'2026-09-09','+000000000',NULL,NULL,1,'Buston','2026-09-15 19:01:59'),
-(25,'Самадчон','Кулдошев',NULL,'2026-09-02','+000000000',NULL,NULL,1,'Buston','2026-09-15 19:05:29'),
-(26,'Чахонгир','Бобокалонов',NULL,'2026-09-03','+000000000',NULL,NULL,1,'Buston','2026-09-15 19:06:13'),
-(27,'Мехрубон','Холиқов',NULL,'2026-09-02','929926754',NULL,NULL,1,'Buston','2026-09-15 19:07:35'),
-(28,'Амир','Абдурахмонов',NULL,'2026-09-03','929926754',NULL,NULL,1,'Buston','2026-09-15 19:10:07'),
-(29,'Абдурауф','Қодиров',NULL,'2026-09-01','929926754',NULL,NULL,1,'Buston','2026-09-15 19:10:36'),
-(30,'Шодрух','Сидиқзода',NULL,'2026-09-02','+000000000',NULL,NULL,1,'г. Душанбе, ул. Ахмади Дониш, 50','2026-09-15 19:14:29');
+/*Table structure for table `bbk_classifiers` */
+
+DROP TABLE IF EXISTS `bbk_classifiers`;
+
+CREATE TABLE `bbk_classifiers` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `code` varchar(50) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_bbk_code` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+/*Data for the table `bbk_classifiers` */
 
 /*Table structure for table `cities` */
 
@@ -185,22 +161,6 @@ CREATE TABLE `cities` (
 
 /*Data for the table `cities` */
 
-insert  into `cities`(`id`,`title`,`typeOf`,`parentId`) values 
-(1,'Тоҷикистон',1,NULL),
-(2,'Россия',1,NULL),
-(3,'Узбекистон',1,NULL),
-(4,'Хатлон',2,1),
-(5,'Худмухтори Бадахшони Кӯҳӣ',2,1),
-(6,'Душанбе',3,1),
-(7,'Хуҷанд',3,3),
-(8,'Конибодом',3,3),
-(9,'Исфара',3,3),
-(10,'Бохтар',3,4),
-(11,'Хоруғ',3,5),
-(12,'Суғд',2,1),
-(13,'США',1,NULL),
-(14,'Қазоқистон',1,NULL);
-
 /*Table structure for table `directions` */
 
 DROP TABLE IF EXISTS `directions`;
@@ -214,7 +174,7 @@ CREATE TABLE `directions` (
   `parentId` int DEFAULT NULL,
   `notes` text,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2723 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2725 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `directions` */
 
@@ -222,8 +182,6 @@ insert  into `directions`(`id`,`title_tj`,`title_ru`,`title_en`,`udc`,`parentId`
 (1,NULL,'Наука в целом (информационные технологи)',NULL,'00',NULL,NULL),
 (2,NULL,'Наука в целом. Науковедение. Организация умственного труда',NULL,'001',1,'см. 167/168 Методология и логика науки. Здесь собираются документы по вопросам, общим для многих отраслей науки, а также по вопросам организации умственного труда. Документы, посвященные одной отрасли знания или одному вопросу, обозначаются соответствующими индексами. Документы по организации научной работы в отдельных отраслях науки и техники классифицируются со знаком отношения к индексу отрасли. При необходимости собрать документы по отраслевому принципу, индекс инверсируется. 001:061.1(100) Международные организации по научной деятельности, например ЮНЕСКО\r\n\r\nсм. 341.16:001 ЮНЕСКО Организация Объединенных Наций по вопросам просвещения, науки и культуры'),
 (3,NULL,'Печать в целом. Документация. Научно-техническая информация (НТИ)',NULL,'002',1,NULL),
-(4,NULL,'Общее понятие о науке',NULL,'001.1',2,NULL),
-(5,NULL,'Определение, предмет, цель, сущность науки',NULL,'001.11',4,NULL),
 (6,NULL,'Философия. Психология',NULL,'1',NULL,NULL),
 (7,NULL,'Религия. Теология',NULL,'2',NULL,NULL),
 (8,NULL,'Теория и методы общественных наук',NULL,'30',NULL,NULL),
@@ -258,17 +216,14 @@ insert  into `directions`(`id`,`title_tj`,`title_ru`,`title_en`,`udc`,`parentId`
 (37,NULL,'	Искусство. Декоративно-прикладное искусство. Фотография. Музыка. Игры. Спорт',NULL,'7',NULL,NULL),
 (38,NULL,'Языкознание. Филология. Художественная литература. Литературоведение',NULL,'8',NULL,NULL),
 (39,NULL,'	География. Биография. История',NULL,'9',NULL,NULL),
-(40,NULL,'Самогон 2',NULL,'001.12',5,NULL),
 (42,NULL,'Метафизика',NULL,'11',6,NULL),
 (43,NULL,'Сущность и задачи философии',NULL,'101',6,NULL),
 (44,NULL,'	Причинность (каузальность). Первопричинность. Принципы. Causa efficiens. ',NULL,'122',6,NULL),
 (45,NULL,'Свобода и необходимость',NULL,'123',6,NULL),
 (46,NULL,'Телеология',NULL,'124',6,NULL),
 (47,NULL,'Конечность. Бесконечность. Бесконечное и безграничное.',NULL,'125',6,NULL),
-(48,NULL,'Системы письма и письменности. Знаки и символы.',NULL,'003',6,NULL),
 (49,NULL,'Душа. Смысл жизни и смерти',NULL,'128',6,NULL),
 (50,NULL,'Информационные технологии. Компьютерные технологии.',NULL,'004',6,NULL),
-(51,NULL,'Изучение проблемы организации:',NULL,'005',6,NULL),
 (52,NULL,'	Стандартизация и стандарты',NULL,'006',6,NULL),
 (53,NULL,'Происхождение и судьба индивидуальных душ. ',NULL,'129',6,NULL),
 (54,NULL,'Философия духа. Метафизика духовной жизни',NULL,'13',6,NULL),
@@ -339,7 +294,22 @@ insert  into `directions`(`id`,`title_tj`,`title_ru`,`title_en`,`udc`,`parentId`
 (121,NULL,'Сущность духа',NULL,'130.11',85,NULL),
 (122,NULL,'Законы духовной жизни	\r\n ',NULL,'130.12',85,NULL),
 (123,NULL,'Понятие и сущность оккультизма',NULL,'133.1',NULL,NULL),
-(124,NULL,'	Сверхчувственное переживание',NULL,'133.2',NULL,NULL);
+(124,NULL,'	Сверхчувственное переживание',NULL,'133.2',NULL,NULL),
+(2724,NULL,NULL,NULL,'1235',NULL,NULL);
+
+/*Table structure for table `favorite_authors` */
+
+DROP TABLE IF EXISTS `favorite_authors`;
+
+CREATE TABLE `favorite_authors` (
+  `userId` int NOT NULL,
+  `authorId` int NOT NULL,
+  `createdAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`userId`,`authorId`),
+  KEY `idx_favorite_authors_author` (`authorId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+/*Data for the table `favorite_authors` */
 
 /*Table structure for table `favorites` */
 
@@ -352,26 +322,10 @@ CREATE TABLE `favorites` (
   `createdAt` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_favorite` (`userId`,`articleId`),
-  KEY `fk_favorite_article` (`articleId`),
-  CONSTRAINT `fk_favorite_article` FOREIGN KEY (`articleId`) REFERENCES `articles` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_favorite_user` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  KEY `fk_favorite_article` (`articleId`)
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `favorites` */
-
-insert  into `favorites`(`id`,`userId`,`articleId`,`createdAt`) values 
-(10,3,57,'2026-09-13 19:56:20'),
-(11,3,51,'2026-09-13 19:56:23'),
-(13,3,66,'2026-09-13 20:25:24'),
-(14,3,60,'2026-09-13 20:25:28'),
-(15,3,59,'2026-09-13 20:25:31'),
-(18,1,66,'2026-09-13 20:28:53'),
-(19,1,56,'2026-09-13 20:28:54'),
-(24,3,55,'2026-09-15 08:38:54'),
-(25,1,59,'2026-09-15 08:57:55'),
-(26,1,61,'2026-09-15 08:57:56'),
-(27,3,53,'2026-09-15 09:02:24'),
-(28,3,58,'2026-09-16 07:01:33');
 
 /*Table structure for table `genres` */
 
@@ -382,22 +336,26 @@ CREATE TABLE `genres` (
   `name` varchar(50) DEFAULT NULL,
   `status` int DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `genres` */
 
 insert  into `genres`(`id`,`name`,`status`) values 
-(1,'Наука',1),
-(2,'Медицина',1),
-(3,'1',1),
-(4,'2',1),
-(5,'3',1),
-(6,'4',1),
-(7,'5',1),
-(8,'6',1),
-(9,'7',1),
-(10,'8',1),
-(11,'9',1);
+(2,'Медицина',1);
+
+/*Table structure for table `isbn_classifiers` */
+
+DROP TABLE IF EXISTS `isbn_classifiers`;
+
+CREATE TABLE `isbn_classifiers` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `code` varchar(32) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_isbn_code` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+/*Data for the table `isbn_classifiers` */
 
 /*Table structure for table `publishers` */
 
@@ -411,23 +369,28 @@ CREATE TABLE `publishers` (
   `cityId` int DEFAULT NULL,
   `address` varchar(150) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `publishers` */
 
-insert  into `publishers`(`id`,`title_tj`,`title_ru`,`title_en`,`cityId`,`address`) values 
-(1,'Ирфон',NULL,NULL,1,'г. Душанбе, просп. Негмата Карабаева, 17'),
-(2,'Адиб',NULL,NULL,1,'г. Душанбе, просп. Негмата Карабаева, 17'),
-(3,'Дониш',NULL,NULL,1,'г. Душанбе, ул. Ахмади Дониш, 50'),
-(11,'Шарқи Озод',NULL,NULL,1,'г. Душанбе, просп. Рудаки, 93'),
-(14,'Матбуот',NULL,NULL,13,'г. Душанбе, просп. Рудаки'),
-(15,'Маориф ва фарҳанг',NULL,NULL,2,'г. Душанбе, просп. Рудаки'),
-(16,'Ганҷ нашриёт',NULL,NULL,1,'г. Душанбе'),
-(17,'Авесто',NULL,NULL,1,'г. Душанбе'),
-(18,'Деваштич',NULL,NULL,1,'г. Душанбе'),
-(21,'Ирфон 1',NULL,NULL,1,'г. Душанбе, просп. Негмата Карабаева, 17'),
-(22,'Ирфон 2',NULL,NULL,1,'г. Душанбе, просп. Негмата Карабаева, 17'),
-(23,'Ирфон 3',NULL,NULL,1,'г. Душанбе, просп. Негмата Карабаева, 17');
+/*Table structure for table `ratings` */
+
+DROP TABLE IF EXISTS `ratings`;
+
+CREATE TABLE `ratings` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `userId` int NOT NULL,
+  `targetType` varchar(16) NOT NULL,
+  `targetId` int NOT NULL,
+  `score` tinyint unsigned NOT NULL,
+  `createdAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updatedAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_rating_user_target` (`userId`,`targetType`,`targetId`),
+  KEY `idx_rating_target` (`targetType`,`targetId`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+/*Data for the table `ratings` */
 
 /*Table structure for table `typeof` */
 
@@ -458,11 +421,6 @@ CREATE TABLE `user_genres` (
 
 /*Data for the table `user_genres` */
 
-insert  into `user_genres`(`userId`,`genreId`) values 
-(3,1),
-(3,2),
-(3,4);
-
 /*Table structure for table `users` */
 
 DROP TABLE IF EXISTS `users`;
@@ -486,16 +444,12 @@ CREATE TABLE `users` (
   UNIQUE KEY `uq_users_login` (`login`),
   UNIQUE KEY `uq_users_email` (`eMail`),
   UNIQUE KEY `uq_users_authToken` (`authToken`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `users` */
 
 insert  into `users`(`id`,`eMail`,`login`,`password`,`firstName`,`lastName`,`familyName`,`birthDate`,`mobilePhone`,`pseudonym`,`createdAt`,`profilePhoto`,`authToken`,`role`) values 
-(1,'ikbolnazarov501@gmail.com','ikbolnazarov501@gmail.com','$2b$12$G4D5dvdRrdnM/zzO3OIqBO0kJapL9WpDKWLiJI0m7CNp585kFYM8S','Мухаммадикбол','Назарзода','Айвазмахмад','2005-07-11','+992926471247','Икбол','2025-11-01 07:51:50','Ð¡Ð½Ð¸Ð¼Ð¾Ðº ÑÐºÑÐ°Ð½Ð° 2025-10-09 225729-1789235625683-311680644.png',NULL,'user'),
-(2,'ikbolnazarov502@gmail.com','ikbolnazarov502@gmail.com','ddlc2018','Самадҷон','Кулдошев',NULL,'2025-11-06','+992926471247','Самад','2025-11-12 07:51:46',NULL,NULL,'user'),
-(3,'nazarovikbol@gmail.com','Admin','$2b$12$yhZG1YY3gJCztwG6RFhXBuyZ0MfMxD6Ib/b36RI93.yDI3/zi.2Hm','Икбол','Назаров','Айвазович','2026-07-02','+992926471247','IQBOL','2026-09-12 21:43:04','1. Ð§ÐµÑÐ½ÑÐ¹ ÐºÐ¾Ñ Ñ ÑÑÐ±ÐºÐ¾Ð¹-1789303032340-818905269.jpg','83b45e47928a729de7848ffb6e4dacf4e50bfd4610911e7f73cbc332f0dfe0b9','admin'),
-(4,'ikbolnazarov5065@gmail.com','1234qwerty','7fe293643ae3c9bc575afc7a25b77437:916e0c69d37c894d97ab22595bdcc046e0dfdd65351d32830844f2362f673cae6f31c729402569fda5014fa88fc8a247ec67bc42ed873b46cd8d769865625fb0','Икбол','Назаров','Айвазович','2026-09-02','+992926471247','IQBOL','2026-09-13 15:09:32','7. ÐÐ°Ð±Ð¾ÑÐºÐ°-1789294188863-781790796.jpg',NULL,'user'),
-(6,'ikbolnazarov2501@gmail.com','123qwerty22','$2b$12$LTJEIWPelWXBcdCBWsAALe7MD.6drmZUQKaloDOfQ.7sXBnbbc/S2','Икбол','Назаровв','Айвазович',NULL,NULL,NULL,'2026-11-09 12:10:02',NULL,NULL,'admin');
+(3,'nazarovikbol@gmail.com','Admin','$2b$12$yhZG1YY3gJCztwG6RFhXBuyZ0MfMxD6Ib/b36RI93.yDI3/zi.2Hm','Икбол','Назаров','Айвазович','2026-07-01','+992926471247','IQBOL','2026-09-12 16:43:04','1. Ð§ÐµÑÐ½ÑÐ¹ ÐºÐ¾Ñ Ñ ÑÑÐ±ÐºÐ¾Ð¹-1789303032340-818905269.jpg','e17a1d527db4ae3273bfa6e40a31b101be4d85c7c72b8febb6a372664a56c657','admin');
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

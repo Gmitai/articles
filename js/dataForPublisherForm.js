@@ -54,8 +54,6 @@ function submitPublisherForm() {
             return result;
         })
         .then(resp => {
-            alert(resp.message || "Редакция обновлена!");
-
             if (typeof window.notifyAdminFormSaved === 'function') {
                 window.notifyAdminFormSaved();
             } else {

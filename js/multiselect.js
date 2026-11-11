@@ -2,7 +2,7 @@ const selectedDiv = document.getElementById('selected-values');
 const dropdown = document.getElementById('dropdown');
 const authorSearchInput = document.getElementById('authorSearchInput');
 const authorToggleBtn = document.getElementById('authorToggleBtn');
-const isArticleAuthorPicker = Boolean(authorSearchInput && authorToggleBtn && dropdown && selectedDiv);
+const isArticleAuthorPicker = Boolean(authorSearchInput && authorToggleBtn && dropdown);
 let selectedAuthors = [];
 let manualSelectedAuthors = [];
 let authorsCatalog = [];
@@ -71,9 +71,7 @@ function syncTypedAuthors() {
         ...selectedAuthors.map(id => authorsCatalog.find(author => Number(author.id) === id)?.fullName).filter(Boolean),
         ...getEnteredAuthorNames().filter(name => !findAuthorByName(name))
     ])];
-    if (selectedDiv) {
-        selectedDiv.textContent = names.length ? `Выбраны / добавятся: ${names.join(', ')}` : 'Выберите из списка или введите ФИО';
-    }
+    if (selectedDiv) selectedDiv.hidden = true;
 }
 
 function setSelectedAuthors(authors) {
@@ -110,13 +108,12 @@ dropdown?.addEventListener('change', event => {
     const checkbox = event.target.closest('input[type="checkbox"]');
     if (!checkbox) return;
 
-    if (!checkbox.checked) {
-        const author = authorsCatalog.find(item => Number(item.id) === Number(checkbox.value));
-        if (author && authorSearchInput) {
-            authorSearchInput.value = getEnteredAuthorNames()
-                .filter(name => normalizeAuthorName(name) !== normalizeAuthorName(author.fullName))
-                .join(', ');
-        }
+    const author = authorsCatalog.find(item => Number(item.id) === Number(checkbox.value));
+    if (author && authorSearchInput) {
+        const names = getEnteredAuthorNames()
+            .filter(name => Number(findAuthorByName(name)?.id) !== Number(author.id));
+        if (checkbox.checked) names.push(author.fullName);
+        authorSearchInput.value = [...new Set(names)].join(', ');
     }
 
     const typedIds = new Set(getEnteredAuthorNames().map(findAuthorByName).filter(Boolean).map(author => Number(author.id)));

@@ -181,4 +181,29 @@ async function prepareBookUpload(files, { keepOriginal = false } = {}) {
     return createPdfFromImages(files);
 }
 
-module.exports = { prepareBookUpload, MAX_PAGES, MAX_TOTAL_BYTES };
+async function countPdfPages(filePath) {
+    let carry = '';
+    let pageCount = 0;
+    let treeCount = 0;
+
+    for await (const chunk of fs.createReadStream(filePath)) {
+        const prefixLength = carry.length;
+        const text = carry + chunk.toString('latin1');
+        const pagePattern = /\/Type\s*\/Page\b/g;
+        const countPattern = /\/Count\s+(\d+)/g;
+        let match;
+        while ((match = pagePattern.exec(text))) {
+            if (match.index + match[0].length > prefixLength) pageCount += 1;
+        }
+        while ((match = countPattern.exec(text))) {
+            if (match.index + match[0].length > prefixLength) {
+                treeCount = Math.max(treeCount, Number(match[1]) || 0);
+            }
+        }
+        carry = text.slice(-64);
+    }
+
+    return pageCount || treeCount;
+}
+
+module.exports = { prepareBookUpload, countPdfPages, MAX_PAGES, MAX_TOTAL_BYTES };

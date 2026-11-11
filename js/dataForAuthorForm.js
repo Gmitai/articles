@@ -72,8 +72,6 @@ function submitAuthorForm() {
             return result;
         })
         .then(resp => {
-            alert(resp.message || "Автор обновлен!");
-
             if (typeof window.notifyAdminFormSaved === 'function') {
                 window.notifyAdminFormSaved();
             } else {

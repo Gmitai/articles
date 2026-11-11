@@ -108,7 +108,6 @@ async function submitDirectionForm() {
         if (!response.ok) {
             throw new Error(data.message || data.error || 'Ошибка сохранения');
         }
-        alert(data.message);
         if (typeof window.notifyAdminFormSaved === 'function') {
             window.notifyAdminFormSaved();
         } else {

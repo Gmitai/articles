@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const requestKey = String(userId);
         if (pendingUserDeletes.has(requestKey)) return;
         pendingUserDeletes.add(requestKey);
-        if (!confirm(`Удалить пользователя «${userName}»? Это действие нельзя отменить.`)) {
+        if (!confirm(`Переместить пользователя «${userName}» в корзину? Его можно будет восстановить.`)) {
             pendingUserDeletes.delete(requestKey);
             return;
         }
@@ -110,7 +110,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             closeModal();
             if (typeof loadForKey === 'function') loadForKey('users');
-            alert(wasEditing ? 'Данные пользователя обновлены' : 'Пользователь добавлен');
         } catch (error) {
             message.textContent = error.message;
             message.classList.add('is-error');

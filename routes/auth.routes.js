@@ -241,6 +241,7 @@ router.post('/auth/register', async (req, res) => {
         );
 
         if (!(await saveUserGenres(result.insertId, genreIds))) {
+            await connection.execute('DELETE FROM user_genres WHERE userId = ?', [result.insertId]);
             await connection.execute('DELETE FROM users WHERE id = ?', [result.insertId]);
             return res.status(400).json({
                 success: false,

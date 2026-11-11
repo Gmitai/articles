@@ -143,6 +143,53 @@ body {
     overflow-x: auto;
 }
 
+.record-search-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.record-search-input {
+    box-sizing: border-box;
+    width: min(100%, 460px);
+    min-width: 220px;
+    height: 42px;
+    margin: 0;
+    padding: 9px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #fff;
+    color: #1f2937;
+    font-size: 14px;
+}
+
+.record-search-input:focus {
+    outline: none;
+    border-color: #64748b;
+    box-shadow: 0 0 0 3px rgba(100, 116, 139, .14);
+}
+
+.record-sort-select {
+    box-sizing: border-box;
+    max-width: 240px;
+    height: 42px;
+    margin: 0;
+    padding: 8px 30px 8px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #fff;
+    color: #1f2937;
+    font-size: 14px;
+}
+
+.record-search-status {
+    color: #6b7280;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
 .placeholder {
     min-height: 300px;
     display: flex;
@@ -298,6 +345,28 @@ body {
     }
 }
 
+.classifier-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.classifier-tab {
+    width: auto;
+    min-width: 90px;
+    padding: 8px 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #fff;
+    color: #1f2937;
+}
+
+.classifier-tab.active {
+    border-color: #1f2937;
+    background: #1f2937;
+    color: #fff;
+}
+
 .admin-user-modal {
     position: fixed;
     inset: 0;
@@ -410,4 +479,135 @@ body {
 
 .admin-user-delete-button:hover {
     background: #fef2f2;
+}
+
+.trash-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.trash-table th,
+.trash-table td {
+    overflow-wrap: anywhere;
+}
+
+.trash-table th:nth-child(1) { width: 16%; }
+.trash-table th:nth-child(2) { width: 30%; }
+.trash-table th:nth-child(3) { width: 20%; }
+.trash-table th:nth-child(4) { width: 34%; }
+
+.trash-bulk-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.trash-bulk-actions button {
+    width: auto;
+    margin: 0;
+    padding: 9px 13px;
+    border: 0;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+.admin-trash-restore-all {
+    background: #e8f5e9;
+    color: #166534;
+}
+
+.admin-trash-clear-all {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+.trash-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.trash-filter {
+    width: auto;
+    margin: 0;
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 20px;
+    background: #fff;
+    color: #374151;
+    cursor: pointer;
+}
+
+.trash-filter.active {
+    border-color: #1f2937;
+    background: #1f2937;
+    color: #fff;
+}
+
+.trash-actions {
+    text-align: right;
+}
+
+.trash-action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.trash-actions button {
+    box-sizing: border-box;
+    width: auto;
+    max-width: 100%;
+    margin: 0;
+    padding: 7px 9px;
+    border: 0;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1.25;
+    white-space: normal;
+}
+
+.admin-trash-restore {
+    background: #e8f5e9;
+    color: #166534;
+}
+
+.admin-trash-purge {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+@media (max-width: 700px) {
+    .trash-table thead {
+        display: none;
+    }
+
+    .trash-table,
+    .trash-table tbody,
+    .trash-table tr,
+    .trash-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .trash-table tr {
+        padding: 10px 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .trash-actions {
+        text-align: left;
+    }
+
+    .trash-action-buttons {
+        justify-content: flex-start;
+    }
+
+    .trash-actions button {
+        flex: 1 1 135px;
+    }
 }

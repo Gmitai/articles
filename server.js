@@ -75,7 +75,7 @@ app.use('/admin-api', adminRoutes);
 app.use('/', mainRoutes);
 app.use('/loadDt', loadDtToFormRoutes);
 
-app.listen(port, '192.168.0.8', () => {
+app.listen(port, 'localhost', () => {
     console.log(`Сервер запущен на порту ${port}`);
 });
 

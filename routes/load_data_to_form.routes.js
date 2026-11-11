@@ -3,21 +3,49 @@ const router = express.Router();
 
 const path = require("path");
 const connection = require('../db/db');
+const ensureInteractionTables = require('../db/interaction-tables');
 router.use(express.static(path.join(__dirname, '..', 'css')))
 router.use(express.static(path.join(__dirname, '..', 'icons')))
 router.use(express.static(path.join(__dirname, '..', 'uploads')))
 router.use(express.json());
 
+router.get('/getArticleIdentifierSuggestions', async (req, res) => {
+    try {
+        await ensureInteractionTables();
+        const [bbkRows] = await connection.execute(`
+            SELECT DISTINCT bbk AS value FROM articles
+            WHERE bbk IS NOT NULL AND TRIM(bbk) <> '' ORDER BY bbk
+        `);
+        const [isbnRows] = await connection.execute(`
+            SELECT DISTINCT isbn AS value FROM articles
+            WHERE isbn IS NOT NULL AND TRIM(isbn) <> '' ORDER BY isbn
+        `);
+        const [bbkClassifierRows] = await connection.execute('SELECT code AS value FROM bbk_classifiers ORDER BY code');
+        const [isbnClassifierRows] = await connection.execute('SELECT code AS value FROM isbn_classifiers ORDER BY code');
+        res.json({
+            bbk: [...new Set([...bbkClassifierRows, ...bbkRows].map(row => row.value))],
+            isbn: [...new Set([...isbnClassifierRows, ...isbnRows].map(row => row.value))]
+        });
+    } catch (error) {
+        console.error('Article identifier suggestions error:', error);
+        res.status(500).json({ error: 'Не удалось загрузить подсказки ББК и ISBN.' });
+    }
+});
+
 router.get('/getArticleById', async (req, res) => {
     const id = req.query.id;
 
     try {
+        await ensureInteractionTables();
         const [articleRows] = await connection.execute(
             `SELECT
                 id,
                 title_tj,
+                genreId,
                 pagesCount,
                 publishYear,
+                bbk,
+                isbn,
                 directionId,
                 publisherId,
                 filePath,

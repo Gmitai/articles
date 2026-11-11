@@ -38,6 +38,10 @@
             ⭐ Избранное
         </button>
 
+        <button class="books-tab" data-tab="authors-favorites">
+            Авторы
+        </button>
+
     </div>
 
     <section id="uploads" class="books-panel active">
@@ -130,6 +134,16 @@
 
     </section>
 
+    <section id="authors-favorites" class="books-panel">
+        <div class="panel-header">
+            <div>
+                <h2>Избранные авторы</h2>
+                <p>Авторы, которых вы сохранили</p>
+            </div>
+        </div>
+        <div id="favoriteAuthorsContainer" class="my-books-grid"></div>
+    </section>
+
 </main>
 
 <script>
@@ -176,6 +190,10 @@
                 }
             }
 
+            if (target === 'authors-favorites' && typeof window.loadFavoriteAuthors === 'function') {
+                window.loadFavoriteAuthors();
+            }
+
         });
 
     });
@@ -220,6 +238,7 @@
 </script>
 
 <script src="/js/my-books.js"></script>
+<script src="/js/favorite-authors.js"></script>
 
 </body>
 </html>
