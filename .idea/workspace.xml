@@ -5,19 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fe834628-b3fc-4675-bd87-9a32f97eadd9" name="Changes" comment="v1.5">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Baza.sql" beforeDir="false" afterPath="$PROJECT_DIR$/Baza.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/css/styles.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/css/user.css" beforeDir="false" afterPath="$PROJECT_DIR$/css/user.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/admin-catalog.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/admin-catalog.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/admin-genres.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/admin-genres.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/admin-users.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/admin-users.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/menues.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/menues.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/user-library.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/user-library.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/admin.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/admin.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/auth.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/auth.routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/image-scans-to-pdf.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/image-scans-to-pdf.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/main.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/main.routes.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/server.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -169,7 +156,7 @@
       <workItem from="1791644489302" duration="127000" />
       <workItem from="1793773773413" duration="1463000" />
       <workItem from="1794206008334" duration="5052000" />
-      <workItem from="1794279339953" duration="10818000" />
+      <workItem from="1794279339953" duration="11327000" />
     </task>
     <task id="LOCAL-00001" summary="v1.2">
       <option name="closed" value="true" />
