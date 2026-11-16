@@ -36,7 +36,7 @@ async function getUserByToken(authToken) {
             pseudonym,
             profilePhoto
          FROM users
-         WHERE authToken = ?
+         WHERE authToken = ? AND recordStatus = 1
          LIMIT 1`,
         [authToken]
     );
@@ -50,7 +50,7 @@ async function getUserByToken(authToken) {
         `SELECT g.id, g.name
          FROM user_genres ug
          JOIN genres g ON g.id = ug.genreId
-         WHERE ug.userId = ?
+         WHERE ug.userId = ? AND g.recordStatus = 1
          ORDER BY g.name`,
         [user.id]
     );
@@ -107,7 +107,7 @@ router.get('/me', async (req, res) => {
 
 router.get('/genres', async (req, res) => {
     try {
-        const [genres] = await db.query('SELECT id, name FROM genres ORDER BY name');
+        const [genres] = await db.query('SELECT id, name FROM genres WHERE recordStatus = 1 ORDER BY name');
         res.json({ success: true, genres });
     } catch (error) {
         console.error('Ошибка получения жанров:', error);
@@ -156,7 +156,7 @@ router.put('/update', async (req, res) => {
         if (genreIds.length) {
             const placeholders = genreIds.map(() => '?').join(', ');
             const [genres] = await db.query(
-                `SELECT id FROM genres WHERE id IN (${placeholders})`,
+                `SELECT id FROM genres WHERE id IN (${placeholders}) AND recordStatus = 1`,
                 genreIds
             );
             if (genres.length !== genreIds.length) {

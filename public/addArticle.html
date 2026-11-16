@@ -33,15 +33,12 @@
         </div>
 
         <div class="form-group">
-            <label for="genreId">Жанр:</label>
-            <select id="genreId" name="genreId"><option value="">Без жанра</option></select>
-        </div>
-
-        <div class="form-group">
             <label for="fileUpload">Выбирите файл:</label>
             <input type="file" id="fileUpload" accept="application/pdf,.pdf,.doc,.docx,.djvu,.djv,image/jpeg,.jpg,.jpeg,image/png,.png" name="fileData" multiple>
             <small>Один PDF, Word или DjVu либо несколько сканов JPG/PNG — они будут собраны в PDF.</small>
         </div>
+
+
         <div class="form-group">
             <label for="pageCount">Количество страниц:</label>
             <input type="number" id="pageCount" name="pCount" required>
@@ -52,16 +49,6 @@
             <input type="date" id="yearOfPublish" name="publishYear" required>
         </div>
 
-        <div class="form-group identifier-select-container">
-            <label for="bbk">ББК:</label>
-            <div class="identifier-select-row"><input type="text" id="bbk" name="bbk" maxlength="50" autocomplete="off"><button type="button" class="tree-button identifier-toggle" data-for="bbk" aria-label="Выбрать ББК">▾</button></div>
-            <div class="identifier-dropdown hidden" data-list-for="bbk" role="listbox"></div>
-        </div>
-        <div class="form-group identifier-select-container">
-            <label for="isbn">ISBN:</label>
-            <div class="identifier-select-row"><input type="text" id="isbn" name="isbn" maxlength="32" autocomplete="off"><button type="button" class="tree-button identifier-toggle" data-for="isbn" aria-label="Выбрать ISBN">▾</button></div>
-            <div class="identifier-dropdown hidden" data-list-for="isbn" role="listbox"></div>
-        </div>
 
         <div class="tree-select-container">
             <label for="udcSearchInput">Направление (УДК)</label>
@@ -89,6 +76,30 @@
         </div>
 
 
+
+        <fieldset class="optional-fields">
+            <legend>Дополнительные данные (необязательно)</legend>
+            <div class="form-group identifier-select-container genre-select-container">
+                <label for="genreName">Жанр:</label>
+                <div class="identifier-select-row">
+                    <input type="text" id="genreName" name="genreName" maxlength="50" placeholder="Введите жанр" autocomplete="off" aria-autocomplete="list" aria-controls="genreDropdown">
+                    <button type="button" class="tree-button identifier-toggle genre-toggle" aria-label="Открыть список жанров" title="Открыть список жанров">▾</button>
+                </div>
+                <div id="genreDropdown" class="identifier-dropdown hidden" role="listbox"></div>
+            </div>
+
+            <div class="form-group identifier-select-container">
+                <label for="bbk">ББК:</label>
+                <div class="identifier-select-row"><input type="text" id="bbk" name="bbk" maxlength="50" autocomplete="off"><button type="button" class="tree-button identifier-toggle" data-for="bbk" aria-label="Выбрать ББК">▾</button></div>
+                <div class="identifier-dropdown hidden" data-list-for="bbk" role="listbox"></div>
+            </div>
+            <div class="form-group identifier-select-container">
+                <label for="isbn">ISBN:</label>
+                <div class="identifier-select-row"><input type="text" id="isbn" name="isbn" maxlength="32" autocomplete="off"><button type="button" class="tree-button identifier-toggle" data-for="isbn" aria-label="Выбрать ISBN">▾</button></div>
+                <div class="identifier-dropdown hidden" data-list-for="isbn" role="listbox"></div>
+            </div>
+
+        </fieldset>
 
         <div class="form-group">
             <button type="submit" >Подтвердить</button>

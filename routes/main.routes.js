@@ -71,7 +71,7 @@ async function getAdminUserId(req) {
     if (!cookie) return null;
     const token = decodeURIComponent(cookie.slice('authToken='.length));
     const [users] = await connection.execute(
-        'SELECT id FROM users WHERE authToken = ? AND role = ? LIMIT 1',
+        'SELECT id FROM users WHERE authToken = ? AND role = ? AND recordStatus = 1 LIMIT 1',
         [token, 'admin']
     );
     return users.length ? users[0].id : null;
@@ -88,7 +88,7 @@ async function getOrCreateDirectionId(udcCode, selectedId) {
     if (!code) return selectedId || null;
     if (code.length > 25) throw new Error('Код УДК не должен превышать 25 символов.');
     const [existing] = await connection.query(
-        'SELECT id FROM directions WHERE TRIM(udc) = ? LIMIT 1', [code]
+        'SELECT id FROM directions WHERE TRIM(udc) = ? AND recordStatus = 1 LIMIT 1', [code]
     );
     if (existing.length) return existing[0].id;
     const [inserted] = await connection.query(
@@ -97,12 +97,27 @@ async function getOrCreateDirectionId(udcCode, selectedId) {
     return inserted.insertId;
 }
 
-async function resolveArticleGenreId(value) {
+async function resolveArticleGenreId(value, name) {
+    const genreName = String(name || '').trim().replace(/\s+/g, ' ');
+    if (genreName) {
+        if (genreName.length > 50) throw new Error('Название жанра не должно превышать 50 символов.');
+        const [existing] = await connection.query(
+            'SELECT id FROM genres WHERE recordStatus = 1 AND LOWER(name) = LOWER(?) LIMIT 1',
+            [genreName]
+        );
+        if (existing.length) return existing[0].id;
+        const [created] = await connection.query(
+            'INSERT INTO genres (name, status) VALUES (?, 1)', [genreName]
+        );
+        return created.insertId;
+    }
+
+    // Keep compatibility with older clients that still submit genreId.
     if (value == null || String(value).trim() === '') return null;
     const id = Number(value);
-    if (!Number.isInteger(id) || id < 1) throw new Error('Select a valid genre.');
-    const [genres] = await connection.query('SELECT id FROM genres WHERE id = ? LIMIT 1', [id]);
-    if (!genres.length) throw new Error('Selected genre was not found.');
+    if (!Number.isInteger(id) || id < 1) throw new Error('Выберите корректный жанр.');
+    const [genres] = await connection.query('SELECT id FROM genres WHERE id = ? AND recordStatus = 1 LIMIT 1', [id]);
+    if (!genres.length) throw new Error('Выбранный жанр не найден.');
     return id;
 }
 
@@ -123,7 +138,7 @@ async function resolveArticleAuthorIds(authorIds, authorNames) {
 
         const [existing] = await connection.query(
             `SELECT id FROM authors
-             WHERE LOWER(CONCAT_WS(' ', lastName, firstName, NULLIF(familyName, ''))) = LOWER(?)
+             WHERE recordStatus = 1 AND LOWER(CONCAT_WS(' ', lastName, firstName, NULLIF(familyName, ''))) = LOWER(?)
              LIMIT 1`,
             [fullName]
         );
@@ -131,7 +146,7 @@ async function resolveArticleAuthorIds(authorIds, authorNames) {
         if (!matchedAuthor && parts.length === 2) {
             const [shortMatches] = await connection.query(
                 `SELECT id FROM authors
-                 WHERE LOWER(CONCAT_WS(' ', lastName, firstName)) = LOWER(?)
+                 WHERE recordStatus = 1 AND LOWER(CONCAT_WS(' ', lastName, firstName)) = LOWER(?)
                  LIMIT 1`,
                 [fullName]
             );
@@ -161,7 +176,7 @@ async function getOrCreatePublisherId(publisherName, selectedId) {
     if (title.length > 50) throw new Error('Название издательства не должно превышать 50 символов.');
 
     const [existing] = await connection.query(
-        'SELECT id FROM publishers WHERE LOWER(TRIM(title_tj)) = LOWER(?) LIMIT 1',
+        'SELECT id FROM publishers WHERE recordStatus = 1 AND LOWER(TRIM(title_tj)) = LOWER(?) LIMIT 1',
         [title]
     );
     if (existing.length) return existing[0].id;
@@ -185,12 +200,12 @@ router.get('/admin', async (req, res) => {
 
 //статьи
 router.get('/articles', async (req, res) => {
-    const [result] = await connection.execute("SELECT a.id, a.title_tj AS 'Название', CONCAT_WS(' ', d.udc, NULLIF(d.title_ru, '')) AS 'Направление (УДК)', p.title_tj AS 'Издательство', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Год издания', IF(a.typeOf=1, 'Статья', 'Книга') AS 'Тип' FROM articles a LEFT JOIN directions d ON a.directionId=d.id LEFT JOIN genres g ON a.genreId=g.id LEFT JOIN publishers p  ON a.publisherId=p.id WHERE a.typeOf=1");
+    const [result] = await connection.execute("SELECT a.id, a.title_tj AS 'Название', CONCAT_WS(' ', d.udc, NULLIF(d.title_ru, '')) AS 'Направление (УДК)', p.title_tj AS 'Издательство', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Год издания', IF(a.typeOf=1, 'Статья', 'Книга') AS 'Тип' FROM articles a LEFT JOIN directions d ON a.directionId=d.id AND d.recordStatus=1 LEFT JOIN genres g ON a.genreId=g.id AND g.recordStatus=1 LEFT JOIN publishers p ON a.publisherId=p.id AND p.recordStatus=1 WHERE a.typeOf=1 AND a.recordStatus=1");
 
     try {
         selected_menuId = 0;
         let subresult;
-        [subresult] = await connection.execute("SELECT a.id AS id, CONCAT(ath.lastName,' ', ath.firstName, ' ', IFNULL(ath.familyName, '')) AS author FROM articles a JOIN article_authors au JOIN authors ath ON au.id_article=a.id AND au.id_author=ath.id");
+        [subresult] = await connection.execute("SELECT a.id AS id, CONCAT(ath.lastName,' ', ath.firstName, ' ', IFNULL(ath.familyName, '')) AS author FROM articles a JOIN article_authors au JOIN authors ath ON au.id_article=a.id AND au.id_author=ath.id WHERE a.recordStatus=1 AND ath.recordStatus=1");
 
         subresult.forEach(item => {
             const indx = result.findIndex(v => v.id === item.id)
@@ -212,11 +227,11 @@ router.get('/articles', async (req, res) => {
 
 //книги
 router.get('/books', async (req, res) => {
-    const [result] = await connection.execute("SELECT a.id, a.title_tj AS 'Название', CONCAT_WS(' ', d.udc, NULLIF(d.title_ru, '')) AS 'Направление (УДК)', p.title_tj AS 'Издательство', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Год издания' FROM articles a LEFT JOIN directions d ON a.directionId=d.id LEFT JOIN genres g ON a.genreId=g.id LEFT JOIN publishers p  ON a.publisherId=p.id WHERE a.typeOf=0");
+    const [result] = await connection.execute("SELECT a.id, a.title_tj AS 'Название', CONCAT_WS(' ', d.udc, NULLIF(d.title_ru, '')) AS 'Направление (УДК)', p.title_tj AS 'Издательство', DATE_FORMAT(a.publishYear, '%d.%m.%Y') AS 'Год издания' FROM articles a LEFT JOIN directions d ON a.directionId=d.id AND d.recordStatus=1 LEFT JOIN genres g ON a.genreId=g.id AND g.recordStatus=1 LEFT JOIN publishers p ON a.publisherId=p.id AND p.recordStatus=1 WHERE a.typeOf=0 AND a.recordStatus=1");
     try {
         selected_menuId = 0;
         let subresult;
-        [subresult] = await connection.execute("SELECT a.id AS id, CONCAT(ath.lastName,' ', ath.firstName, ' ', IFNULL(ath.familyName, '')) AS author FROM articles a JOIN article_authors au JOIN authors ath ON au.id_article=a.id AND au.id_author=ath.id");
+        [subresult] = await connection.execute("SELECT a.id AS id, CONCAT(ath.lastName,' ', ath.firstName, ' ', IFNULL(ath.familyName, '')) AS author FROM articles a JOIN article_authors au JOIN authors ath ON au.id_article=a.id AND au.id_author=ath.id WHERE a.recordStatus=1 AND ath.recordStatus=1");
 
         subresult.forEach(item => {
             const indx = result.findIndex(v => v.id === item.id)
@@ -238,7 +253,7 @@ router.get('/books', async (req, res) => {
 
 //авторы
 router.get('/authors', async (req, res) => {
-    const [result] = await connection.execute("SELECT a.id, CONCAT(a.lastName,' ', a.firstName, ' ', IFNULL(a.familyName, '')) AS 'ФИО', DATE_FORMAT(a.birthDate, '%d.%m.%Y') AS 'Дата рождения', c.title AS 'Город', a.address AS 'Адрес' FROM authors a LEFT JOIN cities c ON a.cityId=c.id");
+    const [result] = await connection.execute("SELECT a.id, CONCAT(a.lastName,' ', a.firstName, ' ', IFNULL(a.familyName, '')) AS 'ФИО', DATE_FORMAT(a.birthDate, '%d.%m.%Y') AS 'Дата рождения', c.title AS 'Город', a.address AS 'Адрес' FROM authors a LEFT JOIN cities c ON a.cityId=c.id WHERE a.recordStatus=1");
     try {
         selected_menuId = 1;
         res.send([result, selected_menuId]);
@@ -249,7 +264,7 @@ router.get('/authors', async (req, res) => {
 
 //издательства
 router.get('/publishers', async (req, res) => {
-    const [result] = await connection.execute("SELECT p.id, p.title_tj as 'Название издательства', c.title as 'Город', address as 'Адрес' from publishers p left join cities c on p.cityId=c.id");
+    const [result] = await connection.execute("SELECT p.id, p.title_tj as 'Название издательства', c.title as 'Город', address as 'Адрес' from publishers p left join cities c on p.cityId=c.id WHERE p.recordStatus=1");
     try {
         selected_menuId=2;
         res.send([result, selected_menuId]);
@@ -268,6 +283,7 @@ router.get('/directions', async (req, res) => {
                 title_ru AS 'Направление',
                 udc AS 'УДК'
             FROM directions
+            WHERE recordStatus = 1
             ORDER BY udc
         `);
 
@@ -287,7 +303,7 @@ router.get('/genres', async (req, res) => {
     if (!(await getAdminUserId(req))) {
         return res.status(403).json({ error: 'Недостаточно прав' });
     }
-    const [result] = await connection.execute('SELECT id, name AS genreName FROM genres ORDER BY name');
+    const [result] = await connection.execute('SELECT id, name AS genreName FROM genres WHERE recordStatus = 1 ORDER BY name');
     try {
         selected_menuId=5;
         res.send([result, selected_menuId]);
@@ -302,7 +318,7 @@ router.get('/users', async (req, res) => {
     if (!adminId) {
         return res.status(403).json({ error: 'Недостаточно прав' });
     }
-    const [result] = await connection.execute("SELECT u.id, CONCAT(u.lastName,' ', u.firstName, ' ', IFNULL(u.familyName, '')) AS 'ФИО', u.login AS 'Логин', u.eMail AS 'Эл-почта', u.mobilePhone AS 'Номер телефона', DATE_FORMAT(u.birthDate, '%d.%m.%Y') AS 'Дата рождения', u.pseudonym AS 'Псевдоним', u.role AS 'Роль', DATE_FORMAT(u.createdAt, '%d.%m.%Y') AS 'Дата регистрации' FROM users u WHERE u.id <> ?", [adminId]);
+    const [result] = await connection.execute("SELECT u.id, CONCAT(u.lastName,' ', u.firstName, ' ', IFNULL(u.familyName, '')) AS 'ФИО', u.login AS 'Логин', u.eMail AS 'Эл-почта', u.mobilePhone AS 'Номер телефона', DATE_FORMAT(u.birthDate, '%d.%m.%Y') AS 'Дата рождения', u.pseudonym AS 'Псевдоним', u.role AS 'Роль', DATE_FORMAT(u.createdAt, '%d.%m.%Y') AS 'Дата регистрации' FROM users u WHERE u.id <> ? AND u.recordStatus = 1", [adminId]);
     try{
         selected_menuId=6;
         res.send([result, selected_menuId]);
@@ -316,7 +332,7 @@ router.get('/users', async (req, res) => {
 
 router.get('/articleFileName/:id', async (req, res) => {
     const articleId = req.params.id;
-    const [result] = await connection.execute(`SELECT filePath FROM articles WHERE id = ${articleId}`);
+    const [result] = await connection.execute('SELECT filePath FROM articles WHERE id = ? AND recordStatus = 1', [articleId]);
     try {
 
         res.send(result);
@@ -327,8 +343,12 @@ router.get('/articleFileName/:id', async (req, res) => {
     }
 });
 
-router.get('/download/:filename' , (req, res) => {
-    const fileName = req.params.filename;
+router.get('/download/:filename' , async (req, res) => {
+    const fileName = path.basename(req.params.filename);
+    const [activeFiles] = await connection.execute(
+        'SELECT id FROM articles WHERE filePath = ? AND recordStatus = 1 LIMIT 1', [fileName]
+    );
+    if (!activeFiles.length) return res.status(404).json({ error: 'Файл не найден' });
     const filepath = path.join(__dirname, '..', 'uploads', fileName);
     res.set('Content-Disposition', 'attachment; filename=' + fileName);
     res.set('Content-Type', 'application/octet-stream');
@@ -382,6 +402,7 @@ router.post('/addArticle', urlencodedParser, async (req, res) => {
     const authors = req.body.authors;
     const authorNames = req.body.authorNames;
     const requestedGenreId = req.body.genreId;
+    const genreName = req.body.genreName;
     const uploadedFiles = Array.isArray(req.files) ? req.files : [];
     let articleCreated = false;
     let preparedBookFile = null;
@@ -405,7 +426,7 @@ router.post('/addArticle', urlencodedParser, async (req, res) => {
         const directionId = await getOrCreateDirectionId(udcCode, direction);
         const authorIds = await resolveArticleAuthorIds(authors, authorNames);
         const publisherId = await getOrCreatePublisherId(publisherName, publisher);
-        const genreId = await resolveArticleGenreId(requestedGenreId);
+        const genreId = await resolveArticleGenreId(requestedGenreId, genreName);
 
         if (coverdata && !['image/jpeg', 'image/png', 'image/webp'].includes(coverdata.mimetype)) {
             throw new Error('Обложка должна быть в формате JPG, PNG или WebP.');
@@ -473,6 +494,7 @@ router.post('/updateArticle', urlencodedParser, async (req, res) => {
     const authors = req.body.authors;
     const authorNames = req.body.authorNames;
     const requestedGenreId = req.body.genreId;
+    const genreName = req.body.genreName;
     let preparedEditedFile = null;
 
     try {
@@ -500,7 +522,7 @@ router.post('/updateArticle', urlencodedParser, async (req, res) => {
         const directionId = await getOrCreateDirectionId(udcCode, direction);
         const authorIds = await resolveArticleAuthorIds(authors, authorNames);
         const publisherId = await getOrCreatePublisherId(publisherName, publisher);
-        const genreId = await resolveArticleGenreId(requestedGenreId);
+        const genreId = await resolveArticleGenreId(requestedGenreId, genreName);
 
         let sql = `
             UPDATE articles
@@ -742,11 +764,12 @@ router.get('/userCatalog', async (req, res) => {
                     SEPARATOR ', '
                 ) AS authors
             FROM articles a
-            LEFT JOIN directions d ON a.directionId = d.id
-            LEFT JOIN genres g ON a.genreId = g.id
-            LEFT JOIN publishers p ON a.publisherId = p.id
+            LEFT JOIN directions d ON a.directionId = d.id AND d.recordStatus = 1
+            LEFT JOIN genres g ON a.genreId = g.id AND g.recordStatus = 1
+            LEFT JOIN publishers p ON a.publisherId = p.id AND p.recordStatus = 1
             LEFT JOIN article_authors aa ON aa.id_article = a.id
-            LEFT JOIN authors ath ON aa.id_author = ath.id
+            LEFT JOIN authors ath ON aa.id_author = ath.id AND ath.recordStatus = 1
+            WHERE a.recordStatus = 1
             GROUP BY
                 a.id,
                 a.title_tj,
@@ -781,7 +804,7 @@ router.get('/userSearchHints', async (req, res) => {
         const [titleRows] = await connection.execute(`
             SELECT DISTINCT title_tj AS value
             FROM articles
-            WHERE title_tj IS NOT NULL AND title_tj <> ''
+            WHERE recordStatus = 1 AND title_tj IS NOT NULL AND title_tj <> ''
             ORDER BY title_tj
         `);
 
@@ -793,22 +816,22 @@ router.get('/userSearchHints', async (req, res) => {
                         IFNULL(familyName, '')
                      )) AS value
             FROM authors
-            WHERE lastName IS NOT NULL
-               OR firstName IS NOT NULL
+            WHERE recordStatus = 1 AND (lastName IS NOT NULL
+               OR firstName IS NOT NULL)
             ORDER BY value
         `);
 
         const [genreRows] = await connection.execute(`
             SELECT DISTINCT name AS value
             FROM genres
-            WHERE name IS NOT NULL AND name <> ''
+            WHERE recordStatus = 1 AND name IS NOT NULL AND name <> ''
             ORDER BY name
         `);
 
         const [udcRows] = await connection.execute(`
             SELECT DISTINCT udc AS value
             FROM directions
-            WHERE udc IS NOT NULL AND udc <> ''
+            WHERE recordStatus = 1 AND udc IS NOT NULL AND udc <> ''
             ORDER BY udc
         `);
 
@@ -836,7 +859,7 @@ router.get('/userSearch', async (req, res) => {
 
     try {
         await ensureInteractionTables();
-        const conditions = [];
+        const conditions = ['a.recordStatus = 1'];
         const params = [];
 
         if (title) {
@@ -859,7 +882,7 @@ router.get('/userSearch', async (req, res) => {
                 EXISTS (
                     SELECT 1
                     FROM article_authors aa2
-                    JOIN authors ath2 ON ath2.id = aa2.id_author
+                    JOIN authors ath2 ON ath2.id = aa2.id_author AND ath2.recordStatus = 1
                     WHERE aa2.id_article = a.id
                     AND LOWER(
                         CONCAT(
@@ -923,9 +946,9 @@ router.get('/userSearch', async (req, res) => {
                     SEPARATOR ', '
                 ) AS authors
             FROM articles a
-                     LEFT JOIN directions d ON a.directionId = d.id
-                     LEFT JOIN genres g ON a.genreId = g.id
-                     LEFT JOIN publishers p ON a.publisherId = p.id
+                     LEFT JOIN directions d ON a.directionId = d.id AND d.recordStatus = 1
+                     LEFT JOIN genres g ON a.genreId = g.id AND g.recordStatus = 1
+                     LEFT JOIN publishers p ON a.publisherId = p.id AND p.recordStatus = 1
                      LEFT JOIN article_authors aa ON aa.id_article = a.id
                      LEFT JOIN authors ath ON aa.id_author = ath.id
         `;
@@ -1038,7 +1061,7 @@ SELECT
 MIN(YEAR(publishYear)) AS minYear,
     MAX(YEAR(publishYear)) AS maxYear
 FROM articles
-WHERE publishYear IS NOT NULL
+WHERE recordStatus = 1 AND publishYear IS NOT NULL
     `);
 
         const minYear = rows[0]?.minYear;
@@ -1078,10 +1101,10 @@ router.get('/item/:id', async (req, res) => {
                    a.filePath, a.coverPath, a.bbk, a.isbn, d.udc, d.title_ru AS direction,
                    g.name AS genre, p.title_tj AS publisher
             FROM articles a
-            LEFT JOIN directions d ON d.id = a.directionId
-            LEFT JOIN genres g ON g.id = a.genreId
-            LEFT JOIN publishers p ON p.id = a.publisherId
-            WHERE a.id = ?
+            LEFT JOIN directions d ON d.id = a.directionId AND d.recordStatus = 1
+            LEFT JOIN genres g ON g.id = a.genreId AND g.recordStatus = 1
+            LEFT JOIN publishers p ON p.id = a.publisherId AND p.recordStatus = 1
+            WHERE a.id = ? AND a.recordStatus = 1
             LIMIT 1
         `, [articleId]);
         if (!rows.length) return res.status(404).json({ success: false, message: 'Книга или статья не найдена.' });
@@ -1090,7 +1113,7 @@ router.get('/item/:id', async (req, res) => {
             SELECT ath.id, TRIM(CONCAT_WS(' ', ath.lastName, ath.firstName, NULLIF(ath.familyName, ''))) AS fullName
             FROM article_authors aa
             JOIN authors ath ON ath.id = aa.id_author
-            WHERE aa.id_article = ?
+            WHERE aa.id_article = ? AND ath.recordStatus = 1
             ORDER BY ath.lastName, ath.firstName
         `, [articleId]);
         const [item] = await attachCatalogInteractions(rows, await getCurrentUserId(req));
@@ -1114,7 +1137,7 @@ router.get('/author/:id', async (req, res) => {
                    c.title AS city
             FROM authors ath
             LEFT JOIN cities c ON c.id = ath.cityId
-            WHERE ath.id = ?
+            WHERE ath.id = ? AND ath.recordStatus = 1
             LIMIT 1
         `, [authorId]);
         if (!rows.length) return res.status(404).json({ success: false, message: 'Автор не найден.' });
@@ -1153,6 +1176,11 @@ router.get('/rating/:targetType/:targetId', async (req, res) => {
             return res.status(400).json({ success: false, message: 'Некорректная запись для рейтинга.' });
         }
         await ensureInteractionTables();
+        const targetTable = targetType === 'article' ? 'articles' : 'authors';
+        const [targets] = await connection.execute(
+            `SELECT id FROM ${targetTable} WHERE id = ? AND recordStatus = 1 LIMIT 1`, [targetId]
+        );
+        if (!targets.length) return res.status(404).json({ success: false, message: 'Запись для оценки не найдена.' });
         const userId = await getCurrentUserId(req);
         const [[rating]] = await connection.execute(`
             SELECT AVG(score) AS ratingAverage, COUNT(*) AS ratingCount,
@@ -1184,7 +1212,7 @@ router.post('/rating/:targetType/:targetId', async (req, res) => {
         const userId = await getCurrentUserId(req);
         if (!userId) return res.status(401).json({ success: false, message: 'Войдите в аккаунт, чтобы поставить оценку.' });
         const table = targetType === 'article' ? 'articles' : 'authors';
-        const [targets] = await connection.execute(`SELECT id FROM ${table} WHERE id = ? LIMIT 1`, [targetId]);
+        const [targets] = await connection.execute(`SELECT id FROM ${table} WHERE id = ? AND recordStatus = 1 LIMIT 1`, [targetId]);
         if (!targets.length) return res.status(404).json({ success: false, message: 'Запись для оценки не найдена.' });
         await connection.execute(`
             INSERT INTO ratings (userId, targetType, targetId, score)
@@ -1218,7 +1246,7 @@ router.get('/favorite-authors', async (req, res) => {
                    TRIM(CONCAT_WS(' ', ath.lastName, ath.firstName, NULLIF(ath.familyName, ''))) AS fullName,
                    AVG(r.score) AS ratingAverage, COUNT(r.id) AS ratingCount
             FROM favorite_authors fa
-            JOIN authors ath ON ath.id = fa.authorId
+            JOIN authors ath ON ath.id = fa.authorId AND ath.recordStatus = 1
             LEFT JOIN ratings r ON r.targetType = 'author' AND r.targetId = ath.id
             WHERE fa.userId = ?
             GROUP BY ath.id, ath.firstName, ath.lastName, ath.familyName, ath.birthDate, fa.createdAt
@@ -1238,6 +1266,10 @@ router.get('/favorite-author/:authorId', async (req, res) => {
         if (!userId) return res.status(401).json({ success: false, message: 'Войдите в аккаунт.' });
         const authorId = Number(req.params.authorId);
         if (!Number.isInteger(authorId) || authorId < 1) return res.status(400).json({ success: false, message: 'Некорректный ID автора.' });
+        const [authors] = await connection.execute(
+            'SELECT id FROM authors WHERE id = ? AND recordStatus = 1 LIMIT 1', [authorId]
+        );
+        if (!authors.length) return res.status(404).json({ success: false, message: 'Автор не найден.' });
         const [rows] = await connection.execute(
             'SELECT authorId FROM favorite_authors WHERE userId = ? AND authorId = ? LIMIT 1',
             [userId, authorId]
@@ -1256,7 +1288,7 @@ router.post('/favorite-author/:authorId', async (req, res) => {
         if (!userId) return res.status(401).json({ success: false, message: 'Войдите в аккаунт.' });
         const authorId = Number(req.params.authorId);
         if (!Number.isInteger(authorId) || authorId < 1) return res.status(400).json({ success: false, message: 'Некорректный ID автора.' });
-        const [authors] = await connection.execute('SELECT id FROM authors WHERE id = ? LIMIT 1', [authorId]);
+        const [authors] = await connection.execute('SELECT id FROM authors WHERE id = ? AND recordStatus = 1 LIMIT 1', [authorId]);
         if (!authors.length) return res.status(404).json({ success: false, message: 'Автор не найден.' });
         const [existing] = await connection.execute(
             'SELECT authorId FROM favorite_authors WHERE userId = ? AND authorId = ? LIMIT 1',
@@ -1314,12 +1346,12 @@ router.get('/favorites', async (req, res) => {
                 ) AS authors
             FROM favorites f
             JOIN articles a ON a.id = f.articleId
-            LEFT JOIN directions d ON a.directionId = d.id
-            LEFT JOIN genres g ON a.genreId = g.id
-            LEFT JOIN publishers p ON a.publisherId = p.id
+            LEFT JOIN directions d ON a.directionId = d.id AND d.recordStatus = 1
+            LEFT JOIN genres g ON a.genreId = g.id AND g.recordStatus = 1
+            LEFT JOIN publishers p ON a.publisherId = p.id AND p.recordStatus = 1
             LEFT JOIN article_authors aa ON aa.id_article = a.id
-            LEFT JOIN authors ath ON aa.id_author = ath.id
-            WHERE f.userId = ?
+            LEFT JOIN authors ath ON aa.id_author = ath.id AND ath.recordStatus = 1
+            WHERE f.userId = ? AND a.recordStatus = 1
             GROUP BY
                 a.id,
                 a.title_tj,
@@ -1359,6 +1391,10 @@ router.get('/favorite/:articleId', async (req, res) => {
         }
 
         const articleId = Number(req.params.articleId);
+        const [articles] = await connection.execute(
+            'SELECT id FROM articles WHERE id = ? AND recordStatus = 1 LIMIT 1', [articleId]
+        );
+        if (!articles.length) return res.status(404).json({ success: false, message: 'Книга не найдена' });
 
         const [rows] = await connection.execute(
             `SELECT id
@@ -1400,7 +1436,7 @@ router.post('/favorite/:articleId', async (req, res) => {
         const [articleRows] = await connection.execute(
             `SELECT id
              FROM articles
-             WHERE id = ?
+             WHERE id = ? AND recordStatus = 1
              LIMIT 1`,
             [articleId]
         );
@@ -1470,7 +1506,7 @@ router.get('/loadDt/getPublisherById', async (req, res) => {
         const [rows] = await connection.execute(
             `SELECT id, title_tj, cityId, address
              FROM publishers
-             WHERE id = ?
+             WHERE id = ? AND recordStatus = 1
              LIMIT 1`,
             [id]
         );
@@ -1542,7 +1578,7 @@ router.get('/loadDt/getDirectionById', async (req, res) => {
         const [rows] = await connection.execute(
             `SELECT id, title_ru, udc, parentId
              FROM directions
-             WHERE id = ?
+             WHERE id = ? AND recordStatus = 1
              LIMIT 1`,
             [id]
         );

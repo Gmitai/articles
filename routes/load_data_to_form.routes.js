@@ -14,14 +14,14 @@ router.get('/getArticleIdentifierSuggestions', async (req, res) => {
         await ensureInteractionTables();
         const [bbkRows] = await connection.execute(`
             SELECT DISTINCT bbk AS value FROM articles
-            WHERE bbk IS NOT NULL AND TRIM(bbk) <> '' ORDER BY bbk
+            WHERE recordStatus = 1 AND bbk IS NOT NULL AND TRIM(bbk) <> '' ORDER BY bbk
         `);
         const [isbnRows] = await connection.execute(`
             SELECT DISTINCT isbn AS value FROM articles
-            WHERE isbn IS NOT NULL AND TRIM(isbn) <> '' ORDER BY isbn
+            WHERE recordStatus = 1 AND isbn IS NOT NULL AND TRIM(isbn) <> '' ORDER BY isbn
         `);
-        const [bbkClassifierRows] = await connection.execute('SELECT code AS value FROM bbk_classifiers ORDER BY code');
-        const [isbnClassifierRows] = await connection.execute('SELECT code AS value FROM isbn_classifiers ORDER BY code');
+        const [bbkClassifierRows] = await connection.execute('SELECT code AS value FROM bbk_classifiers WHERE recordStatus = 1 ORDER BY code');
+        const [isbnClassifierRows] = await connection.execute('SELECT code AS value FROM isbn_classifiers WHERE recordStatus = 1 ORDER BY code');
         res.json({
             bbk: [...new Set([...bbkClassifierRows, ...bbkRows].map(row => row.value))],
             isbn: [...new Set([...isbnClassifierRows, ...isbnRows].map(row => row.value))]
@@ -49,9 +49,10 @@ router.get('/getArticleById', async (req, res) => {
                 directionId,
                 publisherId,
                 filePath,
-                coverPath
+                coverPath,
+                (SELECT name FROM genres WHERE id = articles.genreId AND recordStatus = 1 LIMIT 1) AS genreName
              FROM articles
-             WHERE id = ?`,
+             WHERE id = ? AND recordStatus = 1`,
             [id]
         );
 
@@ -66,7 +67,7 @@ router.get('/getArticleById', async (req, res) => {
              FROM authors a
              JOIN article_authors b
              ON b.id_author = a.id
-             WHERE b.id_article = ?`,
+             WHERE b.id_article = ? AND a.recordStatus = 1`,
             [id]
         );
 
@@ -84,7 +85,7 @@ router.get('/getArticleById', async (req, res) => {
 });
 
 router.get('/getAuthors', async (req, res) => {
-    const [result] = await connection.execute("SELECT id, firstName, lastName, familyName, CONCAT_WS(' ', lastName, firstName, NULLIF(familyName, '')) AS fullName FROM authors ORDER BY lastName, firstName");
+    const [result] = await connection.execute("SELECT id, firstName, lastName, familyName, CONCAT_WS(' ', lastName, firstName, NULLIF(familyName, '')) AS fullName FROM authors WHERE recordStatus = 1 ORDER BY lastName, firstName");
     try {
         res.send(result);
     } catch (err) {
@@ -96,7 +97,7 @@ router.get('/getAuthors', async (req, res) => {
 
 router.get('/getAuthorById', async (req, res) => {
     const id = req.query.id;
-    const sqlAuthor = `SELECT a.id,CONCAT(a.lastName, ' ', a.firstName, ' ', IFNULL(a.familyName, '')) AS fullName, DATE_FORMAT(a.birthDate, '%Y-%m-%d') AS birthDate, a.mobilePhone, a.cityId, c.title AS city, a.address FROM authors a LEFT JOIN cities c ON a.cityId = c.id WHERE a.id = ?`;
+    const sqlAuthor = `SELECT a.id,CONCAT(a.lastName, ' ', a.firstName, ' ', IFNULL(a.familyName, '')) AS fullName, DATE_FORMAT(a.birthDate, '%Y-%m-%d') AS birthDate, a.mobilePhone, a.cityId, c.title AS city, a.address FROM authors a LEFT JOIN cities c ON a.cityId = c.id WHERE a.id = ? AND a.recordStatus = 1`;
 
     const [authorRows] = await connection.execute(sqlAuthor, [id]);
     try {
@@ -109,7 +110,7 @@ router.get('/getAuthorById', async (req, res) => {
 });
 
 router.get('/getDirections', async (req, res) => {
-    const [result] = await connection.execute("SELECT id, parentId, udc, title_ru, CONCAT_WS(' ', udc, NULLIF(title_ru, '')) AS name FROM directions");
+    const [result] = await connection.execute("SELECT id, parentId, udc, title_ru, CONCAT_WS(' ', udc, NULLIF(title_ru, '')) AS name FROM directions WHERE recordStatus = 1");
     try {
         res.send(result);
     } catch (err) {
@@ -118,7 +119,7 @@ router.get('/getDirections', async (req, res) => {
 });
 
 router.get('/getPublishers', async (req, res) => {
-    const [result] = await connection.execute("SELECT id, title_tj FROM publishers");
+    const [result] = await connection.execute("SELECT id, title_tj FROM publishers WHERE recordStatus = 1");
     try {
         res.send(result);
     } catch (err) {

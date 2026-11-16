@@ -26,7 +26,7 @@ function loadArticleData(rowId) {
             const publisherList = document.getElementById("PublisherList");
             const bbkInput = document.getElementById("bbk");
             const isbnInput = document.getElementById("isbn");
-            const genreInput = document.getElementById("genreId");
+            const genreInput = document.getElementById("genreName");
             if (title) title.value = data.title_tj || '';
             if (pageCount) pageCount.value = data.pagesCount || '';
             if (yearOfPublish && data.publishYear) {
@@ -40,10 +40,7 @@ function loadArticleData(rowId) {
             }
             if (bbkInput) bbkInput.value = data.bbk || '';
             if (isbnInput) isbnInput.value = data.isbn || '';
-            if (genreInput) {
-                genreInput.dataset.selectedGenreId = data.genreId || '';
-                genreInput.value = data.genreId || '';
-            }
+            if (genreInput) genreInput.value = data.genreName || '';
             if (typeof window.setPublisherSelection === "function") {
                 window.setPublisherSelection(data.publisherId);
             } else if (publisherList) {

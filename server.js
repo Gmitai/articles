@@ -15,7 +15,23 @@ app.use(express.static(path.join(__dirname, 'Public'), {
 app.use('/js', express.static(path.join(__dirname, 'js')));
 app.use('/css', express.static(path.join(__dirname, 'css')));
 app.use('/icons', express.static(path.join(__dirname, 'icons')));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', async (req, res, next) => {
+    try {
+        const requestedFile = path.basename(decodeURIComponent(req.path));
+        const [references] = await db.query(`
+            SELECT 1 AS active FROM articles
+            WHERE recordStatus = 1 AND (filePath = ? OR coverPath = ?)
+            UNION ALL
+            SELECT 1 AS active FROM users WHERE recordStatus = 1 AND profilePhoto = ?
+            LIMIT 1
+        `, [requestedFile, requestedFile, requestedFile]);
+        if (!references.length) return res.sendStatus(404);
+        next();
+    } catch (error) {
+        console.error('Ошибка проверки файла загрузки:', error);
+        res.sendStatus(500);
+    }
+}, express.static(path.join(__dirname, 'uploads')));
 
 const multer = require('multer');
 
@@ -68,6 +84,9 @@ const profileRoutes = require('./routes/profile.routes');
 const mainRoutes = require('./routes/main.routes');
 const loadDtToFormRoutes = require('./routes/load_data_to_form.routes');
 const adminRoutes = require('./routes/admin.routes');
+const ensureInteractionTables = require('./db/interaction-tables');
+const ensureRecordStatusColumns = require('./db/record-status');
+const db = require('./db/db');
 
 app.use('/', authRoutes);
 app.use('/profile', profileRoutes);
@@ -75,8 +94,17 @@ app.use('/admin-api', adminRoutes);
 app.use('/', mainRoutes);
 app.use('/loadDt', loadDtToFormRoutes);
 
-app.listen(port, '192.168.0.8', () => {
-    console.log(`Сервер запущен на порту ${port}`);
+async function startServer() {
+    await ensureInteractionTables();
+    await ensureRecordStatusColumns();
+    app.listen(port, 'localhost', () => {
+        console.log(`Сервер запущен на порту ${port}`);
+    });
+}
+
+startServer().catch(error => {
+    console.error('Не удалось подготовить базу данных перед запуском:', error);
+    process.exit(1);
 });
 
 //192.168.0.8

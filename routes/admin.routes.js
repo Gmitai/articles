@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const db = require('../db/db');
 const ensureInteractionTables = require('../db/interaction-tables');
+const ensureRecordStatusColumns = require('../db/record-status');
 
 const router = express.Router();
 
@@ -22,7 +23,10 @@ async function ensureTrashTable() {
                 PRIMARY KEY (id),
                 KEY idx_admin_trash_deletedAt (deletedAt)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-        `).then(() => true).catch(error => {
+        `).then(async () => {
+            await ensureRecordStatusColumns();
+            return true;
+        }).catch(error => {
             trashTableReady = null;
             throw error;
         });
@@ -52,8 +56,51 @@ function normalizeSnapshotDates(value, key = '') {
 async function saveToTrash(connection, recordType, record, label, related = {}) {
     await connection.query(
         'INSERT INTO admin_trash (recordType, recordId, label, payload) VALUES (?, ?, ?, ?)',
-        [recordType, record.id, String(label || record.id).slice(0, 500), JSON.stringify(normalizeSnapshotDates({ record, ...related }))]
+        [recordType, record.id, String(label || record.id).slice(0, 500), JSON.stringify(normalizeSnapshotDates({ record, ...(related.classifierType ? { classifierType: related.classifierType } : {}) }))]
     );
+}
+
+async function purgeRecord(connection, row) {
+    const payload = parseTrashPayload(row.payload);
+    const id = Number(row.recordId);
+    const record = payload.record || {};
+    switch (row.recordType) {
+        case 'catalog':
+            await connection.query('DELETE FROM article_authors WHERE id_article = ?', [id]);
+            await connection.query('DELETE FROM favorites WHERE articleId = ?', [id]);
+            await connection.query("DELETE FROM ratings WHERE targetType = 'article' AND targetId = ?", [id]);
+            await connection.query('DELETE FROM articles WHERE id = ? AND recordStatus = 0', [id]);
+            return [record.filePath, record.coverPath];
+        case 'author':
+            await connection.query('DELETE FROM article_authors WHERE id_author = ?', [id]);
+            await connection.query('DELETE FROM favorite_authors WHERE authorId = ?', [id]);
+            await connection.query("DELETE FROM ratings WHERE targetType = 'author' AND targetId = ?", [id]);
+            await connection.query('DELETE FROM authors WHERE id = ? AND recordStatus = 0', [id]);
+            return [];
+        case 'publisher':
+            await connection.query('UPDATE articles SET publisherId = NULL WHERE publisherId = ?', [id]);
+            await connection.query('DELETE FROM publishers WHERE id = ? AND recordStatus = 0', [id]); return [];
+        case 'direction':
+            await connection.query('UPDATE directions SET parentId = ? WHERE parentId = ?', [record.parentId ?? null, id]);
+            await connection.query('UPDATE articles SET directionId = ? WHERE directionId = ?', [record.parentId ?? null, id]);
+            await connection.query('DELETE FROM directions WHERE id = ? AND recordStatus = 0', [id]); return [];
+        case 'genre':
+            await connection.query('DELETE FROM user_genres WHERE genreId = ?', [id]);
+            await connection.query('UPDATE articles SET genreId = NULL WHERE genreId = ?', [id]);
+            await connection.query('DELETE FROM genres WHERE id = ? AND recordStatus = 0', [id]); return [];
+        case 'user':
+            await connection.query('DELETE FROM favorites WHERE userId = ?', [id]);
+            await connection.query('DELETE FROM favorite_authors WHERE userId = ?', [id]);
+            await connection.query('DELETE FROM ratings WHERE userId = ?', [id]);
+            await connection.query('DELETE FROM user_genres WHERE userId = ?', [id]);
+            await connection.query('DELETE FROM users WHERE id = ? AND recordStatus = 0', [id]); return [record.profilePhoto];
+        case 'classifier': {
+            const table = payload.classifierType === 'bbk' ? 'bbk_classifiers' : payload.classifierType === 'isbn' ? 'isbn_classifiers' : null;
+            if (!table) throw new Error('Unknown classifier type in trash.');
+            await connection.query(`DELETE FROM \`${table}\` WHERE id = ? AND recordStatus = 0`, [id]); return [];
+        }
+        default: throw new Error('Unknown trash record type.');
+    }
 }
 
 async function insertSnapshot(connection, table, record) {
@@ -91,15 +138,16 @@ function getAuthToken(req) {
 
 async function requireAdmin(req, res, next) {
     try {
-        await ensureTrashTable();
         await ensureInteractionTables();
+        await ensureRecordStatusColumns();
+        await ensureTrashTable();
         const token = getAuthToken(req);
         if (!token) {
             return res.status(401).json({ success: false, message: 'Нужна авторизация администратора' });
         }
 
         const [users] = await db.query(
-            'SELECT id FROM users WHERE authToken = ? AND role = ? LIMIT 1',
+            'SELECT id FROM users WHERE authToken = ? AND role = ? AND recordStatus = 1 LIMIT 1',
             [token, 'admin']
         );
         if (!users.length) {
@@ -182,10 +230,7 @@ router.delete('/catalog/:id', requireAdmin, async (req, res) => {
             articles[0].title_tj || articles[0].title_ru || `#${articleId}`,
             { articleAuthors, favorites, ratings }
         );
-        await connection.query('DELETE FROM article_authors WHERE id_article = ?', [articleId]);
-        await connection.query('DELETE FROM favorites WHERE articleId = ?', [articleId]);
-        await connection.query("DELETE FROM ratings WHERE targetType = 'article' AND targetId = ?", [articleId]);
-        await connection.query('DELETE FROM articles WHERE id = ?', [articleId]);
+        await connection.query('UPDATE articles SET recordStatus = 0 WHERE id = ?', [articleId]);
         await connection.commit();
         res.json({ success: true, message: 'Запись удалена.' });
     } catch (error) {
@@ -225,10 +270,7 @@ router.delete('/authors/:id', requireAdmin, async (req, res) => {
         );
         const authorLabel = [authors[0].lastName, authors[0].firstName, authors[0].familyName].filter(Boolean).join(' ') || `#${authorId}`;
         await saveToTrash(connection, 'author', authors[0], authorLabel, { articleAuthors, favoriteAuthors, ratings });
-        await connection.query('DELETE FROM article_authors WHERE id_author = ?', [authorId]);
-        await connection.query('DELETE FROM favorite_authors WHERE authorId = ?', [authorId]);
-        await connection.query("DELETE FROM ratings WHERE targetType = 'author' AND targetId = ?", [authorId]);
-        await connection.query('DELETE FROM authors WHERE id = ?', [authorId]);
+        await connection.query('UPDATE authors SET recordStatus = 0 WHERE id = ?', [authorId]);
         await connection.commit();
         res.json({ success: true, message: 'Автор удалён.' });
     } catch (error) {
@@ -267,8 +309,7 @@ router.delete('/publishers/:id', requireAdmin, async (req, res) => {
             publishers[0].title_tj || `#${publisherId}`,
             { linkedArticles }
         );
-        await connection.query('UPDATE articles SET publisherId = NULL WHERE publisherId = ?', [publisherId]);
-        await connection.query('DELETE FROM publishers WHERE id = ?', [publisherId]);
+        await connection.query('UPDATE publishers SET recordStatus = 0 WHERE id = ?', [publisherId]);
         await connection.commit();
         res.json({ success: true, message: 'Издательство удалено.' });
     } catch (error) {
@@ -322,7 +363,7 @@ router.delete('/directions/:id', requireAdmin, async (req, res) => {
             directions[0],
             directions[0].title_ru || directions[0].udc || `#${directionId}`
         );
-        await connection.query('DELETE FROM directions WHERE id = ?', [directionId]);
+        await connection.query('UPDATE directions SET recordStatus = 0 WHERE id = ?', [directionId]);
         await connection.commit();
         res.json({ success: true, message: 'Направление удалено.' });
     } catch (error) {
@@ -356,14 +397,7 @@ router.delete('/trash', requireAdmin, async (req, res) => {
         const [trashRows] = await connection.query('SELECT recordType, recordId, payload FROM admin_trash FOR UPDATE');
         const fileNames = [];
         for (const row of trashRows) {
-            const record = parseTrashPayload(row.payload)?.record;
-            if (row.recordType === 'catalog') fileNames.push(record?.filePath, record?.coverPath);
-            if (row.recordType === 'user') fileNames.push(record?.profilePhoto);
-            if (row.recordType === 'catalog' || row.recordType === 'author') {
-                await connection.query('DELETE FROM ratings WHERE targetType = ? AND targetId = ?', [
-                    row.recordType === 'catalog' ? 'article' : 'author', row.recordId
-                ]);
-            }
+            fileNames.push(...await purgeRecord(connection, row));
         }
         await connection.query('DELETE FROM admin_trash');
         await connection.commit();
@@ -402,6 +436,25 @@ router.post('/trash/:id/restore', requireAdmin, async (req, res) => {
         const payload = parseTrashPayload(trash.payload);
         const record = payload.record;
         const id = Number(record.id);
+        const restoreTables = {
+            catalog: 'articles', author: 'authors', publisher: 'publishers', direction: 'directions',
+            genre: 'genres', user: 'users',
+            classifier: payload.classifierType === 'bbk' ? 'bbk_classifiers' : payload.classifierType === 'isbn' ? 'isbn_classifiers' : null
+        };
+        const restoreTable = restoreTables[trash.recordType];
+        if (!restoreTable) throw new Error('Неизвестный тип записи корзины.');
+        const [restoredRows] = await connection.query(
+            `UPDATE \`${restoreTable}\` SET recordStatus = 1 WHERE id = ? AND recordStatus = 0`, [id]
+        );
+        if (!restoredRows.affectedRows) {
+            const error = new Error('Исходная запись не найдена для восстановления.');
+            error.statusCode = 404;
+            throw error;
+        }
+        await connection.query('DELETE FROM admin_trash WHERE id = ?', [trashId]);
+        await connection.commit();
+        res.json({ success: true, section: trash.recordType === 'catalog' ? (Number(record.typeOf) === 1 ? 'articles' : 'books') : trash.recordType === 'classifier' ? 'directions' : `${trash.recordType}s` });
+        return;
         let section;
 
         switch (trash.recordType) {
@@ -409,7 +462,7 @@ router.post('/trash/:id/restore', requireAdmin, async (req, res) => {
                 await ensureRecordIdAvailable(connection, 'articles', id);
                 await insertSnapshot(connection, 'articles', record);
                 for (const relation of payload.articleAuthors || []) {
-                    const [[authorExists]] = await connection.query('SELECT id FROM authors WHERE id = ?', [relation.id_author]);
+                    const [[authorExists]] = await connection.query('SELECT id FROM authors WHERE id = ? AND recordStatus = 1', [relation.id_author]);
                     if (authorExists) {
                         await connection.query(
                             'INSERT INTO article_authors (id_article, id_author) VALUES (?, ?)',
@@ -442,7 +495,7 @@ router.post('/trash/:id/restore', requireAdmin, async (req, res) => {
                 await ensureRecordIdAvailable(connection, 'authors', id);
                 await insertSnapshot(connection, 'authors', record);
                 for (const relation of payload.articleAuthors || []) {
-                    const [[articleExists]] = await connection.query('SELECT id FROM articles WHERE id = ?', [relation.id_article]);
+                    const [[articleExists]] = await connection.query('SELECT id FROM articles WHERE id = ? AND recordStatus = 1', [relation.id_article]);
                     if (articleExists) {
                         await connection.query(
                             'INSERT INTO article_authors (id_article, id_author) VALUES (?, ?)',
@@ -526,7 +579,7 @@ router.post('/trash/:id/restore', requireAdmin, async (req, res) => {
                     }
                 }
                 for (const favorite of payload.favorites || []) {
-                    const [[articleExists]] = await connection.query('SELECT id FROM articles WHERE id = ?', [favorite.articleId]);
+                    const [[articleExists]] = await connection.query('SELECT id FROM articles WHERE id = ? AND recordStatus = 1', [favorite.articleId]);
                     if (articleExists) {
                         await connection.query(
                             'INSERT IGNORE INTO favorites (userId, articleId, createdAt) VALUES (?, ?, ?)',
@@ -535,7 +588,7 @@ router.post('/trash/:id/restore', requireAdmin, async (req, res) => {
                     }
                 }
                 for (const favorite of payload.favoriteAuthors || []) {
-                    const [[authorExists]] = await connection.query('SELECT id FROM authors WHERE id = ?', [favorite.authorId]);
+                    const [[authorExists]] = await connection.query('SELECT id FROM authors WHERE id = ? AND recordStatus = 1', [favorite.authorId]);
                     if (authorExists) {
                         await connection.query(
                             'INSERT IGNORE INTO favorite_authors (userId, authorId, createdAt) VALUES (?, ?, ?)',
@@ -600,11 +653,7 @@ router.delete('/trash/:id', requireAdmin, async (req, res) => {
             const record = parseTrashPayload(trashRows[0].payload).record;
             fileNames = [record.profilePhoto];
         }
-        if (recordType === 'catalog' || recordType === 'author') {
-            await connection.query('DELETE FROM ratings WHERE targetType = ? AND targetId = ?', [
-                recordType === 'catalog' ? 'article' : 'author', trashRows[0].recordId
-            ]);
-        }
+        fileNames = await purgeRecord(connection, trashRows[0]);
         await connection.query('DELETE FROM admin_trash WHERE id = ?', [trashId]);
         await connection.commit();
         committed = true;
@@ -708,7 +757,7 @@ router.get('/users/:id', requireAdmin, async (req, res) => {
         }
         const [users] = await db.query(
             `SELECT id, eMail, login, firstName, lastName, familyName, pseudonym, role
-             FROM users WHERE id = ? LIMIT 1`,
+             FROM users WHERE id = ? AND recordStatus = 1 LIMIT 1`,
             [userId]
         );
         if (!users.length) {
@@ -760,7 +809,7 @@ router.put('/users/:id', requireAdmin, async (req, res) => {
             return res.status(409).json({ success: false, message: 'Такой логин или email уже используется' });
         }
 
-        const [target] = await db.query('SELECT id FROM users WHERE id = ? LIMIT 1', [userId]);
+        const [target] = await db.query('SELECT id FROM users WHERE id = ? AND recordStatus = 1 LIMIT 1', [userId]);
         if (!target.length) {
             return res.status(404).json({ success: false, message: 'Пользователь не найден' });
         }
@@ -835,11 +884,7 @@ router.delete('/users/:id', requireAdmin, async (req, res) => {
             targets[0].login || targets[0].eMail || `#${userId}`,
             { userGenres, favorites, favoriteAuthors, ratings }
         );
-        await connection.query('DELETE FROM favorites WHERE userId = ?', [userId]);
-        await connection.query('DELETE FROM favorite_authors WHERE userId = ?', [userId]);
-        await connection.query('DELETE FROM ratings WHERE userId = ?', [userId]);
-        await connection.query('DELETE FROM user_genres WHERE userId = ?', [userId]);
-        await connection.query('DELETE FROM users WHERE id = ?', [userId]);
+        await connection.query('UPDATE users SET recordStatus = 0 WHERE id = ?', [userId]);
         await connection.commit();
         res.json({ success: true, message: 'Пользователь удалён' });
     } catch (error) {
@@ -857,7 +902,7 @@ router.post('/genres', requireAdmin, async (req, res) => {
         if (!name || name.length > 50) {
             return res.status(400).json({ success: false, message: 'Введите название жанра не длиннее 50 символов' });
         }
-        const [existing] = await db.query('SELECT id FROM genres WHERE name = ? LIMIT 1', [name]);
+        const [existing] = await db.query('SELECT id FROM genres WHERE name = ? AND recordStatus = 1 LIMIT 1', [name]);
         if (existing.length) {
             return res.status(409).json({ success: false, message: 'Такой жанр уже существует' });
         }
@@ -879,7 +924,7 @@ router.get('/genres/:id', requireAdmin, async (req, res) => {
             return res.status(400).json({ success: false, message: 'Некорректный ID жанра' });
         }
         const [genres] = await db.query(
-            'SELECT id, name, status FROM genres WHERE id = ? LIMIT 1',
+            'SELECT id, name, status FROM genres WHERE id = ? AND recordStatus = 1 LIMIT 1',
             [genreId]
         );
         if (!genres.length) {
@@ -900,13 +945,13 @@ router.put('/genres/:id', requireAdmin, async (req, res) => {
             return res.status(400).json({ success: false, message: 'Проверьте ID и название жанра' });
         }
         const [existing] = await db.query(
-            'SELECT id FROM genres WHERE name = ? AND id <> ? LIMIT 1',
+            'SELECT id FROM genres WHERE name = ? AND id <> ? AND recordStatus = 1 LIMIT 1',
             [name, genreId]
         );
         if (existing.length) {
             return res.status(409).json({ success: false, message: 'Такой жанр уже существует' });
         }
-        const [target] = await db.query('SELECT id FROM genres WHERE id = ? LIMIT 1', [genreId]);
+        const [target] = await db.query('SELECT id FROM genres WHERE id = ? AND recordStatus = 1 LIMIT 1', [genreId]);
         if (!target.length) {
             return res.status(404).json({ success: false, message: 'Жанр не найден' });
         }
@@ -928,7 +973,7 @@ router.delete('/genres/:id', requireAdmin, async (req, res) => {
         const connection = await db.getConnection();
         transaction = connection;
         await connection.beginTransaction();
-        const [genres] = await connection.query('SELECT * FROM genres WHERE id = ? FOR UPDATE', [genreId]);
+        const [genres] = await connection.query('SELECT * FROM genres WHERE id = ? AND recordStatus = 1 FOR UPDATE', [genreId]);
         if (!genres.length) {
             await connection.rollback();
             return res.status(404).json({ success: false, message: 'Жанр не найден' });
@@ -948,8 +993,7 @@ router.delete('/genres/:id', requireAdmin, async (req, res) => {
             'SELECT * FROM user_genres WHERE genreId = ? FOR UPDATE', [genreId]
         );
         await saveToTrash(connection, 'genre', genres[0], genres[0].name || `#${genreId}`, { userGenres });
-        await connection.query('DELETE FROM user_genres WHERE genreId = ?', [genreId]);
-        await connection.query('DELETE FROM genres WHERE id = ?', [genreId]);
+        await connection.query('UPDATE genres SET recordStatus = 0 WHERE id = ?', [genreId]);
         await connection.commit();
         res.json({ success: true, message: 'Жанр удалён' });
     } catch (error) {
@@ -972,7 +1016,7 @@ router.get('/classifiers/:type', requireAdmin, async (req, res) => {
     if (!config) return res.status(404).json({ success: false, message: 'Неизвестный классификатор.' });
     try {
         const [records] = await db.query(
-            `SELECT id, code, title FROM ${config.table} ORDER BY code, title`
+            `SELECT id, code, title FROM ${config.table} WHERE recordStatus = 1 ORDER BY code, title`
         );
         res.json({ success: true, records });
     } catch (error) {
@@ -1006,7 +1050,7 @@ router.get('/classifiers/:type/:id', requireAdmin, async (req, res) => {
     if (!config) return res.status(404).json({ success: false, message: 'Неизвестный классификатор.' });
     if (!Number.isInteger(id) || id < 1) return res.status(400).json({ success: false, message: 'Некорректный ID.' });
     try {
-        const [records] = await db.query(`SELECT id, code, title FROM ${config.table} WHERE id = ? LIMIT 1`, [id]);
+        const [records] = await db.query(`SELECT id, code, title FROM ${config.table} WHERE id = ? AND recordStatus = 1 LIMIT 1`, [id]);
         if (!records.length) return res.status(404).json({ success: false, message: 'Запись не найдена.' });
         res.json({ success: true, record: records[0] });
     } catch (error) {
@@ -1026,7 +1070,7 @@ router.put('/classifiers/:type/:id', requireAdmin, async (req, res) => {
     }
     try {
         const [result] = await db.query(
-            `UPDATE ${config.table} SET code = ?, title = ? WHERE id = ?`, [code, title, id]
+            `UPDATE ${config.table} SET code = ?, title = ? WHERE id = ? AND recordStatus = 1`, [code, title, id]
         );
         if (!result.affectedRows) return res.status(404).json({ success: false, message: 'Запись не найдена.' });
         res.json({ success: true });
@@ -1051,7 +1095,7 @@ router.delete('/classifiers/:type/:id', requireAdmin, async (req, res) => {
             return res.status(404).json({ success: false, message: 'Запись не найдена.' });
         }
         await saveToTrash(transaction, 'classifier', records[0], `${config.label}: ${records[0].code} ${records[0].title}`, { classifierType: req.params.type });
-        await transaction.query(`DELETE FROM ${config.table} WHERE id = ?`, [id]);
+        await transaction.query(`UPDATE ${config.table} SET recordStatus = 0 WHERE id = ?`, [id]);
         await transaction.commit();
         res.json({ success: true });
     } catch (error) {

@@ -418,3 +418,20 @@ button:hover {
 li.selected {
     background: #eaf2ff;
 }
+
+
+.optional-fields {
+    min-width: 0;
+    margin: 4px 0 18px;
+    padding: 14px 14px 2px;
+    border: 1px solid #d9dee7;
+    border-radius: 8px;
+    background: #f8f9fb;
+}
+
+.optional-fields legend {
+    padding: 0 7px;
+    color: #5c6675;
+    font-size: 13px;
+    font-weight: 600;
+}

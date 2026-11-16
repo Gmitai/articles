@@ -117,7 +117,7 @@ router.get('/auth/me', async (req, res) => {
                  createdAt,
                  role
              FROM users
-             WHERE authToken = ?`,
+             WHERE authToken = ? AND recordStatus = 1`,
             [token]
         );
 
@@ -288,7 +288,7 @@ router.post('/auth/login', async (req, res) => {
         const [rows] = await connection.execute(
             `SELECT *
              FROM users
-             WHERE login = ?
+             WHERE login = ? AND recordStatus = 1
                  LIMIT 1`,
             [login]
         );
@@ -378,7 +378,7 @@ router.post('/auth/logout', async (req, res) => {
             await connection.execute(
                 `UPDATE users
                  SET authToken = NULL
-                 WHERE authToken = ?`,
+                 WHERE authToken = ? AND recordStatus = 1`,
                 [token]
             );
         }
@@ -422,7 +422,7 @@ router.get('/auth/cities', async (req, res) => {
 router.get('/auth/genres', async (req, res) => {
     try {
         const [genres] = await connection.execute(
-            'SELECT id, name FROM genres ORDER BY name'
+            'SELECT id, name FROM genres WHERE recordStatus = 1 ORDER BY name'
         );
         res.json(genres);
     } catch (error) {
