@@ -97,7 +97,7 @@ app.use('/loadDt', loadDtToFormRoutes);
 async function startServer() {
     await ensureInteractionTables();
     await ensureRecordStatusColumns();
-    app.listen(port, 'localhost', () => {
+    app.listen(port, '192.168.0.8', () => {
         console.log(`Сервер запущен на порту ${port}`);
     });
 }
