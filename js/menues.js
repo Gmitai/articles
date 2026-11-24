@@ -204,7 +204,7 @@ function renderTable(key, rows, classifierType = null) {
             userEditIcon.style.width = '32px';
             userEditIcon.style.height = '32px';
             editButton.type = 'button';
-            editButton.className = 'admin-user-edit-button';
+            editButton.className = 'admin-user-edit-button admin-record-edit-button';
             editButton.title = key === 'users' ? 'Редактировать пользователя' : 'Редактировать жанр';
             editButton.appendChild(userEditIcon);
             editButton.addEventListener('click', () => {
@@ -245,7 +245,7 @@ function renderTable(key, rows, classifierType = null) {
 
             const editButton = document.createElement('button');
             editButton.type = 'button';
-            editButton.className = 'admin-user-edit-button';
+            editButton.className = 'admin-user-edit-button admin-record-edit-button';
             editButton.title = 'Редактировать';
             editButton.appendChild(img);
             editButton.addEventListener('click', () => {
@@ -297,6 +297,7 @@ function renderTable(key, rows, classifierType = null) {
     });
     table.appendChild(tbody);
     contentEl.appendChild(table);
+    window.updateMinimizedActionButtons?.();
 
     const parseSortableDate = value => {
         const text = String(value ?? '').trim();

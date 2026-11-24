@@ -13,7 +13,7 @@
 <body>
 
 
-<div class="form-container">
+<div class="form-container article-form-container">
     <h2>Добавить</h2>
     <form action="/addArticle" method="post" enctype="multipart/form-data">
         <input type="hidden" id="typeOf" name="typeOf" value="0">
@@ -32,10 +32,13 @@
             <div class="dropdown" id="dropdown"></div>
         </div>
 
-        <div class="form-group">
-            <label for="fileUpload">Выбирите файл:</label>
-            <input type="file" id="fileUpload" accept="application/pdf,.pdf,.doc,.docx,.djvu,.djv,image/jpeg,.jpg,.jpeg,image/png,.png" name="fileData" multiple>
-            <small>Один PDF, Word или DjVu либо несколько сканов JPG/PNG — они будут собраны в PDF.</small>
+        <div class="form-group file-form-group">
+            <span class="file-field-label">Выберите файлы книги или статьи</span>
+            <label class="file-drop-zone" id="fileDropZone" for="fileUpload">
+                <input type="file" id="fileUpload" accept="application/pdf,.pdf,.doc,.docx,.djvu,.djv,image/jpeg,.jpg,.jpeg,image/png,.png" name="fileData" multiple>
+                <span class="file-drop-prompt">Перетащите один PDF, Word или DjVu, несколько сканов JPG/PNG или папку со сканами. Можно также нажать сюда для выбора.</span>
+                <span class="file-selection" id="fileSelection">Файл не выбран</span>
+            </label>
         </div>
 
 
@@ -49,20 +52,6 @@
             <input type="date" id="yearOfPublish" name="publishYear" required>
         </div>
 
-
-        <div class="tree-select-container">
-            <label for="udcSearchInput">Направление (УДК)</label>
-            <div class="udc-select-row">
-                <input type="text" id="udcSearchInput" name="udcCode" class="udc-code-input" list="udcSuggestions" placeholder="Введите код УДК" autocomplete="off">
-                <datalist id="udcSuggestions"></datalist>
-                <button type="button" id="treeToggleBtn" class="tree-button udc-tree-toggle" title="Открыть список УДК" aria-label="Открыть список УДК">&#9662;</button>
-            </div>
-
-            <div id="treeDropdown" class="tree-dropdown hidden">
-                <ul id="treeUDC" class="tree"></ul>
-            </div>
-
-        </div>
 
         <div class="publisher-select-container">
             <label for="publisherSearchInput">Издательство</label>
@@ -88,15 +77,31 @@
                 <div id="genreDropdown" class="identifier-dropdown hidden" role="listbox"></div>
             </div>
 
-            <div class="form-group identifier-select-container">
-                <label for="bbk">ББК:</label>
-                <div class="identifier-select-row"><input type="text" id="bbk" name="bbk" maxlength="50" autocomplete="off"><button type="button" class="tree-button identifier-toggle" data-for="bbk" aria-label="Выбрать ББК">▾</button></div>
-                <div class="identifier-dropdown hidden" data-list-for="bbk" role="listbox"></div>
+            <div class="tree-select-container">
+                <label for="udcSearchInput">Направление (УДК)</label>
+                <div class="udc-select-row">
+                    <input type="text" id="udcSearchInput" name="udcCode" class="udc-code-input" list="udcSuggestions" placeholder="Введите код УДК" autocomplete="off">
+                    <datalist id="udcSuggestions"></datalist>
+                    <button type="button" id="treeToggleBtn" class="tree-button udc-tree-toggle" title="Открыть список УДК" aria-label="Открыть список УДК">&#9662;</button>
+                </div>
+
+                <div id="treeDropdown" class="tree-dropdown hidden">
+                    <ul id="treeUDC" class="tree"></ul>
+                </div>
+
+            </div>
+
+            <div class="classifier-fields-row">
+                <div class="form-group identifier-select-container">
+                    <label for="bbk">ББК:</label>
+                    <div class="identifier-select-row"><input type="text" id="bbk" name="bbk" maxlength="50" autocomplete="off"><button type="button" class="tree-button identifier-toggle" data-for="bbk" aria-label="Выбрать ББК">▾</button></div>
+                    <div class="identifier-dropdown hidden" data-list-for="bbk" role="listbox"></div>
             </div>
             <div class="form-group identifier-select-container">
                 <label for="isbn">ISBN:</label>
                 <div class="identifier-select-row"><input type="text" id="isbn" name="isbn" maxlength="32" autocomplete="off"><button type="button" class="tree-button identifier-toggle" data-for="isbn" aria-label="Выбрать ISBN">▾</button></div>
                 <div class="identifier-dropdown hidden" data-list-for="isbn" role="listbox"></div>
+            </div>
             </div>
 
         </fieldset>
@@ -106,7 +111,7 @@
         </div>
 
         <div class="form-group">
-            <button type="button" onclick="window.parent.closeIframe(getFrmId())">
+            <button type="button" onclick="window.parent.closeIframe(getFrmId(), window.frameElement.id)">
                 Назад
             </button>
         </div>
@@ -232,6 +237,7 @@
         });
     }
 </script>
+<script src="/js/book-file-drop.js" defer></script>
 <script src="/js/book-file-metadata.js"></script>
 <script src="/js/admin-form-bridge.js"></script>
 </body>

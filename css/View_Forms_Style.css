@@ -435,3 +435,101 @@ li.selected {
     font-size: 13px;
     font-weight: 600;
 }
+
+
+.file-field-label {
+    display: block;
+    margin-bottom: 6px;
+    color: #555;
+}
+
+.file-drop-zone {
+    display: flex;
+    min-height: 104px;
+    box-sizing: border-box;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px;
+    border: 2px dashed #b9c3d0;
+    border-radius: 8px;
+    background: #f8f9fb;
+    color: #4d5968;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .15s ease, background-color .15s ease;
+}
+
+.file-drop-zone:hover,
+.file-drop-zone.drag-over {
+    border-color: #3976c5;
+    background: #eef5ff;
+}
+
+.file-drop-zone input[type="file"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.file-drop-prompt {
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.file-selection {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    color: #253247;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+.article-form-container {
+    box-sizing: border-box;
+    width: calc(100% - 32px);
+    max-width: 680px;
+}
+
+
+.classifier-fields-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.classifier-fields-row > .identifier-select-container {
+    flex: 1 1 0;
+    min-width: 0;
+    margin-bottom: 12px;
+}
+
+.classifier-fields-row .identifier-select-row {
+    gap: 6px;
+}
+
+.classifier-fields-row .identifier-select-row input[type="text"],
+.classifier-fields-row .identifier-toggle.tree-button {
+    height: 36px;
+}
+
+.classifier-fields-row .identifier-toggle.tree-button {
+    flex-basis: 38px;
+    width: 38px;
+}
+
+@media (max-width: 520px) {
+    .classifier-fields-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .classifier-fields-row > .identifier-select-container {
+        width: 100%;
+    }
+}

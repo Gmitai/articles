@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.editAdminUser = async userId => {
+        if (window.hasMinimizedForms?.()) return;
         message.textContent = 'Загружаю данные…';
         modal.hidden = false;
         try {
@@ -80,8 +81,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     closeButton.addEventListener('click', closeModal);
-    modal.addEventListener('click', event => {
-        if (event.target === modal) closeModal();
+    document.getElementById('minimizeAddUserModal').addEventListener('click', () => {
+        window.minimizeAdminModal('addUserModal', title.textContent);
     });
 
     form.addEventListener('submit', async event => {

@@ -21,8 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.getElementById('closeClassifierModal').addEventListener('click', closeModal);
-    modal.addEventListener('click', event => {
-        if (event.target === modal) closeModal();
+    document.getElementById('minimizeClassifierModal').addEventListener('click', () => {
+        window.minimizeAdminModal('classifierModal', title.textContent);
     });
 
     window.loadClassifierSection = async type => {
@@ -84,6 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.editClassifier = async (type, id) => {
+        if (window.hasMinimizedForms?.()) return;
         editing = { type, id };
         form.reset();
         modal.hidden = false;

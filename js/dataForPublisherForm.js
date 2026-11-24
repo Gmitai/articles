@@ -57,7 +57,7 @@ function submitPublisherForm() {
             if (typeof window.notifyAdminFormSaved === 'function') {
                 window.notifyAdminFormSaved();
             } else {
-                window.parent.closeIframe(2);
+                window.parent.closeIframe(2, window.frameElement.id);
             }
         })
         .catch(err => {

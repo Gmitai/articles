@@ -43,8 +43,8 @@
     <iframe src="/directionForm.html" class="modal-iframe" id="mIframe4"></iframe>
     <iframe src="/directionForm.html" class="modal-iframe4" id="meIframe4"></iframe>
     <div id="addUserModal" class="admin-user-modal" hidden>
-        <section class="admin-user-dialog" role="dialog" aria-modal="true" aria-labelledby="addUserTitle">
-            <button id="closeAddUserModal" class="admin-user-close" type="button" aria-label="Закрыть">×</button>
+        <section class="admin-user-dialog admin-modal-with-minimize" role="dialog" aria-modal="true" aria-labelledby="addUserTitle">
+            <button id="minimizeAddUserModal" class="admin-user-minimize" type="button" aria-label="Свернуть форму" title="Свернуть форму">-</button>
             <h2 id="addUserTitle">Добавить пользователя</h2>
             <form id="addUserForm">
                 <label>Email<input type="email" name="eMail" maxlength="30" required></label>
@@ -62,29 +62,32 @@
                 </label>
                 <p id="addUserMessage" class="admin-user-message" aria-live="polite"></p>
                 <button type="submit">Создать пользователя</button>
+                <button id="closeAddUserModal" class="admin-user-back" type="button">Назад</button>
             </form>
         </section>
     </div>
     <div id="classifierModal" class="admin-user-modal" hidden>
-        <section class="admin-user-dialog" role="dialog" aria-modal="true" aria-labelledby="classifierModalTitle">
-            <button id="closeClassifierModal" class="admin-user-close" type="button" aria-label="Закрыть">&times;</button>
+        <section class="admin-user-dialog admin-modal-with-minimize" role="dialog" aria-modal="true" aria-labelledby="classifierModalTitle">
+            <button id="minimizeClassifierModal" class="admin-user-minimize" type="button" aria-label="Свернуть форму" title="Свернуть форму">-</button>
             <h2 id="classifierModalTitle"></h2>
             <form id="classifierForm">
                 <label id="classifierCodeLabel">Код<input type="text" name="code" maxlength="50" required></label>
                 <label>Название<input type="text" name="title" maxlength="255" required></label>
                 <p id="classifierMessage" class="admin-user-message" aria-live="polite"></p>
                 <button id="saveClassifierButton" type="submit">Сохранить</button>
+                <button id="closeClassifierModal" class="admin-user-back" type="button">Назад</button>
             </form>
         </section>
     </div>
     <div id="genreModal" class="admin-user-modal" hidden>
-        <section class="admin-user-dialog" role="dialog" aria-modal="true" aria-labelledby="genreModalTitle">
-            <button id="closeGenreModal" class="admin-user-close" type="button" aria-label="Закрыть">×</button>
+        <section class="admin-user-dialog admin-modal-with-minimize" role="dialog" aria-modal="true" aria-labelledby="genreModalTitle">
+            <button id="minimizeGenreModal" class="admin-user-minimize" type="button" aria-label="Свернуть форму" title="Свернуть форму">-</button>
             <h2 id="genreModalTitle">Добавить жанр</h2>
             <form id="genreForm">
                 <label>Название жанра<input type="text" name="name" maxlength="50" required></label>
                 <p id="genreMessage" class="admin-user-message" aria-live="polite"></p>
                 <button id="saveGenreButton" type="submit">Добавить жанр</button>
+                <button id="closeGenreModal" class="admin-user-back" type="button">Назад</button>
             </form>
         </section>
     </div>

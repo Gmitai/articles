@@ -8,10 +8,17 @@
         sendToParent('admin-form-saved');
     };
 
-    document.addEventListener('click', event => {
-        const formContainer = document.querySelector('.form-container');
-        if (formContainer && !formContainer.contains(event.target)) {
-            sendToParent('admin-form-outside-click');
-        }
-    });
+    const formContainer = document.querySelector('.form-container');
+    const form = formContainer?.querySelector('form');
+    if (formContainer && form && !formContainer.querySelector('.form-minimize-button')) {
+        const minimizeButton = document.createElement('button');
+        minimizeButton.type = 'button';
+        minimizeButton.className = 'form-minimize-button';
+        minimizeButton.textContent = '-';
+        minimizeButton.title = 'Свернуть форму';
+        minimizeButton.setAttribute('aria-label', 'Свернуть форму и вернуться к сайту');
+        minimizeButton.addEventListener('click', () => sendToParent('admin-form-minimize'));
+        formContainer.appendChild(minimizeButton);
+    }
+
 })();

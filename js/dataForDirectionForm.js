@@ -111,7 +111,7 @@ async function submitDirectionForm() {
         if (typeof window.notifyAdminFormSaved === 'function') {
             window.notifyAdminFormSaved();
         } else {
-            window.parent.closeIframe(4);
+            window.parent.closeIframe(4, window.frameElement.id);
         }
     } catch (error) {
         console.error('Ошибка сохранения:', error);

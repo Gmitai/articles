@@ -5,7 +5,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fe834628-b3fc-4675-bd87-9a32f97eadd9" name="Changes" comment="v1.5">
-      <change beforePath="$PROJECT_DIR$/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/server.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/Forms_Style.css" beforeDir="false" afterPath="$PROJECT_DIR$/css/Forms_Style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/View_Forms_Style.css" beforeDir="false" afterPath="$PROJECT_DIR$/css/View_Forms_Style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/css/styles.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/Hide_Show_Forms.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/Hide_Show_Forms.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/admin-catalog.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/admin-catalog.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/admin-classifiers.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/admin-classifiers.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/admin-form-bridge.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/admin-form-bridge.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/admin-genres.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/admin-genres.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/admin-users.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/admin-users.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/book-file-metadata.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/book-file-metadata.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/dataForAuthorForm.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/dataForAuthorForm.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/dataForDirectionForm.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/dataForDirectionForm.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/dataForPublisherForm.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/dataForPublisherForm.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/menues.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/menues.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -157,7 +171,7 @@
       <workItem from="1793773773413" duration="1463000" />
       <workItem from="1794206008334" duration="5052000" />
       <workItem from="1794279339953" duration="12035000" />
-      <workItem from="1794801641538" duration="1892000" />
+      <workItem from="1794801641538" duration="7202000" />
     </task>
     <task id="LOCAL-00001" summary="v1.2">
       <option name="closed" value="true" />

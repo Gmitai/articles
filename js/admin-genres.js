@@ -18,11 +18,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.getElementById('closeGenreModal').addEventListener('click', closeModal);
-    modal.addEventListener('click', event => {
-        if (event.target === modal) closeModal();
+    document.getElementById('minimizeGenreModal').addEventListener('click', () => {
+        window.minimizeAdminModal('genreModal', title.textContent);
     });
 
     window.editAdminGenre = async genreId => {
+        if (window.hasMinimizedForms?.()) return;
         modal.hidden = false;
         message.textContent = 'Загружаю жанр…';
         try {

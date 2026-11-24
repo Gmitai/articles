@@ -53,7 +53,9 @@
         const firstFile = files[0];
         if (!firstFile) return;
 
-        const baseName = firstFile.name.replace(/\.[^.]+$/, '').trim();
+        const folderName = fileInput.dataset.droppedFolderName?.trim();
+        delete fileInput.dataset.droppedFolderName;
+        const baseName = folderName || firstFile.name.replace(/\.[^.]+$/, '').trim();
         if (baseName && (!titleEditedManually || titleInput.value === lastAutoTitle || !titleInput.value.trim())) {
             titleInput.value = baseName;
             lastAutoTitle = baseName;

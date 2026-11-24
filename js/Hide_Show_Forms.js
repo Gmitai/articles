@@ -13,7 +13,100 @@ const eforms = {
 };
 let frmId = 0;
 let editMode = false;
+
+function getMinimizedFormsDock() {
+    let dock = document.getElementById('minimizedFormsDock');
+    if (!dock) {
+        dock = document.createElement('div');
+        dock.id = 'minimizedFormsDock';
+        dock.className = 'minimized-forms-dock';
+        dock.setAttribute('role', 'toolbar');
+        dock.setAttribute('aria-label', 'Свернутые формы');
+        document.body.appendChild(dock);
+    }
+    return dock;
+}
+
+function removeMinimizedModal(modalId) {
+    const dock = document.getElementById('minimizedFormsDock');
+    dock?.querySelector(`[data-minimized-modal="${modalId}"]`)?.remove();
+    if (dock && dock.children.length === 0) dock.remove();
+    updateAddButtonState();
+}
+
+window.minimizeAdminModal = (modalId, label) => {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    const dock = getMinimizedFormsDock();
+    if (!dock.querySelector(`[data-minimized-modal="${modalId}"]`)) {
+        const restoreButton = document.createElement('button');
+        restoreButton.type = 'button';
+        restoreButton.className = 'minimized-form-restore';
+        restoreButton.dataset.minimizedModal = modalId;
+        restoreButton.textContent = `Развернуть: ${label || 'Форма'}`;
+        restoreButton.addEventListener('click', () => {
+            modal.hidden = false;
+            removeMinimizedModal(modalId);
+        });
+        dock.appendChild(restoreButton);
+    }
+    modal.hidden = true;
+    updateAddButtonState();
+};
+
+function hasMinimizedForms() {
+    return Boolean(document.querySelector('#minimizedFormsDock .minimized-form-restore'));
+}
+
+function updateAddButtonState() {
+    const minimized = hasMinimizedForms();
+    const addButton = document.getElementById('add');
+    if (addButton) {
+        addButton.disabled = minimized;
+        addButton.setAttribute('aria-disabled', String(minimized));
+        addButton.title = minimized ? 'Сначала разверните или закройте свернутую форму' : '';
+    }
+
+    document.querySelectorAll('.admin-record-edit-button').forEach(button => {
+        if (!button.dataset.enabledTitle) button.dataset.enabledTitle = button.title || 'Редактировать';
+        button.disabled = minimized;
+        button.setAttribute('aria-disabled', String(minimized));
+        button.title = minimized ? 'Сначала разверните свернутую форму' : button.dataset.enabledTitle;
+    });
+}
+
+window.updateMinimizedActionButtons = updateAddButtonState;
+window.hasMinimizedForms = hasMinimizedForms;
+
+function removeMinimizedForm(iframeId) {
+    const dock = document.getElementById('minimizedFormsDock');
+    dock?.querySelector(`[data-minimized-frame="${iframeId}"]`)?.remove();
+    if (dock && dock.children.length === 0) dock.remove();
+    updateAddButtonState();
+}
+
+function minimizeForm(iframeId, frame) {
+    const dock = getMinimizedFormsDock();
+
+    if (!dock.querySelector(`[data-minimized-frame="${iframeId}"]`)) {
+        const title = frame.contentDocument?.querySelector('.form-container h2')?.textContent?.trim() || 'Форма';
+        const restoreButton = document.createElement('button');
+        restoreButton.type = 'button';
+        restoreButton.className = 'minimized-form-restore';
+        restoreButton.dataset.minimizedFrame = iframeId;
+        restoreButton.textContent = `Развернуть: ${title}`;
+        restoreButton.addEventListener('click', () => {
+            frame.style.display = 'block';
+            removeMinimizedForm(iframeId);
+        });
+        dock.appendChild(restoreButton);
+    }
+    frame.style.display = 'none';
+    updateAddButtonState();
+}
+
 function showForm(fId, rowId = 0) {
+    if (hasMinimizedForms()) return;
     fId = Number(fId);
     rowId = Number(rowId);
     let frame;
@@ -31,22 +124,26 @@ function showForm(fId, rowId = 0) {
         return;
     }
     frmId = fId;
+    removeMinimizedForm(frame.id);
     localStorage.setItem("frmId", String(fId));
     frame.style.display = "block";
     frame.contentWindow.location.reload();
 }
-function closeIframe(fId) {
-    fId = Number(fId);
-    const editFrame = document.querySelector(eforms[fId]);
-    const addFrame = document.querySelector(forms[fId]);
-    if (editFrame) {
-        editFrame.style.display = "none";
-    }
-    if (addFrame) {
-        addFrame.style.display = "none";
-    }
+function closeIframe(fId, iframeId) {
+    // Use the calling iframe when available: frmId is shared by every iframe
+    // through localStorage and can point at a different form.
+    const sourceFrame = iframeId ? document.getElementById(iframeId) : null;
+    const normalizedFormId = Number(fId);
+    const framesToClose = sourceFrame
+        ? [sourceFrame]
+        : [document.querySelector(eforms[normalizedFormId]), document.querySelector(forms[normalizedFormId])];
+    framesToClose.filter(Boolean).forEach(frame => {
+        frame.style.display = "none";
+        removeMinimizedForm(frame.id);
+    });
     localStorage.removeItem("rowId");
 }
+window.closeIframe = closeIframe;
 
 window.addEventListener('message', async event => {
     if (event.origin !== window.location.origin || !event.data?.type) return;
@@ -61,8 +158,9 @@ window.addEventListener('message', async event => {
     if (!sourceEntry) return;
 
     const [iframeId, formId] = sourceEntry;
-    if (event.data.type === 'admin-form-outside-click') {
-        closeIframe(formId);
+    const frame = document.getElementById(iframeId);
+    if (event.data.type === 'admin-form-minimize') {
+        minimizeForm(iframeId, frame);
         return;
     }
     if (event.data.type !== 'admin-form-saved') return;
@@ -71,7 +169,8 @@ window.addEventListener('message', async event => {
     if (active && typeof window.loadForKey === 'function') {
         await window.loadForKey(active.dataset.key);
     }
-    document.getElementById(iframeId).style.display = 'none';
+    frame.style.display = 'none';
+    removeMinimizedForm(iframeId);
     localStorage.removeItem('rowId');
 });
 

@@ -17,7 +17,7 @@
         pendingDeletes.add(requestKey);
 
         const label = String(displayName || id);
-        if (!confirm(`Переместить запись «${label}» в корзину? Её можно будет восстановить.`)) {
+        if (!confirm(`Переместить запись «${label}» в корзину?`)) {
             pendingDeletes.delete(requestKey);
             return;
         }

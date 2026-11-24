@@ -75,7 +75,7 @@ function submitAuthorForm() {
             if (typeof window.notifyAdminFormSaved === 'function') {
                 window.notifyAdminFormSaved();
             } else {
-                window.parent.closeIframe(1);
+                window.parent.closeIframe(1, window.frameElement.id);
             }
         })
         .catch(err => {

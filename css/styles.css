@@ -611,3 +611,66 @@ body {
         flex: 1 1 135px;
     }
 }
+
+
+.actions button#add:disabled,
+.actions button#add:disabled:hover {
+    background: #b8bec7;
+    color: #626a75;
+    cursor: not-allowed;
+    opacity: .75;
+}
+
+
+.admin-user-minimize {
+    position: absolute;
+    top: 14px;
+    right: 56px;
+    width: 34px;
+    height: 34px;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #d1d5db;
+    border-radius: 50%;
+    background: #eef2f7;
+    color: #263246;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.admin-user-minimize:hover {
+    background: #dfe7f1;
+}
+
+.admin-user-back {
+    width: 100%;
+    margin: 0;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    background: #eef2f7;
+    color: #263246;
+    cursor: pointer;
+}
+
+.admin-user-back:hover {
+    background: #dfe7f1;
+}
+
+.admin-user-dialog.admin-modal-with-minimize h2 {
+    margin-right: 130px;
+}
+
+
+.admin-record-edit-button:disabled,
+.admin-record-edit-button:disabled:hover {
+    background: #e2e5e9;
+    color: #858c95;
+    cursor: not-allowed;
+    opacity: .6;
+}
+
+.admin-record-edit-button:disabled img {
+    opacity: .45;
+}
